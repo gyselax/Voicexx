@@ -15,6 +15,7 @@ add_compile_definitions(KP_KERNEL_TIMER_PATH="${CMAKE_CURRENT_BINARY_DIR}/kokkos
 
 set(GEOMETRY_XVx_VARIANTS_LIST xperiod_vx xnonperiod_vx xperiod_vx_user_defined_grid xnonperiod_vx_user_defined_grid)
 
-set(BUILD_TESTING false)
+set(GYSELALIBXX_BUILD_TESTING OFF)
+set(GYSELALIBXX_BUILD_SIMULATIONS OFF)
 add_subdirectory(gyselalibxx)
 add_subdirectory(simulations)
