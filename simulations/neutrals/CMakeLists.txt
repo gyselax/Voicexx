@@ -27,6 +27,9 @@ target_link_libraries(neutrals_${GEOMETRY_VARIANT}
         PDI::pdi
 )
 
-install(TARGETS neutrals_${GEOMETRY_VARIANT})
+set_target_properties(neutrals_${GEOMETRY_VARIANT}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+)
 
 endforeach()
