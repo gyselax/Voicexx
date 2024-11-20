@@ -21,9 +21,10 @@ set(GYSELALIBXX_INCLUDE_TESTING_DEPENDENCIES ON)
 set(GYSELALIBXX_BUILD_TESTING OFF)
 set(GYSELALIBXX_BUILD_SIMULATIONS OFF)
 add_subdirectory(gyselalibxx)
-add_subdirectory(simulations)
 
 add_subdirectory(src)
+add_subdirectory(simulations)
+
 
 if (${VOICEXX_BUILD_TESTING})
 add_subdirectory(tests)
