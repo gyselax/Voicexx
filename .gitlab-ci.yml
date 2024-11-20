@@ -1,0 +1,61 @@
+
+.cmake_tests:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+  stage: test
+  timeout: 2 hours
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: |
+    set -x
+    git config --global --add safe.directory ${CI_PROJECT_DIR}/gyselalibxx/vendor/kokkos
+    rm -rf build || true
+    mkdir build
+    cd build
+    cmake -DCMAKE_TOOLCHAIN_FILE=${CI_PROJECT_DIR}/gyselalibxx/toolchains/${TOOLCHAIN} ..
+    cmake --build . -j 4
+    ctest -j 2 --timeout 5 --output-junit tests.xml --output-on-failure
+  artifacts:
+    when: always
+    expire_in: 30 days
+    reports:
+      junit: ./build/tests.xml
+
+
+cmake_tests:
+  extends: .cmake_tests
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    RELATIVE_RESTART_TOLERANCE: '0.0'
+    ABSOLUTE_RESTART_TOLERANCE: '0.0'
+    TOOLCHAIN: 'docker.gyselalibxx_env/tests_toolchain.cmake'
+
+cmake_tests_Release:
+  extends: .cmake_tests
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    RELATIVE_RESTART_TOLERANCE: '0.0'
+    ABSOLUTE_RESTART_TOLERANCE: '0.0'
+    TOOLCHAIN: 'docker.gyselalibxx_env/tests_release_toolchain.cmake'
+
+cmake_tests_Release_OpenMP:
+  extends: .cmake_tests
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    RELATIVE_RESTART_TOLERANCE: '0.0'
+    ABSOLUTE_RESTART_TOLERANCE: '0.0'
+    TOOLCHAIN: 'docker.gyselalibxx_env/tests_release_omp_toolchain.cmake'
+
+cmake_tests_Release_GPU:
+  extends: .cmake_tests
+  tags:
+    - persee
+  variables:
+    RELATIVE_RESTART_TOLERANCE: '1e-14'
+    ABSOLUTE_RESTART_TOLERANCE: '1e-14'
+    TOOLCHAIN: 'v100.persee/toolchain.cmake'
+  before_script: |
+    . ${CI_PROJECT_DIR}/gyselalibxx/toolchains/v100.persee/environment.sh
+
