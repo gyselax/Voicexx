@@ -22,7 +22,9 @@ target_link_libraries(sheath_${GEOMETRY_VARIANT}
   PDI::pdi
   paraconf::paraconf
   )
-
-install(TARGETS sheath_${GEOMETRY_VARIANT})
+set_target_properties(sheath_${GEOMETRY_VARIANT}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+)
 
 endforeach()
