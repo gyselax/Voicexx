@@ -2,10 +2,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(voicexx C CXX)
 
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE "${CMAKE_SOURCE_DIR}/install")
-endif()
-
 ## Look for a pre-installed paraconf
 find_package(paraconf REQUIRED COMPONENTS C)
 
