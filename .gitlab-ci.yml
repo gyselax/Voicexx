@@ -5,6 +5,8 @@
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: manual
   stage: test
+  tags:
+    - persee
   timeout: 2 hours
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -50,8 +52,6 @@ cmake_tests_Release_OpenMP:
 
 cmake_tests_Release_GPU:
   extends: .cmake_tests
-  tags:
-    - persee
   variables:
     RELATIVE_RESTART_TOLERANCE: '1e-14'
     ABSOLUTE_RESTART_TOLERANCE: '1e-14'
