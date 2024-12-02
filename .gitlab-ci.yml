@@ -102,3 +102,22 @@ documentation:
     cmake -DGYSELALIBXX_BUILD_DOCUMENTATION=1 -B build-docs .
     cmake --build build-docs --target doc
 
+cppcheck_static_analysis:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: [ setup_env_mr ]
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script: |
+    git config --global --add safe.directory $(pwd)
+    git fetch --no-recurse-submodules origin ${CI_MERGE_REQUEST_DIFF_BASE_SHA}
+  script: |
+    git diff --name-only ${CI_MERGE_REQUEST_DIFF_BASE_SHA} > changed_files.txt
+    CHANGED_FILES=$(awk '{printf("%s ",$0)} END { printf "\n" }' changed_files.txt)
+    set +e
+    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES}
+  allow_failure:
+    exit_codes: [1, 2] # Allow failure due to style or error but not fatal
+
