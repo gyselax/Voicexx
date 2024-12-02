@@ -1,4 +1,8 @@
 
+stages:
+  - static_analysis
+  - test
+
 .cmake_tests:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
