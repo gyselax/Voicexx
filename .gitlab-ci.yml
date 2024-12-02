@@ -84,12 +84,13 @@ python_best_practices:
   image: ghcr.io/gyselax/gyselalibxx_env
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
-  before_script:
-    export PYTHONPATH="./post-process/PythonScripts"
   script: |
     # Find all files with a .py extension not in gyselalibxx
     PYTHON_FILES=$(find . -type f -name "*.py" ! -path "*/gyselalibxx/*")
-    pylint ${PYTHON_FILES}
+    if [ -n "${PYTHON_FILES}" ]
+    then
+      pylint ${PYTHON_FILES}
+    fi
 
 documentation:
   rules:
