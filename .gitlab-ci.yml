@@ -110,7 +110,6 @@ cppcheck_static_analysis:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   stage: static_analysis
-  needs: [ setup_env_mr ]
   image: ghcr.io/gyselax/gyselalibxx_env
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
