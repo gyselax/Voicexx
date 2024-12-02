@@ -59,3 +59,14 @@ cmake_tests_Release_GPU:
   before_script: |
     . ${CI_PROJECT_DIR}/gyselalibxx/toolchains/v100.persee/environment.sh
 
+indentation:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: |
+    ./ci_tools/indent -td
