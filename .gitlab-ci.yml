@@ -1,4 +1,8 @@
 
+stages:
+  - static_analysis
+  - test
+
 .cmake_tests:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -58,4 +62,84 @@ cmake_tests_Release_GPU:
     TOOLCHAIN: 'v100.persee/toolchain.cmake'
   before_script: |
     . ${CI_PROJECT_DIR}/gyselalibxx/toolchains/v100.persee/environment.sh
+
+indentation:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: |
+    ./ci_tools/indent -td
+
+python_best_practices:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: |
+    # Find all files with a .py extension not in gyselalibxx
+    PYTHON_FILES=$(find . -type f -name "*.py" ! -path "*/gyselalibxx/*")
+    if [ -n "${PYTHON_FILES}" ]
+    then
+      pylint ${PYTHON_FILES}
+    fi
+
+documentation:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  image: ghcr.io/gyselax/gyselalibxx_env
+  before_script: |
+    git config --global --add safe.directory $CI_PROJECT_DIR
+    git fetch origin ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} --recurse-submodules=no
+    git config --global --add safe.directory ${CI_PROJECT_DIR}/gyselalibxx/vendor/kokkos
+  script: |
+    rm -rf build || true
+    # Make docs
+    cmake -DGYSELALIBXX_BUILD_DOCUMENTATION=1 -B build-docs .
+    cmake --build build-docs --target doc
+
+cppcheck_static_analysis:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script: |
+    git config --global --add safe.directory $(pwd)
+    git fetch --no-recurse-submodules origin ${CI_MERGE_REQUEST_DIFF_BASE_SHA}
+  script: |
+    git diff --name-only ${CI_MERGE_REQUEST_DIFF_BASE_SHA} > changed_files.txt
+    CHANGED_FILES=$(awk '{printf("%s ",$0)} END { printf "\n" }' changed_files.txt)
+    set +e
+    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES}
+  allow_failure:
+    exit_codes: [1, 2] # Allow failure due to style or error but not fatal
+
+markdown_best_practices:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: |
+    MARKDOWN_FILES=$(find . -name "*.md" -not -path "./gyselalibxx/*")
+    echo $MARKDOWN_FILES
+    set +e
+    python3 gyselalibxx/ci_tools/markdown_linter.py ${MARKDOWN_FILES}
+  allow_failure:
+    exit_codes: 2
 
