@@ -126,3 +126,20 @@ cppcheck_static_analysis:
   allow_failure:
     exit_codes: [1, 2] # Allow failure due to style or error but not fatal
 
+markdown_best_practices:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  image: ghcr.io/gyselax/gyselalibxx_env
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script: |
+    MARKDOWN_FILES=$(find . -name "*.md" -not -path "./gyselalibxx/*")
+    echo $MARKDOWN_FILES
+    set +e
+    python3 gyselalibxx/ci_tools/markdown_linter.py ${MARKDOWN_FILES}
+  allow_failure:
+    exit_codes: 2
+
