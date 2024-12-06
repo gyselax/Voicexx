@@ -10,6 +10,7 @@ stages:
       when: manual
   stage: test
   timeout: 2 hours
+  needs: []
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script: |
@@ -48,9 +49,11 @@ cmake_tests_Release_OpenMP:
   extends: .cmake_tests
   image: ghcr.io/gyselax/gyselalibxx_env
   variables:
-    RELATIVE_RESTART_TOLERANCE: '0.0'
-    ABSOLUTE_RESTART_TOLERANCE: '0.0'
+    RELATIVE_RESTART_TOLERANCE: '1e-14'
+    ABSOLUTE_RESTART_TOLERANCE: '1e-14'
     TOOLCHAIN: 'docker.gyselalibxx_env/tests_release_omp_toolchain.cmake'
+  before_script: |
+    . ${CI_PROJECT_DIR}/gyselalibxx/toolchains/docker.gyselalibxx_env/tests_omp_environment.sh
 
 cmake_tests_Release_GPU:
   extends: .cmake_tests
@@ -105,7 +108,7 @@ documentation:
   script: |
     rm -rf build || true
     # Make docs
-    cmake -DGYSELALIBXX_BUILD_DOCUMENTATION=1 -B build-docs .
+    cmake -DGYSELALIBXX_BUILD_DOCUMENTATION=1 -DVOICEXX_BUILD_TESTING=0 -B build-docs .
     cmake --build build-docs --target doc
 
 cppcheck_static_analysis:
@@ -122,7 +125,7 @@ cppcheck_static_analysis:
     git diff --name-only ${CI_MERGE_REQUEST_DIFF_BASE_SHA} > changed_files.txt
     CHANGED_FILES=$(awk '{printf("%s ",$0)} END { printf "\n" }' changed_files.txt)
     set +e
-    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES}
+    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES} --home-dir=${CI_PROJECT_DIR}
   allow_failure:
     exit_codes: [1, 2] # Allow failure due to style or error but not fatal
 

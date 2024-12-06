@@ -55,17 +55,17 @@ sed -i 's/^  nbiter: .*/  nbiter: 2/' sheath_restart.yaml
 sed -i 's/^  time_diag: .*/  time_diag: 0.5/' sheath_restart.yaml
 
 h5ls -d ${PWD}/VOICEXX_00005.h5/time_saved ${RSTDIR}/VOICEXX_00005.h5/time_saved
-${PYTHON3_EXE} ${VOICEXX_SRCDIR}/post-process/PythonScripts/compare_hdf5_results.py ${PWD}/VOICEXX_00005.h5 ${RSTDIR}/VOICEXX_00005.h5 time_saved -R ${RELATIVE_RESTART_TOLERANCE} -A ${ABSOLUTE_RESTART_TOLERANCE}
+${PYTHON3_EXE} ${VOICEXX_SRCDIR}/gyselalibxx/post-process/PythonScripts/compare_hdf5_results.py ${PWD}/VOICEXX_00005.h5 ${RSTDIR}/VOICEXX_00005.h5 time_saved -R ${RELATIVE_RESTART_TOLERANCE} -A ${ABSOLUTE_RESTART_TOLERANCE}
 if [ $? -ne 0 ]; then
     exit 1
 fi
 
-${PYTHON3_EXE} ${VOICEXX_SRCDIR}/post-process/PythonScripts/compare_hdf5_results.py ${PWD}/VOICEXX_00005.h5 ${RSTDIR}/VOICEXX_00005.h5 electrostatic_potential -R ${RELATIVE_RESTART_TOLERANCE} -A ${ABSOLUTE_RESTART_TOLERANCE}
+${PYTHON3_EXE} ${VOICEXX_SRCDIR}/gyselalibxx/post-process/PythonScripts/compare_hdf5_results.py ${PWD}/VOICEXX_00005.h5 ${RSTDIR}/VOICEXX_00005.h5 electrostatic_potential -R ${RELATIVE_RESTART_TOLERANCE} -A ${ABSOLUTE_RESTART_TOLERANCE}
 if [ $? -ne 0 ]; then
     exit 1
 fi
 
-${PYTHON3_EXE} ${VOICEXX_SRCDIR}/post-process/PythonScripts/compare_hdf5_results.py ${PWD}/VOICEXX_00005.h5 ${RSTDIR}/VOICEXX_00005.h5 fdistribu -R ${RELATIVE_RESTART_TOLERANCE} -A ${ABSOLUTE_RESTART_TOLERANCE}
+${PYTHON3_EXE} ${VOICEXX_SRCDIR}/gyselalibxx/post-process/PythonScripts/compare_hdf5_results.py ${PWD}/VOICEXX_00005.h5 ${RSTDIR}/VOICEXX_00005.h5 fdistribu -R ${RELATIVE_RESTART_TOLERANCE} -A ${ABSOLUTE_RESTART_TOLERANCE}
 if [ $? -ne 0 ]; then
     exit 1
 fi
