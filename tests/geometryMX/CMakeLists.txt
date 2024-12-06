@@ -8,7 +8,7 @@ set(BASIC_GEOMETRY_XVx_VARIANTS_LIST xperiod_vx xnonperiod_vx)
 foreach(GEOMETRY_VARIANT IN LISTS BASIC_GEOMETRY_XVx_VARIANTS_LIST)
 
 add_executable(unit_tests_geometryMX_${GEOMETRY_VARIANT}
-	../../main.cpp
+	../main.cpp
     fluidspecies.cpp
     moments.cpp
     predcorr_hybrid.cpp

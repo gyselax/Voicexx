@@ -11,16 +11,16 @@ metadata:
   nbstep_diag: int
   iter_saved : int
   Lx : double
-  grid_x_extents: { type: array, subtype: int64, size: 1 }
-  grid_x:
+  breakpoints_x_extents: { type: array, subtype: int64, size: 1 }
+  breakpoints_x:
     type: array
     subtype: double
-    size: [ '$grid_x_extents[0]' ]
-  grid_vx_extents: { type: array, subtype: int64, size: 1 }
-  grid_vx:
+    size: [ '$breakpoints_x_extents[0]' ]
+  breakpoints_vx_extents: { type: array, subtype: int64, size: 1 }
+  breakpoints_vx:
     type: array
     subtype: double
-    size: [ '$grid_vx_extents[0]' ]
+    size: [ '$breakpoints_vx_extents[0]' ]
   MeshX_extents: { type: array, subtype: int64, size: 1 }
   MeshX:
     type: array
@@ -234,18 +234,18 @@ plugins:
     - file: '${filename}'
       on_event: [read_x_extents]
       read:
-        grid_x_extents: {size_of: grid_x}
+        breakpoints_x_extents: {size_of: breakpoints_x}
     - file: '${filename}'
       on_event: [read_x]
       read:
-        grid_x: ~
+        breakpoints_x: ~
     - file: '${filename}'
       on_event: [read_vx_extents]
       read:
-        grid_vx_extents: {size_of: grid_vx}
+        breakpoints_vx_extents: {size_of: breakpoints_vx}
     - file: '${filename}'
       on_event: [read_vx]
       read:
-        grid_vx: ~
+        breakpoints_vx: ~
   #trace: ~
 )PDI_CFG";
