@@ -79,19 +79,22 @@ int main(int argc, char** argv)
     Kokkos::ScopeGuard kokkos_scope(argc, argv);
     ddc::ScopeGuard ddc_scope(argc, argv);
 
-#ifdef INPUT_MESH
-    std::string spline_mesh_filename(PCpp_string(conf_voicexx, ".SplineMesh.grid_file"));
-    size_t spline_mesh_filename_size = spline_mesh_filename.size();
-    PDI_multi_expose(
-            "setFilename",
-            "filename_size",
-            &spline_mesh_filename_size,
-            PDI_OUT,
-            "filename",
-            spline_mesh_filename.c_str(),
-            PDI_OUT,
-            NULL);
-#endif
+    if constexpr (
+            (ddcHelper::is_non_uniform_interpolation_points_v<SplineInterpPointsX>)
+            || (ddc::is_non_uniform_bsplines_v<BSplinesX>)
+            || (ddc::is_non_uniform_bsplines_v<BSplinesVx>)) {
+        std::string spline_mesh_filename(PCpp_string(conf_voicexx, ".SplineMesh.grid_file"));
+        size_t spline_mesh_filename_size = spline_mesh_filename.size();
+        PDI_multi_expose(
+                "setFilename",
+                "filename_size",
+                &spline_mesh_filename_size,
+                PDI_OUT,
+                "filename",
+                spline_mesh_filename.c_str(),
+                PDI_OUT,
+                NULL);
+    }
 
     // Reading config
     // --> Mesh info
@@ -106,9 +109,6 @@ int main(int argc, char** argv)
     IdxRangeXVx const meshXVx(mesh_x, mesh_vx);
 
     SplineXBuilder const builder_x(meshXVx);
-#if !defined(PERIODIC_RDIMX) || defined(INPUT_MESH)
-    SplineXBuilder_1d const builder_x_poisson(mesh_x);
-#endif
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
 
@@ -166,23 +166,21 @@ int main(int argc, char** argv)
     double const time_diag = PCpp_double(conf_voicexx, ".Output.time_diag");
     int const nbstep_diag = int(time_diag / deltat);
 
+    // Creating operators
 #ifdef PERIODIC_RDIMX
+    // Macro is required to ensure spline_x_evaluator stays in the scope
     ddc::PeriodicExtrapolationRule<X> bv_x_min;
     ddc::PeriodicExtrapolationRule<X> bv_x_max;
+    SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
 #else
     ddc::ConstantExtrapolationRule<X> bv_x_min(ddc::coordinate(mesh_x.front()));
     ddc::ConstantExtrapolationRule<X> bv_x_max(ddc::coordinate(mesh_x.back()));
+    SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
 #endif
 
     ddc::ConstantExtrapolationRule<Vx> bv_vx_min(ddc::coordinate(mesh_vx.front()));
     ddc::ConstantExtrapolationRule<Vx> bv_vx_max(ddc::coordinate(mesh_vx.back()));
-
-    // Creating operators
-    SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
     SplineVxEvaluator const spline_vx_evaluator(bv_vx_min, bv_vx_max);
-#if !defined(PERIODIC_RDIMX) || defined(INPUT_MESH)
-    SplineXEvaluator_1d const spline_x_evaluator_poisson(bv_x_min, bv_x_max);
-#endif
     PreallocatableSplineInterpolator const spline_x_interpolator(builder_x, spline_x_evaluator);
     PreallocatableSplineInterpolator const spline_vx_interpolator(builder_vx, spline_vx_evaluator);
 
@@ -261,9 +259,14 @@ int main(int argc, char** argv)
             neumann_spline_quadrature_coefficients<
                     Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx_poisson));
     ChargeDensityCalculator rhs(get_const_field(quadrature_coeffs_alloc));
+
+    // Create the objects needed for the Poisson solver. These objects must not go out of scope
+    // until after the simulation has run.
 #if defined(PERIODIC_RDIMX) && !defined(INPUT_MESH)
     FFTPoissonSolver<IdxRangeX, IdxRangeX, Kokkos::DefaultExecutionSpace> poisson_solver(mesh_x);
 #else
+    SplineXBuilder_1d const builder_x_poisson(mesh_x);
+    SplineXEvaluator_1d const spline_x_evaluator_poisson(bv_x_min, bv_x_max);
     FEM1DPoissonSolver poisson_solver(builder_x_poisson, spline_x_evaluator_poisson);
 #endif
     QNSolver const poisson(poisson_solver, rhs);
