@@ -36,8 +36,8 @@ RSTDIR="${TMPDIR}/RST"
 mkdir "${RSTDIR}"
 cd "${RSTDIR}"
 
-${PYTHON3_EXE} ${VOICEXX_SRCDIR}/gyselalibxx/pre-process/PythonScripts/geometryXVx/suggested_points_refinement.py ${RSTDIR}/grids.h5 --edge-domains 0.0 50.0 --ncells 16 --name breakpoints_x --periodic --xmin 0.0 --xmax 50.0
-${PYTHON3_EXE} ${VOICEXX_SRCDIR}/gyselalibxx/pre-process/PythonScripts/geometryXVx/suggested_points_refinement.py ${RSTDIR}/grids.h5 --edge-domains -6.0 6.0 --ncells 16 --name breakpoints_vx
+${PYTHON3_EXE} ${VOICEXX_SRCDIR}/pre-process/suggested_points_refinement.py ${RSTDIR}/grids.h5 --edge-domains 0.0 50.0 --ncells 16 --name breakpoints_x --periodic --xmin 0.0 --xmax 50.0
+${PYTHON3_EXE} ${VOICEXX_SRCDIR}/pre-process/suggested_points_refinement.py ${RSTDIR}/grids.h5 --edge-domains -6.0 6.0 --ncells 16 --name breakpoints_vx
 
 "${VOICEXX_EXEC}" "--dump-config" "${PWD}/sheath.yaml"
 sed -i 's/^  x_ncells: .*/  x_ncells: 16/' sheath.yaml

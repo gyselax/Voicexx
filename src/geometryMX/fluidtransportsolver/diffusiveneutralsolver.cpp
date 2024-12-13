@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+#include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
 #include "quadrature.hpp"
 #include "rk2.hpp"
@@ -224,7 +225,12 @@ DFieldSpMomX DiffusiveNeutralSolver::operator()(
             });
 
     timestepper.update(neutrals, dt, [&](DFieldSpMomX dn, DConstFieldSpMomX n) {
-        get_derivative(dn, n, density, velocity, temperature);
+        get_derivative(
+                dn,
+                n,
+                get_const_field(density),
+                get_const_field(velocity),
+                get_const_field(temperature));
     });
     Kokkos::Profiling::popRegion();
     return neutrals;

@@ -156,7 +156,9 @@ TEST(GeometryXM, PredCorrHybrid)
     ddc::parallel_fill(init_perturb_amplitude, 0.1);
 
     SingleModePerturbInitialization const
-            init(allfequilibrium, std::move(init_perturb_mode), std::move(init_perturb_amplitude));
+            init(get_const_field(allfequilibrium),
+                 std::move(init_perturb_mode),
+                 std::move(init_perturb_amplitude));
     init(allfdistribu);
 
     // Moments index range initialization
@@ -177,7 +179,7 @@ TEST(GeometryXM, PredCorrHybrid)
     ddc::parallel_fill(moments_init[iflux], 0.);
     ddc::parallel_fill(moments_init[istress], 1.);
 
-    ConstantFluidInitialization fluid_init(moments_init);
+    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
 
 #ifdef PERIODIC_RDIMX
@@ -234,7 +236,7 @@ TEST(GeometryXM, PredCorrHybrid)
             ionization,
             recombination,
             normalization_coeff,
-            quadrature_coeffs);
+            get_const_field(quadrature_coeffs));
 
     // construction of predcorr without fluid species
     PredCorr const predcorr(vlasov, poisson);

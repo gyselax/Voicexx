@@ -5,8 +5,8 @@ foreach(GEOMETRY_VARIANT IN LISTS GEOMETRY_XVx_VARIANTS_LIST)
 add_executable(sheath_${GEOMETRY_VARIANT} sheath.cpp)
 target_link_libraries(sheath_${GEOMETRY_VARIANT}
   PUBLIC
-  DDC::DDC
-  DDC::PDI_Wrapper
+  DDC::core
+  DDC::pdi
   gslx::initialization_${GEOMETRY_VARIANT}
   gslx::interpolation
   gslx::poisson_${GEOMETRY_VARIANT}
