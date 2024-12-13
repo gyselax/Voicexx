@@ -157,7 +157,9 @@ static void TestKineticFluidCoupling()
     ddc::parallel_fill(init_perturb_amplitude, 0.0);
 
     SingleModePerturbInitialization const
-            init(allfequilibrium, std::move(init_perturb_mode), std::move(init_perturb_amplitude));
+            init(get_const_field(allfequilibrium),
+                 std::move(init_perturb_mode),
+                 std::move(init_perturb_amplitude));
     init(allfdistribu);
 
     // Moments index range initialization
@@ -171,7 +173,7 @@ static void TestKineticFluidCoupling()
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 0.);
-    ConstantFluidInitialization fluid_init(moments_init);
+    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
 
 #ifdef PERIODIC_RDIMX
@@ -246,7 +248,7 @@ static void TestKineticFluidCoupling()
             ionization,
             recombination,
             normalization_coeff,
-            quadrature_coeffs);
+            get_const_field(quadrature_coeffs));
 
     double const time_start(0.);
     int const nb_iter(20);

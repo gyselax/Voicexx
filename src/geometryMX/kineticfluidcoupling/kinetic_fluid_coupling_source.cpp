@@ -1,4 +1,5 @@
 #include <ddc/ddc.hpp>
+#include <ddc/pdi.hpp>
 
 #include "kinetic_fluid_coupling_source.hpp"
 #include "rk2.hpp"
@@ -166,8 +167,14 @@ void KineticFluidCouplingSource::operator()(
     DFieldSpX ionization_rate = get_field(ionization_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
-    m_ionization(ionization_rate, kinsp_density, kinsp_temperature);
-    m_recombination(recombination_rate, kinsp_density, kinsp_temperature);
+    m_ionization(
+            ionization_rate,
+            get_const_field(kinsp_density),
+            get_const_field(kinsp_temperature));
+    m_recombination(
+            recombination_rate,
+            get_const_field(kinsp_density),
+            get_const_field(kinsp_temperature));
 
     // source term computation
     IdxRangeX grid_x(get_idx_range<GridX>(allfdistribu));
@@ -176,10 +183,10 @@ void KineticFluidCouplingSource::operator()(
     auto density_source_neutral = get_field(density_source_neutral_alloc);
     get_source_term(
             density_source_neutral,
-            kinsp_density,
-            neutrals,
-            ionization_rate,
-            recombination_rate);
+            get_const_field(kinsp_density),
+            get_const_field(neutrals),
+            get_const_field(ionization_rate),
+            get_const_field(recombination_rate));
 
     // S(v) velocity shape calculation for kinetic species
     DFieldMemSpXVx velocity_shape_source_alloc(get_idx_range(allfdistribu));
@@ -219,10 +226,10 @@ void KineticFluidCouplingSource::operator()(
             });
 
     timestepper_kinetic.update(allfdistribu, dt, [&](DFieldSpXVx df, DConstFieldSpXVx f) {
-        get_derivative_allfdistribu(df, f, velocity_shape_source);
+        get_derivative_allfdistribu(df, f, get_const_field(velocity_shape_source));
     });
     timestepper_neutrals.update(neutrals, dt, [&](DFieldSpMomX dn, DConstFieldSpMomX n) {
-        get_derivative_neutrals(dn, n, density_source_neutral);
+        get_derivative_neutrals(dn, n, get_const_field(density_source_neutral));
     });
 
     Kokkos::Profiling::popRegion();

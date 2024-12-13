@@ -12,8 +12,8 @@ target_include_directories("time_integration_hybrid_${GEOMETRY_VARIANT}"
 
 target_link_libraries("time_integration_hybrid_${GEOMETRY_VARIANT}"
     PUBLIC
-        DDC::DDC
-        DDC::PDI_Wrapper
+        DDC::core
+        DDC::pdi
         gslx::boltzmann_${GEOMETRY_VARIANT}
         gslx::initialization_${GEOMETRY_VARIANT}
         gslx::fluidsolver_${GEOMETRY_VARIANT}

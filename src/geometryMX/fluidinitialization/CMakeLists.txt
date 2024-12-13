@@ -12,7 +12,7 @@ target_include_directories("fluidinitialization_${GEOMETRY_VARIANT}"
 
 target_link_libraries("fluidinitialization_${GEOMETRY_VARIANT}"
     PUBLIC
-        DDC::DDC
+        DDC::core
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::utils
 

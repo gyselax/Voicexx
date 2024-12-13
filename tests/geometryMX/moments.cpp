@@ -116,7 +116,7 @@ TEST(GeometryXM, MomentsInitialization)
     moments_init(ifluid, iparticle_flux) = fluid_particle_flux_init;
     moments_init(ifluid, istress) = fluid_stress_init;
 
-    ConstantFluidInitialization fluid_init(moments_init);
+    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
 
     auto neutrals_host = ddc::create_mirror_view_and_copy(neutrals);
