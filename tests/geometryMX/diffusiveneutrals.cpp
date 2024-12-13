@@ -115,11 +115,16 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     ddc::init_discrete_space<GridMom>();
 
     // Neutral species initialization
+    // Reaction rates
     double const charge_exchange_val(0.5);
     double const ionization_val(1.);
     double const recombination_val(2.);
+    ConstantRate charge_exchange(charge_exchange_val);
+    ConstantRate ionization(ionization_val);
+    ConstantRate recombination(recombination_val);
     double const normalization_coeff(1.);
 
+    // Splines
 #ifdef PERIODIC_RDIMX
     ddc::PeriodicExtrapolationRule<X> bv_x_min;
     ddc::PeriodicExtrapolationRule<X> bv_x_max;
@@ -128,10 +133,6 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     ddc::ConstantExtrapolationRule<X> bv_x_max(x_max);
 #endif
 
-    ConstantRate charge_exchange(charge_exchange_val);
-    ConstantRate ionization(ionization_val);
-    ConstantRate recombination(recombination_val);
-
     SplineXBuilder_1d const spline_x_builder_neutrals(meshX);
     SplineXEvaluator_1d const spline_x_evaluator_neutrals(bv_x_min, bv_x_max);
 
@@ -139,6 +140,12 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
             trapezoid_quadrature_coefficients<Kokkos::DefaultExecutionSpace>(meshVx));
     DFieldVx const quadrature_coeffs = get_field(quadrature_coeffs_alloc);
 
+    // Krook, with extent 0 to not have any impact
+    double const neutrals_wall_extent = 0.;
+    double const neutrals_wall_stiffness = 1.;
+    double const neutrals_wall_amplitude = 0.;
+
+    // Initialization of the neutral solver
     DiffusiveNeutralSolver const neutralsolver(
             charge_exchange,
             ionization,
@@ -146,8 +153,13 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
             normalization_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
-            get_const_field(quadrature_coeffs));
+            get_const_field(quadrature_coeffs),
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            neutrals_wall_amplitude,
+            meshX);
 
+    // Initialization of the neutral density
     host_t<DFieldMemSpMomX> neutrals_init_host(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     ddc::for_each(get_idx_range(neutrals_init_host), [&](IdxSpMomX const ispmx) {
         CoordX coordx(ddc::coordinate(ddc::select<GridX>(ispmx)));
@@ -162,6 +174,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     DFieldMemSpMomX derivative_alloc(get_idx_range(neutrals));
     DFieldSpMomX derivative = get_field(derivative_alloc);
 
+    // Initialization of the kinetic species
     DFieldMemSpX kinsp_density_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
     DFieldMemSpX kinsp_velocity_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
     DFieldMemSpX kinsp_temperature_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
@@ -177,6 +190,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     ddc::parallel_fill(kinsp_velocity, kinsp_velocity_eq);
     ddc::parallel_fill(kinsp_temperature, kinsp_temperature_eq);
 
+    // One iteration of the neutral solver
     neutralsolver.get_derivative(
             derivative,
             get_const_field(neutrals),

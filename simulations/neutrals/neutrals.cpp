@@ -101,13 +101,14 @@ int main(int argc, char** argv)
     IdxRangeX const mesh_x = init_spline_dependent_idx_range<
             GridX,
             BSplinesX,
-            SplineInterpPointsX>(conf_voicexx, "x");
+            SplineInterpPointsX>(conf_voicexx, "x"); // constructing the mesh in X
     IdxRangeVx const mesh_vx = init_spline_dependent_idx_range<
             GridVx,
             BSplinesVx,
-            SplineInterpPointsVx>(conf_voicexx, "vx");
-    IdxRangeXVx const meshXVx(mesh_x, mesh_vx);
+            SplineInterpPointsVx>(conf_voicexx, "vx"); // and the mesh in v
+    IdxRangeXVx const meshXVx(mesh_x, mesh_vx); //merging the two
 
+    // Initialization of the spline builders
     SplineXBuilder const builder_x(meshXVx);
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
@@ -128,7 +129,8 @@ int main(int argc, char** argv)
     IdxRangeSpXVx const meshSpXVx(idx_range_kinsp, meshXVx);
     DFieldMemSpXVx allfdistribu(meshSpXVx);
     double time_start(0);
-    if (iter_start == 0) {
+    if (iter_start == 0) { // if we start a new simulation
+        // we need to add a perturbation otherwise it will stay at equilibrium
         SingleModePerturbInitialization const init = SingleModePerturbInitialization::
                 init_from_input(get_const_field(allfequilibrium), idx_range_kinsp, conf_voicexx);
         init(get_field(allfdistribu));
@@ -271,6 +273,7 @@ int main(int argc, char** argv)
 #endif
     QNSolver const poisson(poisson_solver, rhs);
 
+    // Initialisation of the neutrals
     double const normalization_coeff
             = PCpp_double(conf_voicexx, ".DiffusiveNeutralSolver.normalization_coeff_neutrals");
     double const norm_coeff_rate
@@ -287,6 +290,10 @@ int main(int argc, char** argv)
     DFieldMemVx const quadrature_coeffs_neutrals(
             trapezoid_quadrature_coefficients<Kokkos::DefaultExecutionSpace>(mesh_vx));
 
+    double const neutrals_wall_extent = PCpp_double(conf_voicexx, ".NeutralKrook.extent");
+    double const neutrals_wall_stiffness = PCpp_double(conf_voicexx, ".NeutralKrook.stiffness");
+    double const neutrals_wall_amplitude = PCpp_double(conf_voicexx, ".NeutralKrook.amplitude");
+
     DiffusiveNeutralSolver const neutralsolver(
             charge_exchange,
             ionization,
@@ -294,7 +301,11 @@ int main(int argc, char** argv)
             normalization_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
-            get_const_field(quadrature_coeffs_neutrals));
+            get_const_field(quadrature_coeffs_neutrals),
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            neutrals_wall_amplitude,
+            mesh_x);
 
     KineticFluidCouplingSource const kineticfluidcoupling(
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
@@ -303,7 +314,10 @@ int main(int argc, char** argv)
             ionization,
             recombination,
             normalization_coeff,
-            get_const_field(quadrature_coeffs_alloc));
+            get_const_field(quadrature_coeffs_alloc),
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            mesh_x);
 
     PredCorrHybrid const predcorr(boltzmann, neutralsolver, poisson, kineticfluidcoupling);
 

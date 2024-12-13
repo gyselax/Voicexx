@@ -2,6 +2,7 @@
 
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
+#include "mask_tanh.hpp"
 #include "quadrature.hpp"
 #include "rk2.hpp"
 #include "trapezoid_quadrature.hpp"
@@ -14,7 +15,12 @@ DiffusiveNeutralSolver::DiffusiveNeutralSolver(
         double const normalization_coeff,
         SplineXBuilder_1d const& spline_x_builder,
         SplineXEvaluator_1d const& spline_x_evaluator,
-        DConstFieldVx const& quadrature_coeffs)
+        DConstFieldVx const& quadrature_coeffs,
+        double const neutrals_wall_extent,
+        double const neutrals_wall_stiffness,
+        double const neutrals_wall_amplitude,
+        IdxRangeX const& gridx)
+
     : m_charge_exchange(charge_exchange)
     , m_ionization(ionization)
     , m_recombination(recombination)
@@ -22,7 +28,22 @@ DiffusiveNeutralSolver::DiffusiveNeutralSolver(
     , m_spline_x_builder(spline_x_builder)
     , m_spline_x_evaluator(spline_x_evaluator)
     , m_quadrature_coeffs(quadrature_coeffs)
+    , m_mask_amplitude(neutrals_wall_amplitude)
+    , m_mask(gridx)
 {
+    // The amplitude cannot be negative
+    if (m_mask_amplitude < 0) {
+        throw std::runtime_error("The amplitude should be positive");
+    }
+
+    host_t<DFieldMemX> mask_host(gridx);
+    mask_host = mask_tanh(
+            gridx,
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            MaskType::Inverted,
+            false);
+    ddc::parallel_deepcopy(get_field(m_mask), mask_host);
 }
 
 IdxSp DiffusiveNeutralSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
@@ -94,13 +115,12 @@ void DiffusiveNeutralSolver::get_derivative(
 
                 diffusion_temperature(ifspx)
                         = normalization_coeff_alpha0 * temperature(iion, ix) / (mass(isp) * denom);
-
                 // density source is not solved here, we only solve transport.
             });
 
     // compute coordinates at which spatial derivatives are evaluated
     FieldMemX<CoordX> coords_eval_alloc(get_idx_range<GridX>(neutrals));
-    auto coords_eval = get_field(coords_eval_alloc);
+    FieldX<CoordX> coords_eval = get_field(coords_eval_alloc);
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             get_idx_range<GridX>(neutrals),
@@ -170,14 +190,24 @@ void DiffusiveNeutralSolver::get_derivative(
     });
 
     // build rhs of diffusive model equation
+
+    DConstFieldX mask(get_field(m_mask));
+    double amplitude = m_mask_amplitude;
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_fluidspx,
             KOKKOS_LAMBDA(IdxSpX const ifspx) {
+                IdxX ifx(ifspx);
                 dn(ifspx, ineutral_density)
-                        = -gradx_density_equilibrium_velocity(ifspx)
-                          + gradx_diffusion_temperature(ifspx) * gradx_neutrals_density(ifspx)
-                          + diffusion_temperature(ifspx) * laplx_neutrals_density(ifspx);
+                        = (-gradx_density_equilibrium_velocity(ifspx)
+                           + gradx_diffusion_temperature(ifspx) * gradx_neutrals_density(ifspx)
+                           + diffusion_temperature(ifspx) * laplx_neutrals_density(ifspx))
+                                  * (1.
+                                     - mask(ifx)) // here the masks stops the diffusion in the wall
+                          - amplitude * (mask(ifx))
+                                    * neutrals(
+                                            ifspx,
+                                            ineutral_density); // we relax the density to 0 in the walls
             }); // density source is not solved here, we only solve transport.
 }
 

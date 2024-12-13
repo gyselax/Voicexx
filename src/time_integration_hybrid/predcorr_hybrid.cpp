@@ -75,7 +75,6 @@ DFieldSpXVx PredCorrHybrid::operator()(
         // copy fdistribu
         ddc::parallel_deepcopy(allfdistribu_half_t, allfdistribu);
 
-
         // predictor
         m_boltzmann_solver(get_field(allfdistribu_half_t), get_const_field(electric_field), dt / 2);
 
