@@ -229,6 +229,8 @@ TEST(GeometryXM, PredCorrHybrid)
     double const normalization_coeff(1.0);
 
     // kinetic fluid coupling term
+    double const neutrals_wall_extent = 0.;
+    double const neutrals_wall_stiffness = 1.;
     KineticFluidCouplingSource const kineticfluidcoupling(
             1.0,
             0.0,
@@ -236,7 +238,10 @@ TEST(GeometryXM, PredCorrHybrid)
             ionization,
             recombination,
             normalization_coeff,
-            get_const_field(quadrature_coeffs));
+            get_const_field(quadrature_coeffs),
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            meshX);
 
     // construction of predcorr without fluid species
     PredCorr const predcorr(vlasov, poisson);

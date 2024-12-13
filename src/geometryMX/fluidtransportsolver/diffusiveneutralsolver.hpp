@@ -69,6 +69,9 @@ private:
 
     DConstFieldVx const m_quadrature_coeffs;
 
+    double const m_mask_amplitude;
+    DFieldMemX m_mask;
+
     IdxSp find_ion(IdxRangeSp const idx_range_kinsp) const;
 
 public:
@@ -81,6 +84,10 @@ public:
      * @param[in] spline_x_builder A one-dimensional spline builder.
      * @param[in] spline_x_evaluator A one-dimensional spline evaluator.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
+     * @param[in] mask_extent The extent of the wall for the neutrals
+     * @param[in] mask_stiffnes The stiffness of the wall for the neutrals
+     * @param[in] mask_amplitude The amplitude of the wall for the neutrals
+     * @param[in] gridx The grid on which to construct the wall
      */
     DiffusiveNeutralSolver(
             IReactionRate const& charge_exchange,
@@ -89,7 +96,11 @@ public:
             double const normalization_coeff,
             SplineXBuilder_1d const& spline_x_builder,
             SplineXEvaluator_1d const& spline_x_evaluator,
-            DConstFieldVx const& quadrature_coeffs);
+            DConstFieldVx const& quadrature_coeffs,
+            double const mask_extent,
+            double const mask_stiffness,
+            double const mask_amplitude,
+            IdxRangeX const& gridx);
 
     ~DiffusiveNeutralSolver() override = default;
 

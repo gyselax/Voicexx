@@ -230,6 +230,9 @@ static void TestKineticFluidCoupling()
     DFieldMemVx const quadrature_coeffs_neutrals(
             trapezoid_quadrature_coefficients<Kokkos::DefaultExecutionSpace>(meshVx));
 
+    double const neutrals_wall_extent = 0.;
+    double const neutrals_wall_stiffness = 1.;
+    double const neutrals_wall_amplitude = 0.;
 
     DiffusiveNeutralSolver const fluidsolver(
             charge_exchange,
@@ -238,7 +241,11 @@ static void TestKineticFluidCoupling()
             normalization_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
-            get_const_field(quadrature_coeffs_neutrals));
+            get_const_field(quadrature_coeffs_neutrals),
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            neutrals_wall_amplitude,
+            meshX);
 
     // kinetic fluid coupling term
     KineticFluidCouplingSource const kineticfluidcoupling(
@@ -248,7 +255,10 @@ static void TestKineticFluidCoupling()
             ionization,
             recombination,
             normalization_coeff,
-            get_const_field(quadrature_coeffs));
+            get_const_field(quadrature_coeffs),
+            neutrals_wall_extent,
+            neutrals_wall_stiffness,
+            meshX);
 
     double const time_start(0.);
     int const nb_iter(20);
