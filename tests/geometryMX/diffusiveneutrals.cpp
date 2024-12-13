@@ -146,7 +146,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
             normalization_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
-            quadrature_coeffs);
+            get_const_field(quadrature_coeffs));
 
     host_t<DFieldMemSpMomX> neutrals_init_host(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     ddc::for_each(get_idx_range(neutrals_init_host), [&](IdxSpMomX const ispmx) {
@@ -179,7 +179,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
     neutralsolver.get_derivative(
             derivative,
-            neutrals,
+            get_const_field(neutrals),
             get_const_field(kinsp_density),
             get_const_field(kinsp_velocity),
             get_const_field(kinsp_temperature));

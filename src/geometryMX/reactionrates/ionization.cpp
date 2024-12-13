@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#include <pdi.h>
+
 #include "ionization.hpp"
 #include "ratecomputation.hpp"
 

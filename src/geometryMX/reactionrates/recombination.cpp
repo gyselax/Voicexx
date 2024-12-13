@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#include <pdi.h>
+
 #include "ratecomputation.hpp"
 #include "recombination.hpp"
 #include "species_info.hpp"

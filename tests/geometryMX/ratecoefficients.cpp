@@ -105,7 +105,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 1.);
-    ConstantFluidInitialization fluid_init(moments_init);
+    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
 
     DFieldMemSpMomX derivative_alloc(get_idx_range(neutrals));
@@ -135,9 +135,15 @@ static void TestDiffusiveNeutralsRateCoefficients()
     DFieldSpX ionization_rate = get_field(ionization_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
-    charge_exchange(charge_exchange_rate, kinsp_density, kinsp_temperature);
-    ionization(ionization_rate, kinsp_density, kinsp_temperature);
-    recombination(recombination_rate, kinsp_density, kinsp_temperature);
+    charge_exchange(
+            charge_exchange_rate,
+            get_const_field(kinsp_density),
+            get_const_field(kinsp_temperature));
+    ionization(ionization_rate, get_const_field(kinsp_density), get_const_field(kinsp_temperature));
+    recombination(
+            recombination_rate,
+            get_const_field(kinsp_density),
+            get_const_field(kinsp_temperature));
 
     double mean_cx_rate = ddc::parallel_transform_reduce(
             Kokkos::DefaultExecutionSpace(),
