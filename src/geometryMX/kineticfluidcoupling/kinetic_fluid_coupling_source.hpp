@@ -34,6 +34,7 @@ private:
     IReactionRate const& m_recombination;
     double m_normalization_coeff;
     DConstFieldVx const m_quadrature_coeffs;
+    DFieldMemX m_mask;
 
 public:
     /**
@@ -46,6 +47,9 @@ public:
      * @param[in] recombination The rate of the recombination reaction.
      * @param[in] normalization_coeff The normalization coefficient of neutrals.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
+     * @param[in] mask_extent The extent of the mask for the neutrals fluid.
+     * @param[in] mask_stiffnes The stiffnes of the mask for the neutrals fluid.
+     * @param[in] gridx The grid on which to construct the wall.
      */
     KineticFluidCouplingSource(
             double density_coupling_coeff,
@@ -54,7 +58,10 @@ public:
             IReactionRate const& ionization,
             IReactionRate const& recombination,
             double normalization_coeff,
-            DConstFieldVx const& quadrature_coeffs);
+            DConstFieldVx const& quadrature_coeffs,
+            double mask_extent,
+            double mask_stiffness,
+            IdxRangeX const& gridx);
 
     ~KineticFluidCouplingSource() override = default;
 

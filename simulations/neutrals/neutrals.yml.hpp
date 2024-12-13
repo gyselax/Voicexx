@@ -67,6 +67,11 @@ KineticFluidCouplingSource:
   momentum_coupling_coeff: 0.0
   energy_coupling_coeff: 0.0
 
+NeutralKrook:
+  extent: 0.20
+  stiffness: 1.
+  amplitude: 0.1
+
 CollisionsInfo:
   enable_inter: true
   nustar0: 0.1
