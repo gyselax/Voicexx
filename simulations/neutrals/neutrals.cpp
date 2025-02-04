@@ -2,19 +2,16 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
-#include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include <ddc/ddc.hpp>
 #include <ddc/kernels/splines.hpp>
+#include <ddc/pdi.hpp>
 
 #include <paraconf.h>
-#include <pdi.h>
 
 #include "bsl_advection_vx.hpp"
 #include "bsl_advection_x.hpp"
@@ -23,7 +20,6 @@
 #include "collisions_inter.hpp"
 #include "collisions_intra.hpp"
 #include "constantfluidinitialization.hpp"
-#include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
 #include "fem_1d_poisson_solver.hpp"
@@ -45,7 +41,7 @@
 #include "predcorr_hybrid.hpp"
 #include "qnsolver.hpp"
 #include "recombination.hpp"
-#include "restartinitialization.hpp"
+#include "restartinitializationwithneutrals.hpp"
 #include "singlemodeperturbinitialization.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
@@ -53,10 +49,7 @@
 #include "splitrighthandsidesolver.hpp"
 #include "splitvlasovsolver.hpp"
 
-using std::cerr;
-using std::endl;
 using std::chrono::steady_clock;
-namespace fs = std::filesystem;
 
 int main(int argc, char** argv)
 {
@@ -126,39 +119,41 @@ int main(int argc, char** argv)
 
     ddc::expose_to_pdi("iter_start", iter_start);
 
+    double time_start(0);
     IdxRangeSpXVx const meshSpXVx(idx_range_kinsp, meshXVx);
     DFieldMemSpXVx allfdistribu(meshSpXVx);
-    double time_start(0);
-    if (iter_start == 0) { // if we start a new simulation
-        // we need to add a perturbation otherwise it will stay at equilibrium
-        SingleModePerturbInitialization const init = SingleModePerturbInitialization::
-                init_from_input(get_const_field(allfequilibrium), idx_range_kinsp, conf_voicexx);
-        init(get_field(allfdistribu));
-    } else {
-        RestartInitialization const restart(iter_start, time_start);
-        restart(get_field(allfdistribu));
-    }
-    auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));
 
     // Moments index range initialization
     IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
-
     // Neutral species initialization
     DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, mesh_x));
     DFieldSpMomX neutrals = get_field(neutrals_alloc);
-    host_t<DFieldMemSpMom> moments_init_host(IdxRangeSpMom(idx_range_fluidsp, meshM));
 
-    for (IdxSp const isp : idx_range_fluidsp) {
-        PC_tree_t const conf_nisp = PCpp_get(
-                conf_voicexx,
-                ".NeutralSpeciesInfo[%d]",
-                (isp - idx_range_fluidsp.front()).value());
-        ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
+    if (iter_start == 0) { // if we start a new simulation
+        // we need to add a perturbation otherwise it will stay at equilibrium
+        SingleModePerturbInitialization const init = SingleModePerturbInitialization::
+                init_from_input(get_const_field(allfequilibrium), idx_range_kinsp, conf_voicexx);
+        init(get_field(allfdistribu));
+
+        //neutrals get init according to the input file
+        host_t<DFieldMemSpMom> moments_init_host(IdxRangeSpMom(idx_range_fluidsp, meshM));
+        for (IdxSp const isp : idx_range_fluidsp) {
+            PC_tree_t const conf_nisp = PCpp_get(
+                    conf_voicexx,
+                    ".NeutralSpeciesInfo[%d]",
+                    (isp - idx_range_fluidsp.front()).value());
+            ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
+        }
+        ConstantFluidInitialization fluid_init(get_const_field(moments_init_host));
+        fluid_init(neutrals);
+
+    } else {
+        RestartInitializationWithNeutrals const restart(iter_start, time_start);
+        restart(get_field(allfdistribu), get_field(neutrals));
     }
-    ConstantFluidInitialization fluid_init(get_const_field(moments_init_host));
-    fluid_init(neutrals);
+    auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));
 
     // --> Algorithm info
     double const deltat = PCpp_double(conf_voicexx, ".Algorithm.deltat");

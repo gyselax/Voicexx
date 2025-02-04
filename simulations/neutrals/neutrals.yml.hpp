@@ -4,7 +4,7 @@
 
 #ifdef INPUT_MESH
 constexpr char const* const mesh_params_yaml = R"PARAMS_CFG(SplineMesh:
-  grid_file: "grids.h5"
+  grid_file: "grid.h5"
 
 )PARAMS_CFG";
 #else
@@ -38,13 +38,13 @@ constexpr char const* const params_yaml = R"PARAMS_CFG(SpeciesInfo:
 
 NeutralSpeciesInfo:
 - mass: 400.
-  density_eq: 1.
+  density_eq: 0.
 
 Krook:
-- name: 'adaptive' # 'constant' or adaptive': constant values or not for nu coeff.
+- name: 'constant' # 'constant' or adaptive': constant values or not for nu coeff.
   type: 'sink'
   solver: 'rk2' # possible values : 'rk2'
-  extent: 0.20
+  extent: 0.10
   stiffness: 1
   amplitude: 0.1
   density: 1e-9
@@ -68,7 +68,7 @@ KineticFluidCouplingSource:
   energy_coupling_coeff: 0.0
 
 NeutralKrook:
-  extent: 0.20
+  extent: 0.10
   stiffness: 1.
   amplitude: 0.1
 
