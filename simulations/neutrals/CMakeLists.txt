@@ -12,7 +12,7 @@ target_link_libraries(neutrals_${GEOMETRY_VARIANT}
         gslx::fluidinitialization_${GEOMETRY_VARIANT}
         gslx::fluidsolver_${GEOMETRY_VARIANT}
         gslx::moments
-        gslx::initialization_${GEOMETRY_VARIANT}
+        gslx::initialization_neutrals_${GEOMETRY_VARIANT}
         gslx::interpolation
         gslx::paraconfpp
         gslx::poisson_${GEOMETRY_VARIANT}

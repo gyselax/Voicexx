@@ -230,7 +230,7 @@ plugins:
       write: [time_saved, fdistribu, fluid_moments, electrostatic_potential]
     - file: 'VOICEXX_${iter_start:05}.h5'
       on_event: restart
-      read: [time_saved, fdistribu]
+      read: [time_saved, fdistribu, fluid_moments]
     - file: '${filename}'
       on_event: [read_x_extents]
       read:
