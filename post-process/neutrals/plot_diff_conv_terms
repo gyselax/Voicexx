@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+""" diagnostic for the convective and diffusive terms
+    in the pressure-diffusion equation :
+    sqrt(m_e/m_i) d(n_eq u_i)/dx
+    -alpha_0 d(D T_n d(n)/dx)/dx
+"""
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d
+from utils import compute_fluid_velocity, compute_temperature, compute_krook_neutrals
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plots the convection and diffusion for neutrals')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-1,
+                        type=int,
+                        help='time index')
+    parser.add_argument('--show',
+                        action='store_true',
+                        default=False,
+                        help='Displays figures')
+    parser.add_argument('--slice_begin',
+                        action='store',
+                        default=0,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--slice_end',
+                        action='store',
+                        default=1,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--with_mask',
+                        action='store_true',
+                        default=False,
+                        help='Display the mask contribution')
+    args = parser.parse_args()
+
+    # Load data
+    path_data_structure = Path('../gysdata_voice/data_structure_neutral.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+
+    current_nspecies = 'neutrals'
+    neutrals_mask = ds['krook_neutrals_mask']
+    diffusive_term = ds["diffusion_term"].sel(speciesn=current_nspecies)
+    convective_term = ds["convection_term"].sel(speciesn=current_nspecies)
+
+    time_diag = diffusive_term.coords['time'].values[args.itime]
+    time_init = diffusive_term.coords['time'].values[0]
+    time_values = diffusive_term.coords['time'].values
+    dt = time_values[1] - time_values[0]
+    idx = diffusive_term.coords['x'].values
+    slice_left = args.slice_begin*idx[-1]
+    slice_right = args.slice_end*idx[-1]
+    title = f'convection and diffusion for {current_nspecies}, x=({slice_left},{slice_right}), t={time_diag}, dt={dt}'
+
+    if args.with_mask:
+        convective_term = convective_term*(1-neutrals_mask)
+        diffusive_term = diffusive_term*(1-neutrals_mask)
+        source_krook = compute_krook_neutrals(ds)
+        data_dict = {
+            r'$\sqrt{\frac{m_e}{m_i}} \partial_x (n_{eq} u_i)*(1-M_w)$': convective_term.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+            r'$-\alpha_0 \partial_x (D T_n \partial_x n)*(1-M_w)$': diffusive_term.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+            r'$S_{krook}$': source_krook.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+        }
+        output_filename = Path.cwd() /\
+            f'conv_diff_terms_{current_nspecies}_t{time_diag}_dt{dt}_mask.png'
+    else:
+        data_dict = {
+            r'$\sqrt{\frac{m_e}{m_i}} \partial_x (n_{eq} u_i)*(1-M_w)$': convective_term.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+            r'$-\alpha_0 \partial_x (D T_n \partial_x n)*(1-M_w)$': diffusive_term.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]}
+        output_filename = Path.cwd() /\
+            f'conv_diff_terms_{current_nspecies}_t{time_diag}_dt{dt}.png'
+
+    plot_field1d(data_dict, title, output_filename)
+
+    if args.show:
+        plt.show()

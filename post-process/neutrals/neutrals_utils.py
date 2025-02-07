@@ -16,7 +16,7 @@ def get_charge_exchange_rate(ds, T_i):
             cx_coefficients = ds['charge_exchange_coefficients'][::-1]
             cx_rate_log10 = np.polyval(cx_coefficients, T_i_log10)
             norm_coeff_rate = ds['norm_coeff_rate_neutrals'].values
-            k_cx = 10**cx_rate_log10 * norm_coeff_rate
+            k_cx = np.power(10, cx_rate_log10) * norm_coeff_rate
             return k_cx
     except KeyError as e:
         raise KeyError(f"{e} is missing from the dataset.") from e

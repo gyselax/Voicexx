@@ -7,7 +7,7 @@ import os
 from argparse import ArgumentParser
 from pathlib import Path
 
-from gysdata import DiskStore
+from gysdata_voice import DiskStore
 from plot_utils import plot_field1d, plot_field2d
 
 

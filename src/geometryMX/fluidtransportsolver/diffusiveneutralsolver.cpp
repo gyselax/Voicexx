@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 
+#include <ddc/ddc.hpp>
+#include <ddc/pdi.hpp>
+
+#include <pdi.h>
+
+#include "ddc/create_mirror.hpp"
+
+#include "Kokkos_Core.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
 #include "mask_tanh.hpp"
-#include "quadrature.hpp"
 #include "rk2.hpp"
-#include "trapezoid_quadrature.hpp"
-
 
 DiffusiveNeutralSolver::DiffusiveNeutralSolver(
         IReactionRate const& charge_exchange,
@@ -44,6 +49,8 @@ DiffusiveNeutralSolver::DiffusiveNeutralSolver(
             MaskType::Inverted,
             false);
     ddc::parallel_deepcopy(get_field(m_mask), mask_host);
+    ddc::expose_to_pdi("krook_neutrals_amplitude", neutrals_wall_amplitude);
+    ddc::expose_to_pdi("krook_neutrals_mask", mask_host);
 }
 
 IdxSp DiffusiveNeutralSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
@@ -85,6 +92,15 @@ void DiffusiveNeutralSolver::get_derivative(
     m_charge_exchange(charge_exchange_rate, density, temperature);
     m_ionization(ionization_rate, density, temperature);
     m_recombination(recombination_rate, density, temperature);
+
+    // expose to pdi the reaction coefficients
+    auto cx_host = ddc::create_mirror_view_and_copy(charge_exchange_rate);
+    auto i_host = ddc::create_mirror_view_and_copy(ionization_rate);
+    auto r_host = ddc::create_mirror_view_and_copy(recombination_rate);
+    ddc::PdiEvent("reaction_rate_expose")
+            .with("charge_exchange_rate", cx_host)
+            .and_with("ionization_rate", i_host)
+            .and_with("recombination_rate", r_host);
 
     // compute diffusive model equation terms
     DFieldMemSpX density_equilibrium_velocity_alloc(idx_range_fluidspx);
@@ -189,26 +205,37 @@ void DiffusiveNeutralSolver::get_derivative(
                        get_const_field(gradx_neutrals_density_spline_x_coeff));
     });
 
-    // build rhs of diffusive model equation
-
+    // get the neutral mask
     DConstFieldX mask(get_field(m_mask));
     double amplitude = m_mask_amplitude;
+
+    DFieldMemSpX diff_term_alloc(idx_range_fluidspx);
+    DFieldMemSpX conv_term_alloc(idx_range_fluidspx);
+    DFieldSpX diff_term = get_field(diff_term_alloc);
+    DFieldSpX conv_term = get_field(conv_term_alloc);
+
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_fluidspx,
             KOKKOS_LAMBDA(IdxSpX const ifspx) {
                 IdxX ifx(ifspx);
+                diff_term(ifspx) = -gradx_density_equilibrium_velocity(ifspx);
+                conv_term(ifspx)
+                        = gradx_diffusion_temperature(ifspx) * gradx_neutrals_density(ifspx)
+                          + diffusion_temperature(ifspx) * laplx_neutrals_density(ifspx);
                 dn(ifspx, ineutral_density)
-                        = (-gradx_density_equilibrium_velocity(ifspx)
-                           + gradx_diffusion_temperature(ifspx) * gradx_neutrals_density(ifspx)
-                           + diffusion_temperature(ifspx) * laplx_neutrals_density(ifspx))
-                                  * (1.
-                                     - mask(ifx)) // here the masks stops the diffusion in the wall
-                          - amplitude * (mask(ifx))
-                                    * neutrals(
-                                            ifspx,
-                                            ineutral_density); // we relax the density to 0 in the walls
+                        // here the masks stops the diffusion and convection in the wall
+                        = (diff_term(ifspx) + conv_term(ifspx)) * (1. - mask(ifx))
+                          // we relax the density to 0 in the walls
+                          - amplitude * (mask(ifx)) * neutrals(ifspx, ineutral_density);
             }); // density source is not solved here, we only solve transport.
+
+    // we expose to pdi the coefficients
+    auto diff_term_host = ddc::create_mirror_view_and_copy(diff_term);
+    auto conv_term_host = ddc::create_mirror_view_and_copy(conv_term);
+    ddc::PdiEvent("diff_conv_expose")
+            .with("diffusion_term", diff_term_host)
+            .and_with("convection_term", conv_term_host);
 }
 
 DFieldSpMomX DiffusiveNeutralSolver::operator()(

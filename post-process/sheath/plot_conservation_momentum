@@ -13,11 +13,11 @@ from pathlib import Path
 
 import numpy as np
 
-from gysdata import DiskStore
+from gysdata_voice import DiskStore
 from plot_utils import plot_field1d, plot_field2d
 from math_utils import compute_moment, differentiate
-from geometryXVx.utils import compute_krook_sink_constant, compute_krook_sink_adaptive, compute_kinetic_source
-from geometryXVx.utils import compute_collinter_momentum_exchange, compute_temperature
+from utils import compute_krook_sink_constant, compute_krook_sink_adaptive, compute_kinetic_source
+from utils import compute_collinter_momentum_exchange, compute_temperature
 
 
 if __name__ == '__main__':
