@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+"""Plots the mask of the krook operator for the neutral species
+"""
+import os
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plots the neutrals krook')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-1,
+                        type=int,
+                        help='time index')
+
+    args = parser.parse_args()
+
+    # Load data
+    # Load the DiskStore (to access the made calculations)
+    path_data_structure = Path('data_structure_neutral.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+    mask = ds['krook_neutrals_mask']
+    output_filename = os.path.join(Path.cwd(), f'neutrals_krook.png')
+    plot_field1d({f'neutrals krook': mask}, f'neutrals krook', output_filename)

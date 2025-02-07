@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+""" diagnostic for the n_eq appearing in the pressure-diffusion equation :
+    $n_eq=\frac{n_i*n_e*K_r+n_N*n_i*K_{cx}}{n_i*K_{cx}+n_e*K_i}
+"""
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d
+from math_utils import compute_moment
+from neutrals_utils import get_charge_exchange_rate, get_ionization_rate, get_recombination_rate
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plots n_eq')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-2,  # the reaction rates are note stored for the last iteration
+                        type=int,
+                        help='time index')
+    parser.add_argument('--show',
+                        action='store_true',
+                        default=False,
+                        help='Displays figures')
+    parser.add_argument('--slice_begin',
+                        action='store',
+                        default=0,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--slice_end',
+                        action='store',
+                        default=1,
+                        type=float,
+                        help='first point to consider (0,1)')
+    args = parser.parse_args()
+
+    # Load data
+    path_data_structure = Path('data_structure_neutral.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+
+    fluid_moments = ds['fluid_moments']
+    fdistribu = ds['fdistribu']
+
+    # Neutral density
+    current_nspecies = 'neutrals'
+    moment_order = 'density'
+    density_n = fluid_moments.sel(
+        speciesn=current_nspecies, moment=moment_order)
+    density_n = density_n.chunk({'time': len(density_n['time'])})
+
+    # electron-ion densities
+    densities = compute_moment(fdistribu, 'v_x', moment_order=0)
+    densities = densities.chunk({'time': len(densities['time'])})
+    density_e = densities.sel(species='electrons')
+    density_i = densities.sel(species='ions')
+
+    k_cx = ds['charge_exchange_rate']
+    k_i = ds['ionization_rate']
+    k_r = ds['recombination_rate']
+
+    n_eq = (density_i * density_e * k_r + density_n * density_i *
+            k_cx) / (density_i * k_cx + density_e * k_i)
+
+    time_diag = fluid_moments.coords['time'].values[args.itime]
+    time_init = fluid_moments.coords['time'].values[0]
+    time_values = fluid_moments.coords['time'].values
+    dt = time_values[1] - time_values[0]
+    idx = fluid_moments.coords['x'].values
+    slice_left = args.slice_begin*idx[-1]
+    slice_right = args.slice_end*idx[-1]
+    title = f'n_eq, x=({slice_left},{slice_right}), t={time_diag}, dt={dt}'
+
+    data_dict = {
+        r'$n_eq$': n_eq.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]
+    }
+
+    output_filename = Path.cwd() / \
+        f'n_eq_t{time_diag}_dt{dt}.png'
+    plot_field1d(data_dict, title, output_filename)
+
+    if args.show:
+        plt.show()

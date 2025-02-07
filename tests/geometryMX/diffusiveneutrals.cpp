@@ -7,6 +7,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <pdi.h>
+
 #include "constantfluidinitialization.hpp"
 #include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
@@ -33,6 +35,9 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     CoordVx const vx_min(-8);
     CoordVx const vx_max(8);
     IdxStepVx const vx_size(50);
+
+    PC_tree_t conf_pdi = PC_parse_string("");
+    PDI_init(conf_pdi);
 
     // Creating mesh & supports
     ddc::init_discrete_space<BSplinesX>(x_min, x_max, x_size);
@@ -226,4 +231,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     });
 
     EXPECT_LE(error_l1 / max_derivative, 0.01);
+
+    PC_tree_destroy(&conf_pdi);
+    PDI_finalize();
 }

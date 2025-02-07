@@ -5,7 +5,6 @@
 #include "mask_tanh.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
-#include "trapezoid_quadrature.hpp"
 
 KineticFluidCouplingSource::KineticFluidCouplingSource(
         double const density_coupling_coeff,

@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+"""diagnostic of reaction coefficients
+    K_i, K_r and K_cx
+"""
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d
+from math_utils import compute_moment
+from neutrals_utils import get_charge_exchange_rate, get_ionization_rate, get_recombination_rate
+from utils import compute_temperature
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plot the reaction coefficients')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-1,
+                        type=int,
+                        help='time index')
+    parser.add_argument('--show',
+                        action='store_true',
+                        default=False,
+                        help='Displays figures')
+    parser.add_argument('--slice_begin',
+                        action='store',
+                        default=0,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--slice_end',
+                        action='store',
+                        default=1,
+                        type=float,
+                        help='first point to consider (0,1)')
+    args = parser.parse_args()
+
+    # Load data
+    path_data_structure = Path('data_structure_neutral.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+    fluid_moments = ds['fluid_moments']
+    fdistribu = ds['fdistribu']
+
+    # mass and density of the neutrals
+    neutrals_masses = ds['neutrals_masses']
+    current_nspecies = 'neutrals'
+    moment_order = 'density'
+    m_n = neutrals_masses.sel(speciesn=current_nspecies)
+    density_n = fluid_moments.sel(
+        speciesn=current_nspecies, moment=moment_order)
+    density_n = density_n.chunk({'time': len(density_n['time'])})
+
+    # electron-ion densities
+    densities = compute_moment(fdistribu, 'v_x', moment_order=0)
+    particle_flux = compute_moment(fdistribu, 'v_x', moment_order=1)
+    momentum_flux = compute_moment(fdistribu, 'v_x', moment_order=2)
+    densities = densities.chunk({'time': len(densities['time'])})
+    density_e = densities.sel(species='electrons')
+    density_i = densities.sel(species='ions')
+
+    # Computation of the reaction rates using the same
+    # polynomials as in cpp or if not available using
+    # the constant rates.
+    plasma_temperature = compute_temperature(
+        densities, particle_flux, momentum_flux)
+
+    k_cx = get_charge_exchange_rate(ds, plasma_temperature.sel(species='ions'))
+    k_i = get_ionization_rate(
+        ds, plasma_temperature.sel(species='electrons'), density_e)
+    k_r = get_recombination_rate(
+        ds, plasma_temperature.sel(species='electrons'), density_e)
+    # shenanigans, I know this is not clean but it is the easiest way I found
+    # to convert k_cx from a numpy ndarray to a xarray
+    k_cx = k_cx+k_i-k_i
+
+    idx = k_i.coords['x'].values
+    idt = k_i.coords['time'].values
+    slice_left = args.slice_begin*idx[-1]
+    slice_right = args.slice_end*idx[-1]
+
+    time_diag = fluid_moments.coords['time'].values[args.itime]
+    time_init = fluid_moments.coords['time'].values[0]
+    time_values = density_n.coords['time'].values
+    dt = time_values[1] - time_values[0]
+    title = f'reaction coefficients, t = {time_diag}, dt_diag={dt}'
+
+    data_dict = {
+        r'$K_{cx}$': k_cx.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+        r'$K_i$': k_i.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+        r'$K_r$': k_r.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]
+    }
+
+    output_filename = Path.cwd() / \
+        f'reaction_coefficients_t{time_diag}_dt{dt}.png'
+    plot_field1d(data_dict, title, output_filename)
+    output_filename = Path.cwd() / \
+        f'reaction_coefficients_t{time_diag}_dt{dt}_log.png'
+    plot_field1d(data_dict, title, output_filename,scale='log')
+
+    if args.show:
+        plt.show()
