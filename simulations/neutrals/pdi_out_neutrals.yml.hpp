@@ -126,6 +126,13 @@ metadata:
     subtype: double
     size: [ '$kinetic_source_spatial_extent_extents[0]' ]
 
+  krook_neutrals_amplitude : double
+  krook_neutrals_mask_extents: { type: array, subtype: int64, size: 1 }
+  krook_neutrals_mask:
+    type: array
+    subtype: double
+    size: [ '$krook_neutrals_mask_extents[0]' ]
+
   filename_size: size_t
   filename: {type: array, subtype: char, size: "$filename_size"}
 
@@ -145,6 +152,31 @@ data:
     type: array
     subtype: double
     size: [ '$electrostatic_potential_extents[0]' ]
+  charge_exchange_rate_extents: { type: array, subtype: int64, size: 2 }
+  charge_exchange_rate:
+    type: array
+    subtype: double
+    size: [ '$charge_exchange_rate_extents[0]' , '$charge_exchange_rate_extents[1]' ]
+  ionization_rate_extents: { type: array, subtype: int64, size: 2 }
+  ionization_rate:
+    type: array
+    subtype: double
+    size: [ '$ionization_rate_extents[0]' , '$ionization_rate_extents[1]' ]
+  recombination_rate_extents: { type: array, subtype: int64, size: 2 }
+  recombination_rate:
+    type: array
+    subtype: double
+    size: [ '$recombination_rate_extents[0]' , '$recombination_rate_extents[1]' ]
+  diffusion_term_extents: { type: array, subtype: int64, size: 2 }
+  diffusion_term:
+    type: array
+    subtype: double
+    size: [ '$diffusion_term_extents[0]' , '$diffusion_term_extents[1]' ]
+  convection_term_extents: { type: array, subtype: int64, size: 2 }
+  convection_term:
+    type: array
+    subtype: double
+    size: [ '$convection_term_extents[0]' , '$convection_term_extents[1]' ]
 
 plugins:
   set_value:
@@ -222,12 +254,25 @@ plugins:
         - kinetic_source_velocity_shape
         - kinetic_source_spatial_extent
 
+        - krook_neutrals_amplitude
+        - krook_neutrals_mask
+
 
     - file: 'VOICEXX_${iter_saved:05}.h5'
       on_event: [iteration, last_iteration]
       when: '${iter} % ${nbstep_diag} = 0'
       collision_policy: replace_and_warn
       write: [time_saved, fdistribu, fluid_moments, electrostatic_potential]
+    - file: 'VOICEXX_${iter_saved:05}.h5'
+      on_event: [reaction_rate_expose]
+      when: '${iter} % ${nbstep_diag} = 0'
+      collision_policy: write_into
+      write: [charge_exchange_rate, ionization_rate, recombination_rate]
+    - file: 'VOICEXX_${iter_saved:05}.h5'
+      on_event: [diff_conv_expose]
+      when: '${iter} % ${nbstep_diag} = 0'
+      collision_policy: write_into
+      write: [diffusion_term, convection_term]
     - file: 'VOICEXX_${iter_start:05}.h5'
       on_event: restart
       read: [time_saved, fdistribu, fluid_moments]

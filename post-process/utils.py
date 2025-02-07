@@ -81,11 +81,30 @@ def compute_kinetic_source(diskstore):
     '''
     try:
         return diskstore['kinetic_source_amplitude'] \
-                * diskstore['kinetic_source_spatial_extent'] \
-                * diskstore['kinetic_source_velocity_shape']
+            * diskstore['kinetic_source_spatial_extent'] \
+            * diskstore['kinetic_source_velocity_shape']
     except KeyError as e:
         print('Info: no kinetic source in simulation:', e)
         return xr.zeros_like(diskstore['fdistribu'])
+
+
+def compute_krook_neutrals(diskstore):
+    '''Computes the neutrals krook expression
+    '''
+    try:
+        nu = diskstore['krook_neutrals_amplitude']
+        mask = diskstore['krook_neutrals_mask']
+
+    except KeyError as e:
+        print('Info: no neutrals krook sink in simulation:', e)
+        return xr.zeros_like(diskstore['fluid_moments'])
+
+    fluid_moments = diskstore['fluid_moments']
+    current_nspecies = 'neutrals'
+    moment_order = 'density'
+    density_n = fluid_moments.sel(
+        speciesn=current_nspecies, moment=moment_order)
+    return nu*mask*(density_n)
 
 
 def compute_collinter_collision_frequency(diskstore, density, temperature):
@@ -122,13 +141,14 @@ def compute_collinter_momentum_exchange(diskstore, density, fluid_velocity, temp
     momentum exchange term
     '''
     try:
-        collfreq = compute_collinter_collision_frequency(diskstore, density, temperature)
+        collfreq = compute_collinter_collision_frequency(
+            diskstore, density, temperature)
         masses = diskstore['fdistribu_masses']
         masses_ratio = masses/masses.values[::-1]
         fluid_velocity_flipped = fluid_velocity.copy()
         fluid_velocity_flipped.coords['species'] = fluid_velocity_flipped.coords['species'][::-1]
-        momentum_term = -collfreq*density * (fluid_velocity - np.sqrt(masses_ratio) \
-                                    * fluid_velocity_flipped)
+        momentum_term = -collfreq*density * (fluid_velocity - np.sqrt(masses_ratio)
+                                             * fluid_velocity_flipped)
         return momentum_term
     except KeyError as e:
         print('Info: no inter_species collisions in simulation:', e)
@@ -147,7 +167,8 @@ def compute_collinter_energy_exchange(diskstore, density, temperature):
         masses_flipped = masses.copy()
         masses_flipped.coords['species'] = masses_flipped.coords['species'][::-1]
         ma_on_ma_mb = masses/(masses + masses_flipped)
-        collfreq = compute_collinter_collision_frequency(diskstore, density, temperature)
+        collfreq = compute_collinter_collision_frequency(
+            diskstore, density, temperature)
 
         return -3*collfreq*density*ma_on_ma_mb*(temperature - temperature_flipped)
 

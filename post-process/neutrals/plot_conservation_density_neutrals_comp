@@ -9,12 +9,14 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 from gysdata_voice import DiskStore
 from plot_utils import plot_field1d, plot_field2d
 from math_utils import compute_moment, differentiate
-from utils import compute_krook_neutrals
+from neutrals_utils import get_charge_exchange_rate, get_ionization_rate, get_recombination_rate
+from utils import compute_fluid_velocity, compute_temperature, compute_krook_neutrals
 
 if __name__ == '__main__':
     parser = ArgumentParser(
@@ -27,7 +29,7 @@ if __name__ == '__main__':
                         help='location of the results')
     parser.add_argument('--itime',
                         action='store',
-                        default=-2,
+                        default=-1,
                         type=int,
                         help='time index')
     parser.add_argument('--show',
@@ -44,55 +46,76 @@ if __name__ == '__main__':
                         default=1,
                         type=float,
                         help='first point to consider (0,1)')
-    parser.add_argument('--with_mask',
-                        action='store_true',
-                        default=False,
-                        help='Display the mask contribution')
     args = parser.parse_args()
 
     # Load data
     path_data_structure = Path('data_structure_neutral.yaml')
     ds = DiskStore(args.data_dir, data_structure=path_data_structure)
-
     fluid_moments = ds['fluid_moments']
     fdistribu = ds['fdistribu']
-    current_nspecies = 'neutrals'
-    diffusive_term = ds["diffusion_term"].sel(speciesn=current_nspecies)
-    convective_term = ds["convection_term"].sel(speciesn=current_nspecies)
-    k_cx = ds['charge_exchange_rate']
-    k_r = ds['recombination_rate']
-    k_i = ds['ionization_rate']
 
+    masses = ds['fdistribu_masses']
+    neutrals_masses = ds['neutrals_masses']
+    m_e = masses.sel(species='electrons')
+    m_i = masses.sel(species='ions')
+
+    current_nspecies = 'neutrals'
+    m_n = neutrals_masses.sel(speciesn=current_nspecies)
+
+    # Neutral temperature and normalization coefficients.
     alpha_0 = ds['normalization_coeff_neutrals']
+    moment_order = 'density'
     neutrals_mask = ds['krook_neutrals_mask']
 
-    # Plasma density
-    densities = compute_moment(fdistribu, 'v_x', moment_order=0)
-    densities = densities.chunk({'time': len(densities['time'])})
-    density_e = densities.sel(species='electrons')
-    density_i = densities.sel(species='ions')
-
     # Neutral density
-    moment_order = 'density'
     density_n = fluid_moments.sel(
         speciesn=current_nspecies, moment=moment_order)
     density_n = density_n.chunk({'time': len(density_n['time'])})
+    # electron-ion densities
+    densities = compute_moment(fdistribu, 'v_x', moment_order=0)
+    particle_flux = compute_moment(fdistribu, 'v_x', moment_order=1)
+    momentum_flux = compute_moment(fdistribu, 'v_x', moment_order=2)
+    densities = densities.chunk({'time': len(densities['time'])})
+    density_e = densities.sel(species='electrons')
+    density_i = densities.sel(species='ions')
+    fluid_velocity_i = compute_fluid_velocity(
+        density_i, particle_flux.sel(species='ions'))
+
+    # Computation of the reaction rates using the same polynomials as in cpp or if not available using the constant rates.
+    plasma_temperature = compute_temperature(
+        densities, particle_flux, momentum_flux)
+    neutrals_temperature = plasma_temperature.sel(species='ions')  # T_n = T_i
+
+    k_cx = get_charge_exchange_rate(ds, plasma_temperature.sel(species='ions'))
+    k_i = get_ionization_rate(
+        ds, plasma_temperature.sel(species='electrons'), density_e)
+    k_r = get_recombination_rate(
+        ds, plasma_temperature.sel(species='electrons'), density_e)
 
     # First term
     dn_dt = differentiate(density_n, 'time')
 
-    # Second term, diffusive
+    # Second term, convective
+    n_eq = (density_i * density_e * k_r + density_n * density_i *
+            k_cx) / (density_i * k_cx + density_e * k_i)
+    u_i = fluid_velocity_i
+    convective_term = differentiate(np.sqrt(m_e / m_i) * n_eq * u_i, 'x')
+    convective_term = convective_term*(1-neutrals_mask)
+
+    # Third term, diffusive
+    D_p = 1 / (m_n * (density_i * k_cx + density_e * k_i))
+    diffusive_term = - alpha_0 * \
+        differentiate(D_p * neutrals_temperature *
+                      differentiate(density_n, 'x'), 'x')
     diffusive_term = diffusive_term*(1-neutrals_mask)
 
-    # Third term, convective
-    convective_term = convective_term*(1-neutrals_mask)
     # Fourth term, source
     S_n = density_i * density_e * k_r - density_n * density_e * k_i
     source_term = S_n / alpha_0
     source_term = source_term*(1-neutrals_mask)
 
     # Fifth term, neutral krook
-    source_krook = -compute_krook_neutrals(ds)
+    source_krook = compute_krook_neutrals(ds)
 
     error = dn_dt + convective_term + diffusive_term - source_term - source_krook
 
