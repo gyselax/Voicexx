@@ -18,6 +18,6 @@ target_link_libraries("fluidinitialization_${GEOMETRY_VARIANT}"
 
 )
 
-add_library("gslx::fluidinitialization_${GEOMETRY_VARIANT}" ALIAS "fluidinitialization_${GEOMETRY_VARIANT}")
+add_library("voicexx::fluidinitialization_${GEOMETRY_VARIANT}" ALIAS "fluidinitialization_${GEOMETRY_VARIANT}")
 
 endforeach()

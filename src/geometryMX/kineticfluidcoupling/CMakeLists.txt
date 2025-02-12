@@ -19,13 +19,13 @@ target_link_libraries("fluidrhs_${GEOMETRY_VARIANT}"
         gslx::quadrature
         gslx::speciesinfo
         gslx::initialization_${GEOMETRY_VARIANT}
-        gslx::reactionrates_${GEOMETRY_VARIANT}
         gslx::timestepper
         gslx::utils_${GEOMETRY_VARIANT}
         gslx::utils
         gslx::rhs_${GEOMETRY_VARIANT}
+        voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
 
-add_library("gslx::fluidrhs_${GEOMETRY_VARIANT}" ALIAS "fluidrhs_${GEOMETRY_VARIANT}")
+add_library("voicexx::fluidrhs_${GEOMETRY_VARIANT}" ALIAS "fluidrhs_${GEOMETRY_VARIANT}")
 
 endforeach()

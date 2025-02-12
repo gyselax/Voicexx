@@ -20,6 +20,6 @@ target_link_libraries("initialization_neutrals_${GEOMETRY_VARIANT}"
         gslx::utils
 )
 
-add_library("gslx::initialization_neutrals_${GEOMETRY_VARIANT}" ALIAS "initialization_neutrals_${GEOMETRY_VARIANT}")
+add_library("voicexx::initialization_neutrals_${GEOMETRY_VARIANT}" ALIAS "initialization_neutrals_${GEOMETRY_VARIANT}")
 
 endforeach()
