@@ -16,14 +16,14 @@ target_link_libraries("time_integration_hybrid_${GEOMETRY_VARIANT}"
         DDC::pdi
         gslx::boltzmann_${GEOMETRY_VARIANT}
         gslx::initialization_${GEOMETRY_VARIANT}
-        gslx::fluidsolver_${GEOMETRY_VARIANT}
-        gslx::fluidrhs_${GEOMETRY_VARIANT}
         gslx::poisson_${GEOMETRY_VARIANT}
         gslx::speciesinfo
         gslx::utils
+        voicexx::fluidsolver_${GEOMETRY_VARIANT}
+        voicexx::fluidrhs_${GEOMETRY_VARIANT}
 
 )
 
-add_library("gslx::time_integration_hybrid_${GEOMETRY_VARIANT}" ALIAS "time_integration_hybrid_${GEOMETRY_VARIANT}")
+add_library("voicexx::time_integration_hybrid_${GEOMETRY_VARIANT}" ALIAS "time_integration_hybrid_${GEOMETRY_VARIANT}")
 
 endforeach()

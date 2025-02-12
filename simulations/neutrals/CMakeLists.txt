@@ -9,20 +9,20 @@ target_link_libraries(neutrals_${GEOMETRY_VARIANT}
         DDC::pdi
         gslx::advection
         gslx::boltzmann_${GEOMETRY_VARIANT}
-        gslx::fluidinitialization_${GEOMETRY_VARIANT}
-        gslx::fluidsolver_${GEOMETRY_VARIANT}
         gslx::moments
-        gslx::initialization_neutrals_${GEOMETRY_VARIANT}
         gslx::interpolation
         gslx::paraconfpp
         gslx::poisson_${GEOMETRY_VARIANT}
-        gslx::reactionrates_${GEOMETRY_VARIANT}
         gslx::rhs_${GEOMETRY_VARIANT}
         gslx::speciesinfo
-        gslx::time_integration_hybrid_${GEOMETRY_VARIANT}
         gslx::io
         gslx::utils
         gslx::rhs_${GEOMETRY_VARIANT}
+        voicexx::initialization_neutrals_${GEOMETRY_VARIANT}
+        voicexx::reactionrates_${GEOMETRY_VARIANT}
+        voicexx::time_integration_hybrid_${GEOMETRY_VARIANT}
+        voicexx::fluidinitialization_${GEOMETRY_VARIANT}
+        voicexx::fluidsolver_${GEOMETRY_VARIANT}
 
         paraconf::paraconf
         PDI::pdi

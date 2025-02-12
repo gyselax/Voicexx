@@ -20,13 +20,13 @@ target_link_libraries("fluidsolver_${GEOMETRY_VARIANT}"
         gslx::interpolation
         gslx::quadrature
         gslx::speciesinfo
-        gslx::reactionrates_${GEOMETRY_VARIANT}
         gslx::speciesinfo
         gslx::timestepper
         gslx::utils
         gslx::rhs_${GEOMETRY_VARIANT}
+        voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
 
-add_library("gslx::fluidsolver_${GEOMETRY_VARIANT}" ALIAS "fluidsolver_${GEOMETRY_VARIANT}")
+add_library("voicexx::fluidsolver_${GEOMETRY_VARIANT}" ALIAS "fluidsolver_${GEOMETRY_VARIANT}")
 
 endforeach()

@@ -24,6 +24,6 @@ target_link_libraries("reactionrates_${GEOMETRY_VARIANT}"
 
 )
 
-add_library("gslx::reactionrates_${GEOMETRY_VARIANT}" ALIAS "reactionrates_${GEOMETRY_VARIANT}")
+add_library("voicexx::reactionrates_${GEOMETRY_VARIANT}" ALIAS "reactionrates_${GEOMETRY_VARIANT}")
 
 endforeach()
