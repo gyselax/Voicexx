@@ -23,11 +23,13 @@
 #include "collisions_intra.hpp"
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
+#include "densitycoupling.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
 #include "input.hpp"
+#include "iplasmaneutralscoupling.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
@@ -36,6 +38,7 @@
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals_owngrid.yml.hpp"
 #include "nullfluidsolver.hpp"
+#include "nullplasmaneutralscoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "qnsolver.hpp"
@@ -48,6 +51,7 @@
 
 // used for the fact that we have a different grid for the neutrals
 #include "charge_exchange.hpp"
+#include "densitycoupling.hpp"
 #include "diffgridsfluidsolver.hpp"
 #include "ionisation.hpp"
 #include "nullplasmaneutralscoupling.hpp"
@@ -336,8 +340,16 @@ int main(int argc, char** argv)
         ptr_neutral_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
     }
 
-    // for the moment we don't have any coupling
-    NullPlasmaNeutralsCoupling<GridXNeutrals> const kineticfluidcoupling;
+    DensityCoupling const kineticfluidcoupling(
+            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
+            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.momentum_coupling_coeff"),
+            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.energy_coupling_coeff"),
+            ionisation,
+            recombination,
+            builder_x,
+            interpolator_from_X_to_Xn,
+            mean_free_path,
+            get_const_field(quadrature_coeffs_alloc));
 
     PredCorrHybrid<GridXNeutrals> const
             predcorr(boltzmann, *ptr_neutral_solver, poisson, kineticfluidcoupling);
@@ -362,6 +374,7 @@ int main(int argc, char** argv)
             ddc::discrete_space<Species>().masses()[idx_range_fluidsp]);
     ddc::expose_to_pdi("temperature_normalisation", temperature_normalisation);
     ddc::expose_to_pdi("density_normalisation", density_normalisation);
+    ddc::expose_to_pdi("k_cx_0", charge_exchange.get_Kcx0());
     ddc::expose_to_pdi("mean_free_path", mean_free_path);
     ddc::PdiEvent("initial_state").with("fdistribu_eq", allfequilibrium_host);
 
