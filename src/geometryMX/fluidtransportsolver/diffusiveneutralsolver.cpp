@@ -99,8 +99,8 @@ void DiffusiveNeutralSolver::get_derivative(
     auto r_host = ddc::create_mirror_view_and_copy(recombination_rate);
     ddc::PdiEvent("reaction_rate_expose")
             .with("charge_exchange_rate", cx_host)
-            .and_with("ionization_rate", i_host)
-            .and_with("recombination_rate", r_host);
+            .with("ionization_rate", i_host)
+            .with("recombination_rate", r_host);
 
     // compute diffusive model equation terms
     DFieldMemSpX density_equilibrium_velocity_alloc(idx_range_fluidspx);
@@ -235,7 +235,7 @@ void DiffusiveNeutralSolver::get_derivative(
     auto conv_term_host = ddc::create_mirror_view_and_copy(conv_term);
     ddc::PdiEvent("diff_conv_expose")
             .with("diffusion_term", diff_term_host)
-            .and_with("convection_term", conv_term_host);
+            .with("convection_term", conv_term_host);
 }
 
 DFieldSpMomX DiffusiveNeutralSolver::operator()(

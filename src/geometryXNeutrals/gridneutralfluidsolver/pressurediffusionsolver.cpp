@@ -84,8 +84,8 @@ void PressureDiffusionSolver::get_derivative(
     auto r_host = ddc::create_mirror_view_and_copy(recombination_rate);
     ddc::PdiEvent("reaction_rate_expose")
             .with("charge_exchange_rate", cx_host)
-            .and_with("ionization_rate", i_host)
-            .and_with("recombination_rate", r_host);
+            .with("ionization_rate", i_host)
+            .with("recombination_rate", r_host);
 
     // create the fields to interpolate the plasma quantities on the neutral grid
     IdxRangeSpXn idx_range_kinspxn(
@@ -221,10 +221,10 @@ void PressureDiffusionSolver::get_derivative(
     ddc::parallel_deepcopy(flux_grad_host, grad_particle_flux);
     ddc::PdiEvent("diff_conv_expose")
             .with("pressure_grad", pressure_grad_host)
-            .and_with("diff_coeff", diffusion_coeff_host)
-            .and_with("part_flux", particle_flux_host)
-            .and_with("flux_grad", flux_grad_host)
-            .and_with("n_eq_ui", n_eq_ui_host);
+            .with("diff_coeff", diffusion_coeff_host)
+            .with("part_flux", particle_flux_host)
+            .with("flux_grad", flux_grad_host)
+            .with("n_eq_ui", n_eq_ui_host);
 }
 
 DFieldSpMomXn PressureDiffusionSolver::operator()(
