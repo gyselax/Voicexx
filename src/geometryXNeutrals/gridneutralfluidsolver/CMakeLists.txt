@@ -14,7 +14,7 @@ target_include_directories("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
 target_link_libraries("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
-        sll::SLL
+        gslx::utils
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::interpolation
         gslx::quadrature
