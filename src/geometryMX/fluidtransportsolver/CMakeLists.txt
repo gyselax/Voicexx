@@ -14,7 +14,7 @@ target_include_directories("fluidsolver_${GEOMETRY_VARIANT}"
 target_link_libraries("fluidsolver_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
-        sll::SLL
+        gslx::utils
         gslx::advection
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::interpolation
