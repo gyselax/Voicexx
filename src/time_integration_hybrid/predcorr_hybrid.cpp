@@ -67,10 +67,10 @@ DFieldSpXVx PredCorrHybrid::operator()(
         ddc::parallel_deepcopy(fluid_moments_host, fluid_moments);
         ddc::PdiEvent("iteration")
                 .with("iter", iter)
-                .and_with("time_saved", iter_time)
-                .and_with("fdistribu", allfdistribu_host)
-                .and_with("fluid_moments", fluid_moments_host)
-                .and_with("electrostatic_potential", electrostatic_potential_host);
+                .with("time_saved", iter_time)
+                .with("fdistribu", allfdistribu_host)
+                .with("fluid_moments", fluid_moments_host)
+                .with("electrostatic_potential", electrostatic_potential_host);
 
         // copy fdistribu
         ddc::parallel_deepcopy(allfdistribu_half_t, allfdistribu);
@@ -106,10 +106,10 @@ DFieldSpXVx PredCorrHybrid::operator()(
     ddc::parallel_deepcopy(fluid_moments_host, fluid_moments);
     ddc::PdiEvent("last_iteration")
             .with("iter", iter)
-            .and_with("time_saved", final_time)
-            .and_with("fdistribu", allfdistribu_host)
-            .and_with("fluid_moments", fluid_moments_host)
-            .and_with("electrostatic_potential", electrostatic_potential_host);
+            .with("time_saved", final_time)
+            .with("fdistribu", allfdistribu_host)
+            .with("fluid_moments", fluid_moments_host)
+            .with("electrostatic_potential", electrostatic_potential_host);
 
     return allfdistribu;
 }
