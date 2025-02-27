@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include <sll/view.hpp>
-
 #include "geometry.hpp"
+#include "view.hpp"
 
 /**
  * @brief An abstract interface representing a reaction rate that depends on temperature and density.
