@@ -7,16 +7,16 @@ target_link_libraries(sheath_${GEOMETRY_VARIANT}
   PUBLIC
   DDC::core
   DDC::pdi
-  gslx::initialization_${GEOMETRY_VARIANT}
-  gslx::interpolation
-  gslx::poisson_${GEOMETRY_VARIANT}
-  gslx::time_integration_${GEOMETRY_VARIANT}
-  gslx::speciesinfo
-  gslx::boltzmann_${GEOMETRY_VARIANT}
   gslx::advection
-  gslx::paraconfpp
-  gslx::rhs_${GEOMETRY_VARIANT}
+  gslx::boltzmann_${GEOMETRY_VARIANT}
+  gslx::initialisation_${GEOMETRY_VARIANT}
+  gslx::interpolation
   gslx::io
+  gslx::paraconfpp
+  gslx::poisson_${GEOMETRY_VARIANT}
+  gslx::rhs_${GEOMETRY_VARIANT}
+  gslx::speciesinfo
+  gslx::time_integration_${GEOMETRY_VARIANT}
   gslx::utils
 
   PDI::pdi

@@ -15,7 +15,7 @@ target_link_libraries("time_integration_hybrid_${GEOMETRY_VARIANT}"
         DDC::core
         DDC::pdi
         gslx::boltzmann_${GEOMETRY_VARIANT}
-        gslx::initialization_${GEOMETRY_VARIANT}
+        gslx::initialisation_${GEOMETRY_VARIANT}
         gslx::poisson_${GEOMETRY_VARIANT}
         gslx::speciesinfo
         gslx::utils
