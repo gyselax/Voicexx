@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+""" diagnostics for the neutral diffusion
+"""
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plots the neutrals diffusion')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-1,
+                        type=int,
+                        help='time index')
+    parser.add_argument('--show',
+                        action='store_true',
+                        default=False,
+                        help='Displays figures')
+    parser.add_argument('--slice_begin',
+                        action='store',
+                        default=0,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--slice_end',
+                        action='store',
+                        default=1,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--show_pressure',
+                        action='store_true',
+                        default=False,
+                        help='display the pressure gradient')
+    parser.add_argument('--show_coeff',
+                        action='store_true',
+                        default=False,
+                        help='display the pressure-diffusion coefficient')
+    args = parser.parse_args()
+
+    # Load data
+    path_data_structure = Path('data_structure_neutral_owngrid.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+
+    current_nspecies = 'neutrals'
+    diff_coeff = ds["diff_coeff"].sel(speciesn=current_nspecies)
+    pressure_grad = ds["pressure_grad"].sel(speciesn=current_nspecies)
+    convection = ds["n_eq_ui"].sel(speciesn=current_nspecies)
+    diffusion = diff_coeff*pressure_grad
+
+    time_diag = diff_coeff.coords['time'].values[args.itime]
+    time_init = diff_coeff.coords['time'].values[0]
+    time_values = diff_coeff.coords['time'].values
+    dt = time_values[1] - time_values[0]
+    idx = diff_coeff.coords['xn'].values
+    slice_left = args.slice_begin*idx[-1]
+    slice_right = args.slice_end*idx[-1]
+    title = f'Diffusion {current_nspecies}, xn=({slice_left},{slice_right}), t={time_diag}, dt={dt}'
+
+    data_dict={r'$n_{eq}u_i$': convection.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+               r'$D_p\partial_x p_N$': diffusion.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]}
+    if args.show_pressure:
+        data_dict[r'$\partial_x p_N$']=pressure_grad.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]
+    if args.show_coeff:
+        data_dict[r'$D_p$']= diff_coeff.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]
+
+    output_filename = Path.cwd() / \
+        f'diffusion_{current_nspecies}_t{time_diag}_dt{dt}.png'
+    plot_field1d(data_dict, title, output_filename)
+
+    if args.show:
+        plt.show()
