@@ -9,6 +9,7 @@ You will need to append this directory, and its subdirectories to the PATH and P
 export PATH=$PATH:<path-to-voice>/post-process/
 export PATH=$PATH:<path-to-voice>/post-process/neutrals/
 export PATH=$PATH:<path-to-voice>/post-process/sheath/
+export PATH=$PATH:<path-to-voice>/post-process/neutrals_owngrid/
 
 export PYTHONPATH=$PYTHONPATH:<path-to-voice>/post-process/
 ```
