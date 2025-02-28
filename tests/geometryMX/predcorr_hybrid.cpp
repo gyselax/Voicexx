@@ -28,7 +28,7 @@
 #include "predcorr_hybrid.hpp"
 #include "qnsolver.hpp"
 #include "quadrature.hpp"
-#include "singlemodeperturbinitialization.hpp"
+#include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "spline_interpolator.hpp"
 #include "splitrighthandsidesolver.hpp"
@@ -155,7 +155,7 @@ TEST(GeometryXM, PredCorrHybrid)
     host_t<DFieldMemSp> init_perturb_amplitude(idx_range_kinsp);
     ddc::parallel_fill(init_perturb_amplitude, 0.1);
 
-    SingleModePerturbInitialization const
+    SingleModePerturbInitialisation const
             init(get_const_field(allfequilibrium),
                  std::move(init_perturb_mode),
                  std::move(init_perturb_amplitude));
