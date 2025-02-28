@@ -14,16 +14,15 @@ target_include_directories("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
 target_link_libraries("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
-        gslx::utils
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::interpolation
         gslx::quadrature
+        gslx::rhs_${GEOMETRY_VARIANT}
         gslx::speciesinfo
         gslx::timestepper
         gslx::utils
-        gslx::rhs_${GEOMETRY_VARIANT}
-        voicexx::reactionrates_${GEOMETRY_VARIANT}
         voicexx::geometry_neutrals_${GEOMETRY_VARIANT}
+        voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
 
 add_library("voicexx::gridneutralfluidsolver_${GEOMETRY_VARIANT}" ALIAS "gridneutralfluidsolver_${GEOMETRY_VARIANT}")

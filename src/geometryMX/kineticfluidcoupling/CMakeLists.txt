@@ -14,15 +14,14 @@ target_link_libraries("fluidrhs_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
         DDC::pdi
-        gslx::utils
         gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::quadrature
-        gslx::speciesinfo
         gslx::initialization_${GEOMETRY_VARIANT}
-        gslx::timestepper
-        gslx::utils_${GEOMETRY_VARIANT}
-        gslx::utils
+        gslx::quadrature
         gslx::rhs_${GEOMETRY_VARIANT}
+        gslx::speciesinfo
+        gslx::timestepper
+        gslx::utils
+        gslx::utils_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
 
