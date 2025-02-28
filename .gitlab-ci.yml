@@ -127,7 +127,7 @@ cppcheck_static_analysis:
     git diff --name-only ${CI_MERGE_REQUEST_DIFF_BASE_SHA} > changed_files.txt
     CHANGED_FILES=$(awk '{printf("%s ",$0)} END { printf "\n" }' changed_files.txt)
     set +e
-    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES} --home-dir=${CI_PROJECT_DIR}
+    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES} --default-geometry=geometryXVx --home-dir=${CI_PROJECT_DIR}
   allow_failure:
     exit_codes: [1, 2] # Allow failure due to style or error but not fatal
 

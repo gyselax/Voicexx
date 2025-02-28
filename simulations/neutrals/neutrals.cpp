@@ -42,7 +42,7 @@
 #include "qnsolver.hpp"
 #include "recombination.hpp"
 #include "restartinitializationwithneutrals.hpp"
-#include "singlemodeperturbinitialization.hpp"
+#include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
 #include "spline_interpolator.hpp"
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 
     if (iter_start == 0) { // if we start a new simulation
         // we need to add a perturbation otherwise it will stay at equilibrium
-        SingleModePerturbInitialization const init = SingleModePerturbInitialization::
+        SingleModePerturbInitialisation const init = SingleModePerturbInitialisation::
                 init_from_input(get_const_field(allfequilibrium), idx_range_kinsp, conf_voicexx);
         init(get_field(allfdistribu));
 

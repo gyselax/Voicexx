@@ -37,9 +37,9 @@
 #include "pdi_out.yml.hpp"
 #include "predcorr.hpp"
 #include "qnsolver.hpp"
-#include "restartinitialization.hpp"
+#include "restartinitialisation.hpp"
 #include "sheath.yaml.hpp"
-#include "singlemodeperturbinitialization.hpp"
+#include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
 #include "spline_interpolator.hpp"
@@ -118,11 +118,11 @@ int main(int argc, char** argv)
     DFieldMemSpXVx allfdistribu(meshSpXVx);
     double time_start(0);
     if (iter_start == 0) {
-        SingleModePerturbInitialization const init = SingleModePerturbInitialization::
+        SingleModePerturbInitialisation const init = SingleModePerturbInitialisation::
                 init_from_input(get_const_field(allfequilibrium), idx_range_kinsp, conf_voicexx);
         init(get_field(allfdistribu));
     } else {
-        RestartInitialization const restart(iter_start, time_start);
+        RestartInitialisation const restart(iter_start, time_start);
         restart(get_field(allfdistribu));
     }
     auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));

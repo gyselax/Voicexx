@@ -15,7 +15,7 @@ target_link_libraries("fluidrhs_${GEOMETRY_VARIANT}"
         DDC::core
         DDC::pdi
         gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::initialization_${GEOMETRY_VARIANT}
+        gslx::initialisation_${GEOMETRY_VARIANT}
         gslx::quadrature
         gslx::rhs_${GEOMETRY_VARIANT}
         gslx::speciesinfo
