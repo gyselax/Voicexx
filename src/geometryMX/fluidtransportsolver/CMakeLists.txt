@@ -14,16 +14,14 @@ target_include_directories("fluidsolver_${GEOMETRY_VARIANT}"
 target_link_libraries("fluidsolver_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
-        gslx::utils
         gslx::advection
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::interpolation
         gslx::quadrature
-        gslx::speciesinfo
+        gslx::rhs_${GEOMETRY_VARIANT}
         gslx::speciesinfo
         gslx::timestepper
         gslx::utils
-        gslx::rhs_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
 
