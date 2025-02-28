@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+""" diagnostics for the particle flux for the neutrals, and the divergence of this flux
+"""
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plots the neutrals particle flux, and its gradient')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-1,
+                        type=int,
+                        help='time index')
+    parser.add_argument('--show',
+                        action='store_true',
+                        default=False,
+                        help='Displays figures')
+    parser.add_argument('--slice_begin',
+                        action='store',
+                        default=0,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--slice_end',
+                        action='store',
+                        default=1,
+                        type=float,
+                        help='first point to consider (0,1)')
+    parser.add_argument('--show_grad',
+                        action='store_true',
+                        default=False,
+                        help='display the gradient')
+    args = parser.parse_args()
+
+    # Load data
+    path_data_structure = Path('data_structure_neutral_owngrid.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+
+    current_nspecies = 'neutrals'
+    flux_grad = ds["flux_grad"].sel(speciesn=current_nspecies)
+    flux = ds["part_flux"].sel(speciesn=current_nspecies)
+
+    time_diag = flux.coords['time'].values[args.itime]
+    time_init = flux.coords['time'].values[0]
+    time_values = flux.coords['time'].values
+    dt = time_values[1] - time_values[0]
+    idx = flux.coords['xn'].values
+    slice_left = args.slice_begin*idx[-1]
+    slice_right = args.slice_end*idx[-1]
+    title = f'flux {current_nspecies}, xn=({slice_left},{slice_right}), t={time_diag}, dt={dt}'
+
+    if args.show_grad:
+        data_dict = {r'$\Gamma_N$': flux.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)],
+                 r'$\partial_x \Gamma_N$': flux_grad.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]}
+    else :
+        data_dict = {r'$\Gamma_N$': flux.sel(time=time_diag)[(idx <= slice_right) & (idx >= slice_left)]}
+
+    output_filename = Path.cwd() / \
+        f'flux_{current_nspecies}_t{time_diag}_dt{dt}.png'
+    plot_field1d(data_dict, title, output_filename)
+
+    if args.show:
+        plt.show()
