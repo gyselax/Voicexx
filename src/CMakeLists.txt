@@ -1,4 +1,3 @@
 
 add_subdirectory(geometryMX)
-add_subdirectory(time_integration_hybrid)
 add_subdirectory(geometryXNeutrals)
