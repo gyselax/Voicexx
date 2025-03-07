@@ -24,11 +24,18 @@ if __name__ == '__main__':
                         default=-1,
                         type=int,
                         help='time index')
+    parser.add_argument('--gridneutrals',
+                        action='store_true',
+                        default=False,
+                        help='whether we use a different grid for the neutrals')
 
     args = parser.parse_args()
 
     # Load data
-    path_data_structure = Path('data_structure_neutral.yaml')
+    if args.gridneutrals:
+        path_data_structure = Path('data_structure_neutral_owngrid.yaml')
+    else:
+        path_data_structure = Path('data_structure_neutral.yaml')
     ds = DiskStore(args.data_dir, data_structure=path_data_structure)
     fluid_moments = ds['fluid_moments']
 
