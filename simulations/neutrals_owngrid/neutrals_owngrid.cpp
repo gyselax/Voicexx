@@ -50,6 +50,7 @@
 #include "charge_exchange.hpp"
 #include "diffgridsfluidsolver.hpp"
 #include "ionisation.hpp"
+#include "densitycoupling.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
 #include "predcorr_hybrid.hpp"
@@ -336,8 +337,16 @@ int main(int argc, char** argv)
         ptr_neutral_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
     }
 
-    // for the moment we don't have any coupling
-    NullPlasmaNeutralsCoupling<GridXNeutrals> const kineticfluidcoupling;
+    GridNeutralDensityCoupling const kineticfluidcoupling(
+            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
+            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.momentum_coupling_coeff"),
+            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.energy_coupling_coeff"),
+            ionization,
+            recombination,
+            spline_builder_on_X,
+            interpolator_from_X_to_Xn,
+            mean_free_path,
+            get_const_field(quadrature_coeffs_alloc));
 
     PredCorrHybrid<GridXNeutrals> const
             predcorr(boltzmann, *ptr_neutral_solver, poisson, kineticfluidcoupling);

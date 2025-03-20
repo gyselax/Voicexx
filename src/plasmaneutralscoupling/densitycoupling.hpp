@@ -5,7 +5,7 @@
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
 #include "igridneutralcoupling.hpp"
-#include "ireactionrate.hpp"
+#include "ireactionrate_gridneutral.hpp"
 
 /**
  * @brief A class that describes a source of particles due to neutrals.
@@ -27,13 +27,16 @@
 class GridNeutralDensityCoupling : public IGridNeutralCoupling
 {
 private:
-    double m_density_coupling_coeff;
-    double m_momentum_coupling_coeff;
-    double m_energy_coupling_coeff;
-    IReactionRate const& m_ionization;
-    IReactionRate const& m_recombination;
-    /*double m_normalization_coeff;*/
+    double const m_density_coupling_coeff;
+    double const m_momentum_coupling_coeff;
+    double const m_energy_coupling_coeff;
+    IGridNeutralReactionRate const& m_ionization;
+    IGridNeutralReactionRate const& m_recombination;
+    double const m_mean_free_path;
     DConstFieldVx const m_quadrature_coeffs;
+
+    SplineXBuilder_1d const& m_spline_builder_on_X;
+    SplineX_GridXnEvaluator const& m_interpolator_from_X_to_Xn;
 
 public:
     /**
@@ -54,14 +57,12 @@ public:
             double density_coupling_coeff,
             double momentum_coupling_coeff,
             double energy_coupling_coeff,
-            IReactionRate const& ionization,
-            IReactionRate const& recombination,
-            /*double normalization_coeff,*/
-            DConstFieldVx const& quadrature_coeffs
-            /*double mask_extent,*/
-            /*double mask_stiffness,*/
-            /*IdxRangeX const& gridx*/
-    );
+            IGridNeutralReactionRate const& ionization,
+            IGridNeutralReactionRate const& recombination,
+            SplineXBuilder_1d const& spline_builder_on_X,
+            SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
+            double const mean_free_path,
+            DConstFieldVx const& quadrature_coeffs);
 
     /**
      * @brief Update the distribution function and neutral density with respect to the density source
@@ -75,16 +76,6 @@ public:
     void operator()(DFieldSpXVx const allfdistribu, DFieldSpMomXn neutrals, double const dt)
             const override;
 
-public:
-    /**
-    * @brief Returns the index of the ion species in the index range.
-    *
-    * @param[in] idx_range_kinsp The index range of the kinetic species.
-    * 
-    * @return The index of the ion species in the index range.
-    */
-    IdxSp find_ion(IdxRangeSp const idx_range_kinsp) const;
-
     /**
      * @brief Computes the source term density_source_neutral(x), with is the result
      * of the sink due to ionization and the source due to recombination
@@ -97,7 +88,7 @@ public:
      * 
     */
     void get_source_term(
-            DFieldXn density_source_neutral,
+            DFieldSpXn density_source_neutral,
             DConstFieldSpX kinsp_density,
             DConstFieldSpMomXn neutrals,
             DConstFieldSpX ionization,
@@ -114,7 +105,8 @@ public:
     void get_derivative_neutrals(
             DFieldSpMomXn dn,
             DConstFieldSpMomXn neutrals,
-            DConstFieldXn density_source_neutral) const;
+            DConstFieldSpXn density_source_neutral,
+            double const sqrt_mass_ratio) const;
 
     /**
      * @brief Computes df for the equation df/dt = density_source_neutral(x) * velocity_shape_source(x,v).
@@ -128,4 +120,20 @@ public:
             DFieldSpXVx df,
             DConstFieldSpXVx allfdistribu,
             DConstFieldSpXVx velocity_shape_source) const;
+
+    void get_plasma_source(
+            DFieldSpXVx plasma_source,
+            DConstFieldSpX kinsp_temperature,
+            DConstFieldSpXn neutral_density_source_on_Xn) const;
+    void interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X) const;
+
+private:
+    /**
+    * @brief Returns the index of the ion species in the index range.
+    *
+    * @param[in] idx_range_kinsp The index range of the kinetic species.
+    *
+    * @return The index of the ion species in the index range.
+    */
+    IdxSp find_ion(IdxRangeSp const idx_range_kinsp) const;
 };

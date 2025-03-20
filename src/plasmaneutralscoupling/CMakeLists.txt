@@ -4,6 +4,7 @@ foreach(GEOMETRY_VARIANT IN LISTS GEOMETRY_XVx_VARIANTS_LIST)
 
 add_library("plasmaneutralscoupling_${GEOMETRY_VARIANT}" STATIC
     noenergytransfercoupling.cpp
+    densitycoupling.cpp
 )
 
 target_include_directories("plasmaneutralscoupling_${GEOMETRY_VARIANT}"
