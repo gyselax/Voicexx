@@ -36,18 +36,6 @@ constexpr char const* const params_yaml = R"PARAMS_CFG(SpeciesInfo:
   perturb_amplitude: 0.
   perturb_mode: 1
 
-NeutralSpeciesInfo:
-- mass: 400.
-  density_eq: 0.03
-
-DiffusiveSolver:
-  on: True
-  boundary_condition : 'recycling' # possible values: 'recycling', 'zero flux', 'escaping neutrals'
-  recycling_coefficient : 0.5 # only relevant for recycling boundary condition
-  mean_free_path: 10 # between two charge-exchange reactions
-  n_0: 1e20 # density of normalisation
-  T_0: 10 # temperature of normalisation, in eV
-
 NeutralMesh:
   x_min: 5 # usually should match with the krook
   x_max: 45
@@ -71,14 +59,27 @@ KineticSource:
   energy: 1.
   temperature: 1.
 
-KineticFluidCouplingSource:
-  density_coupling_coeff: 1.0
-  momentum_coupling_coeff: 0.0
-  energy_coupling_coeff: 0.0
-
 CollisionsInfo:
   enable_inter: true
   nustar0: 0.1
+
+NeutralSpeciesInfo:
+- mass: 400.
+  density_eq: 0.03
+
+DiffusiveSolver:
+  on: True
+  boundary_condition : 'recycling' # possible values: 'recycling', 'zero flux', 'escaping neutrals'
+  recycling_coefficient : 0.5 # only relevant for recycling boundary condition
+  mean_free_path: 10 # between two charge-exchange reactions
+  n_0: 1e20 # density of normalisation
+  T_0: 10 # temperature of normalisation, in eV
+
+KineticFluidCoupling:
+  on: True
+  density_coupling_coeff: 1.0
+  momentum_coupling_coeff: 0.0
+  energy_coupling_coeff: 0.0
 
 Algorithm:
   deltat: 0.1

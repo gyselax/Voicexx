@@ -28,6 +28,7 @@
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "igridneutralcoupling.hpp"
 #include "input.hpp"
 #include "iplasmaneutralscoupling.hpp"
 #include "irighthandside.hpp"
@@ -38,7 +39,7 @@
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals_owngrid.yml.hpp"
 #include "nullfluidsolver.hpp"
-#include "nullplasmaneutralscoupling.hpp"
+#include "nullplasmaneutralcoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "qnsolver.hpp"
@@ -340,19 +341,26 @@ int main(int argc, char** argv)
         ptr_neutral_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
     }
 
-    DensityCoupling const kineticfluidcoupling(
-            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
-            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.momentum_coupling_coeff"),
-            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.energy_coupling_coeff"),
-            ionisation,
-            recombination,
-            builder_x,
-            interpolator_from_X_to_Xn,
-            mean_free_path,
-            get_const_field(quadrature_coeffs_alloc));
+    // depending if we want the plasma and the neutrals to exchange,
+    // we choose the coupling
+    std::unique_ptr<DensityCoupling> ptr_kinfluidcoupling;
+    if (PCpp_bool(conf_voicexx, ".KineticFluidCoupling.on")) {
+        ptr_kinfluidcoupling = std::make_unique<DensityCoupling>(
+                PCpp_double(conf_voicexx, ".KineticFluidCoupling.density_coupling_coeff"),
+                PCpp_double(conf_voicexx, ".KineticFluidCoupling.momentum_coupling_coeff"),
+                PCpp_double(conf_voicexx, ".KineticFluidCoupling.energy_coupling_coeff"),
+                ionisation,
+                recombination,
+                builder_x,
+                interpolator_from_X_to_Xn,
+                mean_free_path,
+                get_const_field(quadrature_coeffs_alloc));
+    } else {
+        ptr_kinfluidcoupling = std::make_unique<NullPlasmaNeutralsCoupling<GridXNeutrals>>();
+    }
 
     PredCorrHybrid<GridXNeutrals> const
-            predcorr(boltzmann, *ptr_neutral_solver, poisson, kineticfluidcoupling);
+            predcorr(boltzmann, *ptr_neutral_solver, poisson, *ptr_kinfluidcoupling);
 
     // Starting the code
     ddc::expose_to_pdi("Nx_spline_cells", ddc::discrete_space<BSplinesX>().ncells());
