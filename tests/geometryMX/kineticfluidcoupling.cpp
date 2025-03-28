@@ -14,13 +14,13 @@
 #include "bsl_advection_x.hpp"
 #include "charge_exchange.hpp"
 #include "chargedensitycalculator.hpp"
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
-#include "ionization.hpp"
+#include "ionisation.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_fluid_coupling_source.hpp"
 #include "maxwellianequilibrium.hpp"
@@ -38,7 +38,7 @@
 #include "trapezoid_quadrature.hpp"
 
 /**
- * This test initializes the fluid species with constant reaction rates for ionization and recombination.
+ * This test initialises the fluid species with constant reaction rates for ionisation and recombination.
  * Then, using the analytical solution for this scenario where T is cte. we compare it to the solver.
  */
 static void TestKineticFluidCoupling()
@@ -73,7 +73,7 @@ static void TestKineticFluidCoupling()
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(meshVx);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -89,7 +89,7 @@ static void TestKineticFluidCoupling()
     kinetic_masses(ielec) = mass_elec;
     kinetic_masses(iion) = mass_ion;
 
-    // Fluid species index range initialization
+    // Fluid species index range initialisation
     IdxStepSp const nb_fluidspecies(1);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
 
@@ -131,7 +131,7 @@ static void TestKineticFluidCoupling()
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    // Initialization of kinetic species distribution function
+    // Initialisation of kinetic species distribution function
     DFieldMemSpXVx allfdistribu_alloc(IdxRangeSpXVx(idx_range_kinsp, meshX, meshVx));
     DFieldSpXVx allfdistribu = get_field(allfdistribu_alloc);
 
@@ -162,18 +162,18 @@ static void TestKineticFluidCoupling()
                  std::move(init_perturb_amplitude));
     init(allfdistribu);
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
 
-    // Initialization of fluid species moments
+    // Initialisation of fluid species moments
     DFieldMemSpMomX fluid_moments_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     DFieldSpMomX fluid_moments = get_field(fluid_moments_alloc);
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 0.);
-    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
 
 #ifdef PERIODIC_RDIMX
@@ -217,11 +217,11 @@ static void TestKineticFluidCoupling()
 #endif
     QNSolver const poisson(poisson_solver, rhs);
 
-    double const normalization_coeff(0.01);
+    double const normalisation_coeff(0.01);
     double const k_0(1.e-3);
 
     ChargeExchangeRate charge_exchange(k_0);
-    IonizationRate ionization(k_0);
+    IonisationRate ionisation(k_0);
     RecombinationRate recombination(k_0);
 
     SplineXBuilder_1d const spline_x_builder_neutrals(meshX);
@@ -236,9 +236,9 @@ static void TestKineticFluidCoupling()
 
     DiffusiveNeutralSolver const fluidsolver(
             charge_exchange,
-            ionization,
+            ionisation,
             recombination,
-            normalization_coeff,
+            normalisation_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
             get_const_field(quadrature_coeffs_neutrals),
@@ -252,9 +252,9 @@ static void TestKineticFluidCoupling()
             1.,
             0.,
             0.,
-            ionization,
+            ionisation,
             recombination,
-            normalization_coeff,
+            normalisation_coeff,
             get_const_field(quadrature_coeffs),
             neutrals_wall_extent,
             neutrals_wall_stiffness,
@@ -272,16 +272,16 @@ static void TestKineticFluidCoupling()
 
     // analytical solution
     // we know the rate values for the initial conditions, we assume T=cte. so rates independent of time.
-    double const ionization_rate = 1.130359390036803 * k_0;
+    double const ionisation_rate = 1.130359390036803 * k_0;
     double const recombination_rate = 7.638123065868132e-06 * k_0;
 
     double const N = 1.;
-    double const alpha = -(N * ionization_rate) / normalization_coeff;
-    double const beta = -(ionization_rate + recombination_rate) / (2 * normalization_coeff);
-    double const C = (recombination_rate + ionization_rate)
-                     / (2 * (0.0 * ionization_rate - 1.0 * recombination_rate));
+    double const alpha = -(N * ionisation_rate) / normalisation_coeff;
+    double const beta = -(ionisation_rate + recombination_rate) / (2 * normalisation_coeff);
+    double const C = (recombination_rate + ionisation_rate)
+                     / (2 * (0.0 * ionisation_rate - 1.0 * recombination_rate));
     double const X_1
-            = N * (recombination_rate - ionization_rate) / (recombination_rate + ionization_rate);
+            = N * (recombination_rate - ionisation_rate) / (recombination_rate + ionisation_rate);
 
     DFieldMemSpMomX X_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     DFieldSpMomX X = get_field(X_alloc);

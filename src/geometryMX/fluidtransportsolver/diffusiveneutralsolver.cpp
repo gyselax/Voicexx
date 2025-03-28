@@ -15,9 +15,9 @@
 
 DiffusiveNeutralSolver::DiffusiveNeutralSolver(
         IReactionRate const& charge_exchange,
-        IReactionRate const& ionization,
+        IReactionRate const& ionisation,
         IReactionRate const& recombination,
-        double const normalization_coeff,
+        double const normalisation_coeff,
         SplineXBuilder_1d const& spline_x_builder,
         SplineXEvaluator_1d const& spline_x_evaluator,
         DConstFieldVx const& quadrature_coeffs,
@@ -27,9 +27,9 @@ DiffusiveNeutralSolver::DiffusiveNeutralSolver(
         IdxRangeX const& gridx)
 
     : m_charge_exchange(charge_exchange)
-    , m_ionization(ionization)
+    , m_ionisation(ionisation)
     , m_recombination(recombination)
-    , m_normalization_coeff(normalization_coeff)
+    , m_normalisation_coeff(normalisation_coeff)
     , m_spline_x_builder(spline_x_builder)
     , m_spline_x_evaluator(spline_x_evaluator)
     , m_quadrature_coeffs(quadrature_coeffs)
@@ -82,24 +82,24 @@ void DiffusiveNeutralSolver::get_derivative(
 
     // building reaction rates
     DFieldMemSpX charge_exchange_rate_alloc(idx_range_fluidspx);
-    DFieldMemSpX ionization_rate_alloc(idx_range_fluidspx);
+    DFieldMemSpX ionisation_rate_alloc(idx_range_fluidspx);
     DFieldMemSpX recombination_rate_alloc(idx_range_fluidspx);
 
     DFieldSpX charge_exchange_rate = get_field(charge_exchange_rate_alloc);
-    DFieldSpX ionization_rate = get_field(ionization_rate_alloc);
+    DFieldSpX ionisation_rate = get_field(ionisation_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
     m_charge_exchange(charge_exchange_rate, density, temperature);
-    m_ionization(ionization_rate, density, temperature);
+    m_ionisation(ionisation_rate, density, temperature);
     m_recombination(recombination_rate, density, temperature);
 
     // expose to pdi the reaction coefficients
     auto cx_host = ddc::create_mirror_view_and_copy(charge_exchange_rate);
-    auto i_host = ddc::create_mirror_view_and_copy(ionization_rate);
+    auto i_host = ddc::create_mirror_view_and_copy(ionisation_rate);
     auto r_host = ddc::create_mirror_view_and_copy(recombination_rate);
     ddc::PdiEvent("reaction_rate_expose")
             .with("charge_exchange_rate", cx_host)
-            .with("ionization_rate", i_host)
+            .with("ionisation_rate", i_host)
             .with("recombination_rate", r_host);
 
     // compute diffusive model equation terms
@@ -111,7 +111,7 @@ void DiffusiveNeutralSolver::get_derivative(
     IdxSp const iion(find_ion(get_idx_range<Species>(density)));
     IdxMom const ineutral_density(0);
 
-    double const normalization_coeff_alpha0(m_normalization_coeff);
+    double const normalisation_coeff_alpha0(m_normalisation_coeff);
     double const mass_ratio(mass(ielec()) / mass(iion));
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
@@ -121,7 +121,7 @@ void DiffusiveNeutralSolver::get_derivative(
                 IdxX const ix(ddc::select<GridX>(ifspx));
 
                 double const denom = density(iion, ix) * charge_exchange_rate(ifspx)
-                                     + density(ielec(), ix) * ionization_rate(ifspx);
+                                     + density(ielec(), ix) * ionisation_rate(ifspx);
 
                 density_equilibrium_velocity(ifspx)
                         = (density(ielec(), ix) * density(iion, ix) * recombination_rate(ifspx)
@@ -130,7 +130,7 @@ void DiffusiveNeutralSolver::get_derivative(
                           * velocity(iion, ix) * Kokkos::sqrt(mass_ratio) / denom;
 
                 diffusion_temperature(ifspx)
-                        = normalization_coeff_alpha0 * temperature(iion, ix) / (mass(isp) * denom);
+                        = normalisation_coeff_alpha0 * temperature(iion, ix) / (mass(isp) * denom);
                 // density source is not solved here, we only solve transport.
             });
 

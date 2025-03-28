@@ -13,7 +13,7 @@
 #include "bsl_advection_vx.hpp"
 #include "bsl_advection_x.hpp"
 #include "chargedensitycalculator.hpp"
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "fem_1d_poisson_solver.hpp"
@@ -72,7 +72,7 @@ TEST(GeometryXM, PredCorrHybrid)
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(meshVx);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -88,7 +88,7 @@ TEST(GeometryXM, PredCorrHybrid)
     kinetic_masses(ielec) = mass_elec;
     kinetic_masses(iion) = mass_ion;
 
-    // Fluid species index range initialization
+    // Fluid species index range initialisation
     IdxStepSp const nb_fluidspecies(1);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
 
@@ -130,7 +130,7 @@ TEST(GeometryXM, PredCorrHybrid)
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    // Initialization of kinetic species distribution function
+    // Initialisation of kinetic species distribution function
     DFieldMemSpXVx allfdistribu_alloc(IdxRangeSpXVx(idx_range_kinsp, meshX, meshVx));
     DFieldSpXVx allfdistribu = get_field(allfdistribu_alloc);
 
@@ -161,7 +161,7 @@ TEST(GeometryXM, PredCorrHybrid)
                  std::move(init_perturb_amplitude));
     init(allfdistribu);
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(3);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
@@ -170,7 +170,7 @@ TEST(GeometryXM, PredCorrHybrid)
     IdxMom iflux(1);
     IdxMom istress(2);
 
-    // Initialization of fluid species moments
+    // Initialisation of fluid species moments
     DFieldMemSpMomX fluid_moments_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     DFieldSpMomX fluid_moments = get_field(fluid_moments_alloc);
 
@@ -179,7 +179,7 @@ TEST(GeometryXM, PredCorrHybrid)
     ddc::parallel_fill(moments_init[iflux], 0.);
     ddc::parallel_fill(moments_init[istress], 1.);
 
-    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
 
 #ifdef PERIODIC_RDIMX
@@ -224,9 +224,9 @@ TEST(GeometryXM, PredCorrHybrid)
     QNSolver const poisson(poisson_solver, rhs);
 
     ConstantRate const charge_exchange(0.0);
-    ConstantRate const ionization(0.0);
+    ConstantRate const ionisation(0.0);
     ConstantRate const recombination(0.0);
-    double const normalization_coeff(1.0);
+    double const normalisation_coeff(1.0);
 
     // kinetic fluid coupling term
     double const neutrals_wall_extent = 0.;
@@ -235,9 +235,9 @@ TEST(GeometryXM, PredCorrHybrid)
             1.0,
             0.0,
             0.0,
-            ionization,
+            ionisation,
             recombination,
-            normalization_coeff,
+            normalisation_coeff,
             get_const_field(quadrature_coeffs),
             neutrals_wall_extent,
             neutrals_wall_stiffness,

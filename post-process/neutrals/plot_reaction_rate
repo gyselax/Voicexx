@@ -48,7 +48,7 @@ if __name__ == '__main__':
     ds = DiskStore(args.data_dir, data_structure=path_data_structure)
     k_cx = ds['charge_exchange_rate']
     k_r = ds['recombination_rate']
-    k_i = ds['ionization_rate']
+    k_i = ds['ionisation_rate']
 
     idx = k_i.coords['x'].values
     idt = k_i.coords['time'].values

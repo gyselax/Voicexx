@@ -2,10 +2,10 @@
 
 #include <pdi.h>
 
-#include "ionization.hpp"
+#include "ionisation.hpp"
 #include "ratecomputation.hpp"
 
-IonizationRate::IonizationRate(double const norm_coeff_rate)
+IonisationRate::IonisationRate(double const norm_coeff_rate)
     : m_slope_coefficient("slope_coefficient")
     , m_intercept_coefficient("intercept_coefficient")
     , m_norm_coeff_rate(norm_coeff_rate)
@@ -32,16 +32,16 @@ IonizationRate::IonizationRate(double const norm_coeff_rate)
 
     PDI_multi_expose(
             "i_rate_coeff_pol_expose",
-            "ionization_slope_coefficients",
+            "ionisation_slope_coefficients",
             slope_coefficient_host.data(),
             PDI_OUT,
-            "ionization_intercept_coefficients",
+            "ionisation_intercept_coefficients",
             intercept_coefficient_host.data(),
             PDI_OUT,
             NULL);
 }
 
-DFieldSpX IonizationRate::operator()(
+DFieldSpX IonisationRate::operator()(
         DFieldSpX rate,
         DConstFieldSpX density,
         DConstFieldSpX temperature) const

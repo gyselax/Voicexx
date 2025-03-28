@@ -4,9 +4,9 @@
 #include <ddc/pdi.hpp>
 
 #include "geometry.hpp"
-#include "restartinitializationwithneutrals.hpp"
+#include "restartinitialisationwithneutrals.hpp"
 
-RestartInitializationWithNeutrals::RestartInitializationWithNeutrals(
+RestartInitialisationWithNeutrals::RestartInitialisationWithNeutrals(
         int iter_start,
         double& time_start)
     : m_iter_start(iter_start)
@@ -14,7 +14,7 @@ RestartInitializationWithNeutrals::RestartInitializationWithNeutrals(
 {
 }
 
-DFieldSpXVx RestartInitializationWithNeutrals::operator()(
+DFieldSpXVx RestartInitialisationWithNeutrals::operator()(
         DFieldSpXVx const allfdistribu,
         DFieldSpMomX const fluid_moments) const
 {

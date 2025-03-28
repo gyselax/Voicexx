@@ -59,7 +59,7 @@ KineticSource:
   temperature: 1.
 
 DiffusiveNeutralSolver:
-  normalization_coeff_neutrals: 1e-2
+  normalisation_coeff_neutrals: 1e-2
   norm_coeff_rate_neutrals: 1e-3
 
 KineticFluidCouplingSource:

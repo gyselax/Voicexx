@@ -15,7 +15,7 @@
 
 PressureDiffusionSolver::PressureDiffusionSolver(
         IReactionRate const& charge_exchange,
-        IReactionRate const& ionization,
+        IReactionRate const& ionisation,
         IReactionRate const& recombination,
         double const mean_free_path,
         SplineXNeutralsBuilder const& spline_builder_on_Xn,
@@ -25,7 +25,7 @@ PressureDiffusionSolver::PressureDiffusionSolver(
         DConstFieldVx const& quadrature_coeffs)
 
     : m_charge_exchange(charge_exchange)
-    , m_ionization(ionization)
+    , m_ionisation(ionisation)
     , m_recombination(recombination)
     , m_mean_free_path(mean_free_path)
     , m_spline_builder_on_Xn(spline_builder_on_Xn)
@@ -67,24 +67,24 @@ void PressureDiffusionSolver::get_derivative(
     // building reaction rates
     // pay attention, these are normalised to Kcx0=10^-14
     DFieldMemSpX charge_exchange_rate_alloc(idx_range_ratespx);
-    DFieldMemSpX ionization_rate_alloc(idx_range_ratespx);
+    DFieldMemSpX ionisation_rate_alloc(idx_range_ratespx);
     DFieldMemSpX recombination_rate_alloc(idx_range_ratespx);
 
     DFieldSpX charge_exchange_rate = get_field(charge_exchange_rate_alloc);
-    DFieldSpX ionization_rate = get_field(ionization_rate_alloc);
+    DFieldSpX ionisation_rate = get_field(ionisation_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
     m_charge_exchange(charge_exchange_rate, density, temperature);
-    m_ionization(ionization_rate, density, temperature);
+    m_ionisation(ionisation_rate, density, temperature);
     m_recombination(recombination_rate, density, temperature);
 
     // expose to pdi the reaction coefficients
     auto cx_host = ddc::create_mirror_view_and_copy(charge_exchange_rate);
-    auto i_host = ddc::create_mirror_view_and_copy(ionization_rate);
+    auto i_host = ddc::create_mirror_view_and_copy(ionisation_rate);
     auto r_host = ddc::create_mirror_view_and_copy(recombination_rate);
     ddc::PdiEvent("reaction_rate_expose")
             .with("charge_exchange_rate", cx_host)
-            .with("ionization_rate", i_host)
+            .with("ionisation_rate", i_host)
             .with("recombination_rate", r_host);
 
     // create the fields to interpolate the plasma quantities on the neutral grid
@@ -102,7 +102,7 @@ void PressureDiffusionSolver::get_derivative(
     DFieldMemSpXn i_rate_Xn_alloc(idx_range_fluidspxn);
     DFieldMemSpXn r_rate_Xn_alloc(idx_range_fluidspxn);
     DFieldSpXn charge_exchange_rate_on_Xn = get_field(cx_rate_Xn_alloc);
-    DFieldSpXn ionization_rate_on_Xn = get_field(i_rate_Xn_alloc);
+    DFieldSpXn ionisation_rate_on_Xn = get_field(i_rate_Xn_alloc);
     DFieldSpXn recombination_rate_on_Xn = get_field(r_rate_Xn_alloc);
 
     // do the interpolation on the neutral grid
@@ -111,7 +111,7 @@ void PressureDiffusionSolver::get_derivative(
     interpolate_on_neutral_grid(temperature_on_Xn, temperature);
 
     interpolate_on_neutral_grid(charge_exchange_rate_on_Xn, get_const_field(charge_exchange_rate));
-    interpolate_on_neutral_grid(ionization_rate_on_Xn, get_const_field(ionization_rate));
+    interpolate_on_neutral_grid(ionisation_rate_on_Xn, get_const_field(ionisation_rate));
     interpolate_on_neutral_grid(recombination_rate_on_Xn, get_const_field(recombination_rate));
 
     // compute diffusive model equation terms
@@ -140,12 +140,12 @@ void PressureDiffusionSolver::get_derivative(
                 IdxXn const ixn(ifspxn);
 
                 //in this for loop we construct the terms n_eq*u_i, p_N and \hat D
-                //we will take their derivatives afterward
+                //we will take their derivatives afterwards
                 double density_neutrals = neutrals(ifspxn, ineutral_density);
                 double density_elec = density_on_Xn(ielec(), ixn);
                 double density_ions = density_on_Xn(iion, ixn);
                 double K_cx = charge_exchange_rate_on_Xn(ifspxn);
-                double K_i = ionization_rate_on_Xn(ifspxn);
+                double K_i = ionisation_rate_on_Xn(ifspxn);
                 double K_r = recombination_rate_on_Xn(ifspxn);
                 neutral_pressure(ifspxn) = temperature_on_Xn(iion, ixn) * density_neutrals;
                 density_equilibrium(ifspxn) = (density_neutrals * density_ions * K_cx

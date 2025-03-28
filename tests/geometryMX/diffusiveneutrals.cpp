@@ -9,7 +9,7 @@
 
 #include <pdi.h>
 
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
@@ -20,7 +20,7 @@
 #include "trapezoid_quadrature.hpp"
 
 /**
- * This test initializes a neutral density with an exponential spatial variation 
+ * This test initialises a neutral density with an exponential spatial variation 
  * and constant quantities for the kinetic species densities, temperature, etc.
  * Then the time derivative of the diffusive neutral model is computed using the solver, 
  * and analytically. The two expressions for the derivative are compared and the relative 
@@ -54,7 +54,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     SplineXBuilder const builder_x(meshXVx);
     SplineVxBuilder const builder_vx(meshXVx);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -70,7 +70,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     kinetic_masses(my_ielec) = mass_elec;
     kinetic_masses(my_iion) = mass_ion;
 
-    // Neutral species index range initialization
+    // Neutral species index range initialisation
     IdxStepSp const nb_fluidspecies(1);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
     IdxSp const my_ifluid = idx_range_fluidsp.front();
@@ -114,20 +114,20 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
 
-    // Neutral species initialization
+    // Neutral species initialisation
     // Reaction rates
     double const charge_exchange_val(0.5);
-    double const ionization_val(1.);
+    double const ionisation_val(1.);
     double const recombination_val(2.);
     ConstantRate charge_exchange(charge_exchange_val);
-    ConstantRate ionization(ionization_val);
+    ConstantRate ionisation(ionisation_val);
     ConstantRate recombination(recombination_val);
-    double const normalization_coeff(1.);
+    double const normalisation_coeff(1.);
 
     // Splines
 #ifdef PERIODIC_RDIMX
@@ -150,12 +150,12 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     double const neutrals_wall_stiffness = 1.;
     double const neutrals_wall_amplitude = 0.;
 
-    // Initialization of the neutral solver
+    // Initialisation of the neutral solver
     DiffusiveNeutralSolver const neutralsolver(
             charge_exchange,
-            ionization,
+            ionisation,
             recombination,
-            normalization_coeff,
+            normalisation_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
             get_const_field(quadrature_coeffs),
@@ -164,7 +164,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
             neutrals_wall_amplitude,
             meshX);
 
-    // Initialization of the neutral density
+    // Initialisation of the neutral density
     host_t<DFieldMemSpMomX> neutrals_init_host(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     ddc::for_each(get_idx_range(neutrals_init_host), [&](IdxSpMomX const ispmx) {
         CoordX coordx(ddc::coordinate(ddc::select<GridX>(ispmx)));
@@ -179,7 +179,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     DFieldMemSpMomX derivative_alloc(get_idx_range(neutrals));
     DFieldSpMomX derivative = get_field(derivative_alloc);
 
-    // Initialization of the kinetic species
+    // Initialisation of the kinetic species
     DFieldMemSpX kinsp_density_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
     DFieldMemSpX kinsp_velocity_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
     DFieldMemSpX kinsp_temperature_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
@@ -219,10 +219,10 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
         double const advec_term(
                 std::sqrt(mass_ratio) * kinsp_velocity_eq * charge_exchange_val
-                / (charge_exchange_val + ionization_val));
+                / (charge_exchange_val + ionisation_val));
         double const diffusive_term(
-                normalization_coeff * kinsp_temperature_eq
-                / (neutral_mass * kinsp_density_eq * (charge_exchange_val + ionization_val)));
+                normalisation_coeff * kinsp_temperature_eq
+                / (neutral_mass * kinsp_density_eq * (charge_exchange_val + ionisation_val)));
         double const derivative_pred(
                 -advec_term * neutral_val_deriv + diffusive_term * neutral_val_deriv2);
 

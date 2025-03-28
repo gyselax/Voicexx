@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from gysdata_voice import DiskStore
 from plot_utils import plot_field1d
 from math_utils import compute_moment
-from neutrals_utils import get_charge_exchange_rate, get_ionization_rate, get_recombination_rate
+from neutrals_utils import get_charge_exchange_rate, get_ionisation_rate, get_recombination_rate
 
 if __name__ == '__main__':
     parser = ArgumentParser(
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     density_i = densities.sel(species='ions')
 
     k_cx = ds['charge_exchange_rate']
-    k_i = ds['ionization_rate']
+    k_i = ds['ionisation_rate']
     k_r = ds['recombination_rate']
 
     n_eq = (density_i * density_e * k_r + density_n * density_i *

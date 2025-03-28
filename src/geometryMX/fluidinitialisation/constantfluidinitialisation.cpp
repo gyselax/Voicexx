@@ -2,15 +2,15 @@
 
 #include <ddc/ddc.hpp>
 
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 
-ConstantFluidInitialization::ConstantFluidInitialization(host_t<DConstFieldSpMom> moments)
+ConstantFluidInitialisation::ConstantFluidInitialisation(host_t<DConstFieldSpMom> moments)
     : m_moments_alloc(get_idx_range(moments))
 {
     ddc::parallel_deepcopy(m_moments_alloc, moments);
 }
 
-DFieldSpMomX ConstantFluidInitialization::operator()(DFieldSpMomX const fluid_moments) const
+DFieldSpMomX ConstantFluidInitialisation::operator()(DFieldSpMomX const fluid_moments) const
 {
     DConstFieldSpMom moments(get_field(m_moments_alloc));
     ddc::parallel_for_each(

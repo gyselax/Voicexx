@@ -26,16 +26,16 @@ def get_charge_exchange_rate(ds, T_i):
     except KeyError:
         raise KeyError("charge_exchange_constant_rate is missing from the dataset.") from e
 
-def get_ionization_rate(ds, T_e, n_e):
+def get_ionisation_rate(ds, T_e, n_e):
     """
-    Returns the ionization rate computed from the rates or reading the constant value from PDI.
+    Returns the ionisation rate computed from the rates or reading the constant value from PDI.
     """
     try:
-        if ds['ionization_slope_coefficients'].size > 0:
+        if ds['ionisation_slope_coefficients'].size > 0:
             T_e_log10 = np.log10(T_e)
             density_e_log10 = np.log10(n_e)
-            i_slope_coefficient = ds['ionization_slope_coefficients']
-            i_intercept_coefficient = ds['ionization_intercept_coefficients']
+            i_slope_coefficient = ds['ionisation_slope_coefficients']
+            i_intercept_coefficient = ds['ionisation_intercept_coefficients']
             norm_coeff_rate = ds['norm_coeff_rate_neutrals'].values
 
             coefficients_size = len(i_slope_coefficient)
@@ -52,7 +52,7 @@ def get_ionization_rate(ds, T_e, n_e):
         raise KeyError(f"{e} is missing from the dataset.") from e
 
     try:
-        return ds['ionization_constant_rate']
+        return ds['ionisation_constant_rate']
     except KeyError:
         raise KeyError("charge_exchange_constant_rate is missing from the dataset.") from e
 

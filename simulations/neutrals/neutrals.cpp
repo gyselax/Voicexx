@@ -19,14 +19,14 @@
 #include "chargedensitycalculator.hpp"
 #include "collisions_inter.hpp"
 #include "collisions_intra.hpp"
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "input.hpp"
-#include "ionization.hpp"
+#include "ionisation.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_fluid_coupling_source.hpp"
 #include "kinetic_source.hpp"
@@ -41,7 +41,7 @@
 #include "predcorr_hybrid.hpp"
 #include "qnsolver.hpp"
 #include "recombination.hpp"
-#include "restartinitializationwithneutrals.hpp"
+#include "restartinitialisationwithneutrals.hpp"
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
             SplineInterpPointsVx>(conf_voicexx, "vx"); // and the mesh in v
     IdxRangeXVx const meshXVx(mesh_x, mesh_vx); //merging the two
 
-    // Initialization of the spline builders
+    // Initialisation of the spline builders
     SplineXBuilder const builder_x(meshXVx);
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     IdxRangeSp idx_range_fluidsp;
     init_species_withfluid(idx_range_kinsp, idx_range_fluidsp, conf_voicexx);
 
-    // Initialization of kinetic species distribution function
+    // Initialisation of kinetic species distribution function
     IdxRangeSpVx const meshSpVx(idx_range_kinsp, mesh_vx);
     DFieldMemSpVx allfequilibrium(meshSpVx);
     MaxwellianEquilibrium const init_fequilibrium
@@ -119,11 +119,11 @@ int main(int argc, char** argv)
     IdxRangeSpXVx const meshSpXVx(idx_range_kinsp, meshXVx);
     DFieldMemSpXVx allfdistribu(meshSpXVx);
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
-    // Neutral species initialization
+    // Neutral species initialisation
     DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, mesh_x));
     DFieldSpMomX neutrals = get_field(neutrals_alloc);
 
@@ -142,11 +142,11 @@ int main(int argc, char** argv)
                     (isp - idx_range_fluidsp.front()).value());
             ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
         }
-        ConstantFluidInitialization fluid_init(get_const_field(moments_init_host));
+        ConstantFluidInitialisation fluid_init(get_const_field(moments_init_host));
         fluid_init(neutrals);
 
     } else {
-        RestartInitializationWithNeutrals const restart(iter_start, time_start);
+        RestartInitialisationWithNeutrals const restart(iter_start, time_start);
         restart(get_field(allfdistribu), get_field(neutrals));
     }
     auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
     std::vector<std::reference_wrapper<IRightHandSide const>> rhs_operators;
     std::vector<KrookSourceConstant> krook_source_constant_vector;
     std::vector<KrookSourceAdaptive> krook_source_adaptive_vector;
-    // Krook operators initialization
+    // Krook operators initialisation
     int const nb_rhsKrook(PCpp_len(conf_voicexx, ".Krook"));
     for (int ik = 0; ik < nb_rhsKrook; ++ik) {
         // --> Krook info
@@ -265,14 +265,14 @@ int main(int argc, char** argv)
     QNSolver const poisson(poisson_solver, rhs);
 
     // Initialisation of the neutrals
-    double const normalization_coeff
-            = PCpp_double(conf_voicexx, ".DiffusiveNeutralSolver.normalization_coeff_neutrals");
+    double const normalisation_coeff
+            = PCpp_double(conf_voicexx, ".DiffusiveNeutralSolver.normalisation_coeff_neutrals");
     double const norm_coeff_rate
             = PCpp_double(conf_voicexx, ".DiffusiveNeutralSolver.norm_coeff_rate_neutrals");
 
     // The CX coefficient needs to be first constructed in order to write a correct initstate file. Check pdi_out_neutrals.yml.hpp for a closer look.
     ChargeExchangeRate charge_exchange(norm_coeff_rate);
-    IonizationRate ionization(norm_coeff_rate);
+    IonisationRate ionisation(norm_coeff_rate);
     RecombinationRate recombination(norm_coeff_rate);
 
     SplineXBuilder_1d const spline_x_builder_neutrals(mesh_x);
@@ -287,9 +287,9 @@ int main(int argc, char** argv)
 
     DiffusiveNeutralSolver const neutralsolver(
             charge_exchange,
-            ionization,
+            ionisation,
             recombination,
-            normalization_coeff,
+            normalisation_coeff,
             spline_x_builder_neutrals,
             spline_x_evaluator_neutrals,
             get_const_field(quadrature_coeffs_neutrals),
@@ -302,9 +302,9 @@ int main(int argc, char** argv)
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.momentum_coupling_coeff"),
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.energy_coupling_coeff"),
-            ionization,
+            ionisation,
             recombination,
-            normalization_coeff,
+            normalisation_coeff,
             get_const_field(quadrature_coeffs_alloc),
             neutrals_wall_extent,
             neutrals_wall_stiffness,
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
     ddc::expose_to_pdi(
             "neutrals_masses",
             ddc::discrete_space<Species>().masses()[idx_range_fluidsp]);
-    ddc::expose_to_pdi("normalization_coeff_neutrals", normalization_coeff);
+    ddc::expose_to_pdi("normalisation_coeff_neutrals", normalisation_coeff);
     ddc::expose_to_pdi("norm_coeff_rate_neutrals", norm_coeff_rate);
     ddc::PdiEvent("initial_state").with("fdistribu_eq", allfequilibrium_host);
 

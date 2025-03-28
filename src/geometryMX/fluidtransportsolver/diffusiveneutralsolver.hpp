@@ -27,30 +27,30 @@
  * 
  * where @f$n_i@f$ (resp. @f$n_e@f$) is the ion (resp. electron) density and @f$m_n@f$ stands
  * for the mass of neutrals. The @f$K_i@f$, @f$K_r@f$ and @f$K_{cx}@f$ coefficients 
- * represent the reaction rates of ionization, recombination and charge-exchange reactions.
+ * represent the reaction rates of ionisation, recombination and charge-exchange reactions.
  * 
  * The density source term @f$S_n@f$ is 
  * 
  * @f$S_n = n_i n_e K_r - n_n n_e K_i.@f$
  * 
- * The pressure-diffusive equation is normalized to the relevant normalization quantities 
+ * The pressure-diffusive equation is normalised to the relevant normalisation quantities 
  * of the geometryXVx folder: 
  * - densities to a reference density @f$n_0@f$;
  * - temperatures to a reference temperature @f$T_0@f$;
- * - time normalized to the electron plasma frequency @f$\omega_{pe0} = \sqrt{n_0 e^2/(m_e \varepsilon_0)}@f$;
+ * - time normalised to the electron plasma frequency @f$\omega_{pe0} = \sqrt{n_0 e^2/(m_e \varepsilon_0)}@f$;
  * - space to the Debye length @f$\lambda_{D0} = \sqrt{\varepsilon_0 T_0 / (n_0 e^2)}@f$;
  * - ion mean velocity to the ion thermal velocity @f$v_{Ti0} = \sqrt{T_0/m_i}@f$;
  * - reaction rates to a reference rate @f$K_0@f$;
  * - masses to the electron mass @f$m_e@f$.
  * 
  * With these conventions the pressure-diffusive equation can be written with all quantities 
- * normalized as
+ * normalised as
  * 
  * @f$\partial_t n_n + \partial_x (\sqrt{\frac{m_e}{m_i}}n_{n,eq} u_i - \alpha_0 D_p T_n \partial_x n_n) = \alpha_0^{-1} S_n, @f$
  * 
- * Where @f$\alpha_0@f$ is a normalization coefficient equal to @f$\alpha_0 = \omega_{pe0}/(n_0 K_0)@f$.
- * All the terms that appear in this normalized equation keep the same expression as when writing
- * the dimensional form of the model, except that quantities involved are normalized.
+ * Where @f$\alpha_0@f$ is a normalisation coefficient equal to @f$\alpha_0 = \omega_{pe0}/(n_0 K_0)@f$.
+ * All the terms that appear in this normalised equation keep the same expression as when writing
+ * the dimensional form of the model, except that quantities involved are normalised.
  * 
  * The pressure-diffusive model is solved using a RK2 time integrator.
  * Spatial derivatives are computed using splines polynomials. 
@@ -59,10 +59,10 @@ class DiffusiveNeutralSolver : public IFluidTransportSolver
 {
 private:
     IReactionRate const& m_charge_exchange;
-    IReactionRate const& m_ionization;
+    IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
 
-    double const m_normalization_coeff;
+    double const m_normalisation_coeff;
 
     SplineXBuilder_1d const& m_spline_x_builder;
     SplineXEvaluator_1d const& m_spline_x_evaluator;
@@ -78,9 +78,9 @@ public:
     /**
      * @brief Creates an instance of the DiffusiveNeutralSolver class.
      * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
-     * @param[in] ionization An object that represents ionization reaction rate.
+     * @param[in] ionisation An object that represents ionisation reaction rate.
      * @param[in] recombination An object that represents recombination reaction rate.
-     * @param[in] normalization_coeff A normalization coefficient for the diffusive neutral model.
+     * @param[in] normalisation_coeff A normalisation coefficient for the diffusive neutral model.
      * @param[in] spline_x_builder A one-dimensional spline builder.
      * @param[in] spline_x_evaluator A one-dimensional spline evaluator.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
@@ -91,9 +91,9 @@ public:
      */
     DiffusiveNeutralSolver(
             IReactionRate const& charge_exchange,
-            IReactionRate const& ionization,
+            IReactionRate const& ionisation,
             IReactionRate const& recombination,
-            double const normalization_coeff,
+            double const normalisation_coeff,
             SplineXBuilder_1d const& spline_x_builder,
             SplineXEvaluator_1d const& spline_x_evaluator,
             DConstFieldVx const& quadrature_coeffs,
