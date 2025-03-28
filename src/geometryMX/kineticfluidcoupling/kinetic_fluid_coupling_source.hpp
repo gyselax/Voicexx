@@ -30,9 +30,9 @@ private:
     double m_density_coupling_coeff;
     double m_momentum_coupling_coeff;
     double m_energy_coupling_coeff;
-    IReactionRate const& m_ionization;
+    IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
-    double m_normalization_coeff;
+    double m_normalisation_coeff;
     DConstFieldVx const m_quadrature_coeffs;
     DFieldMemX m_mask;
 
@@ -43,9 +43,9 @@ public:
      * @param[in] density_coupling_coeff The coefficient of the density source.
      * @param[in] momentum_coupling_coeff The coefficient of the momentum source.
      * @param[in] energy_coupling_coeff The coefficient of the energy source.
-     * @param[in] ionization The rate of the ionization reaction.
+     * @param[in] ionisation The rate of the ionisation reaction.
      * @param[in] recombination The rate of the recombination reaction.
-     * @param[in] normalization_coeff The normalization coefficient of neutrals.
+     * @param[in] normalisation_coeff The normalisation coefficient of neutrals.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      * @param[in] mask_extent The extent of the mask for the neutrals fluid.
      * @param[in] mask_stiffnes The stiffnes of the mask for the neutrals fluid.
@@ -55,9 +55,9 @@ public:
             double density_coupling_coeff,
             double momentum_coupling_coeff,
             double energy_coupling_coeff,
-            IReactionRate const& ionization,
+            IReactionRate const& ionisation,
             IReactionRate const& recombination,
-            double normalization_coeff,
+            double normalisation_coeff,
             DConstFieldVx const& quadrature_coeffs,
             double mask_extent,
             double mask_stiffness,
@@ -92,7 +92,7 @@ public:
      * @param[in, out] density_source_neutral The source term.
      * @param[in] kinsp_density The computed plasma densities of the distribution function.
      * @param[in] neutrals The neutral density.
-     * @param[in] ionization The ionization rate.
+     * @param[in] ionisation The ionisation rate.
      * @param[in] recombination The recombination rate.
      * 
     */
@@ -100,7 +100,7 @@ public:
             DFieldX density_source_neutral,
             DConstFieldSpX kinsp_density,
             DConstFieldSpMomX neutrals,
-            DConstFieldSpX ionization,
+            DConstFieldSpX ionisation,
             DConstFieldSpX recombination) const;
 
     /**

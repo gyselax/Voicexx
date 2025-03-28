@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from gysdata_voice import DiskStore
 from plot_utils import plot_field1d
 from math_utils import compute_moment
-from neutrals_utils import get_charge_exchange_rate, get_ionization_rate, get_recombination_rate
+from neutrals_utils import get_charge_exchange_rate, get_ionisation_rate, get_recombination_rate
 from utils import compute_temperature
 
 if __name__ == '__main__':
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         densities, particle_flux, momentum_flux)
 
     k_cx = get_charge_exchange_rate(ds, plasma_temperature.sel(species='ions'))
-    k_i = get_ionization_rate(
+    k_i = get_ionisation_rate(
         ds, plasma_temperature.sel(species='electrons'), density_e)
     k_r = get_recombination_rate(
         ds, plasma_temperature.sel(species='electrons'), density_e)

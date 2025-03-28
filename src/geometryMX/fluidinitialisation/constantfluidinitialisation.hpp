@@ -2,21 +2,23 @@
 
 #pragma once
 
-#include "geometry_neutrals.hpp"
-#include "igridneutralfluidinit.hpp"
+#include "geometry.hpp"
+#include "ifluidinitialisation.hpp"
 /**
- * @brief A class that initialises on its own grid a fluid species with constant moments.
+ * @brief A class that initialises a fluid species with constant moments.
  */
-class GridNeutralConstantInit : public IGridNeutralFluidInit
+class ConstantFluidInitialisation : public IFluidInitialisation
 {
-    DFieldMemSpMom m_moments_alloc; // the value of the moments does not depend on x
+    DFieldMemSpMom m_moments_alloc;
 
 public:
     /**
-     * @brief Creates an instance of the GridNeutralConstantInit class.
+     * @brief Creates an instance of the ConstantFluidInitialisation class.
      * @param[in] moments The fluid moments the fluid species should be initialised with. 
      */
-    explicit GridNeutralConstantInit(host_t<DConstFieldSpMom> moments);
+    ConstantFluidInitialisation(host_t<DConstFieldSpMom> moments);
+
+    ~ConstantFluidInitialisation() override = default;
 
     /**
      * @brief Initialises the fluid species with a constant moments.
@@ -24,5 +26,5 @@ public:
      *                             On output: a field referencing a the fluid species initialised with constant moments.
      * @return A field referencing the initialised fluid species.
      */
-    DFieldSpMomXn operator()(DFieldSpMomXn const fluid_moments) const override;
+    DFieldSpMomX operator()(DFieldSpMomX const fluid_moments) const override;
 };

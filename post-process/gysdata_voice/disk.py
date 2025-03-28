@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 '''
-Functions used to create a store that respresents the outputs
+Functions used to create a store that represents the outputs
 from the code on disk
 '''
 
@@ -51,7 +51,7 @@ class DsetInfo(object):
 
 class Store(object):
     '''
-    A Store that respresents the outputs from the code on disk.
+    A Store that represents the outputs from the code on disk.
     '''
 
     def __init__(self, data_dir, data_structure=None, fields=None):

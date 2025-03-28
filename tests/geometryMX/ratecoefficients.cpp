@@ -10,11 +10,11 @@
 #include <pdi.h>
 
 #include "charge_exchange.hpp"
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffusiveneutralsolver.hpp"
 #include "geometry.hpp"
-#include "ionization.hpp"
+#include "ionisation.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "quadrature.hpp"
 #include "recombination.hpp"
@@ -22,7 +22,7 @@
 
 
 /**
- * This test initializes a neutral density with a flat spatial profile 
+ * This test initialises a neutral density with a flat spatial profile 
  * and constant quantities for the kinetic plasma species densities, temperature, etc.
  * Then the time derivative of the diffusive neutral model is computed using the solver, 
  * and analytically. The two expressions for the derivative are compared and the relative 
@@ -53,7 +53,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
     IdxRangeVx meshVx(SplineInterpPointsVx::get_domain<GridVx>());
     IdxRangeXVx meshXVx(meshX, meshVx);
 
-    // Kinetic and neutral species index range initialization
+    // Kinetic and neutral species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -89,7 +89,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
@@ -97,7 +97,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
     IdxRangeSpX idx_range_fluidspx = IdxRangeSpX(idx_range_fluidsp, meshX);
 
     ChargeExchangeRate charge_exchange(1.);
-    IonizationRate ionization(1.);
+    IonisationRate ionisation(1.);
     RecombinationRate recombination(1.);
 
     DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
@@ -105,7 +105,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 1.);
-    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
 
     DFieldMemSpMomX derivative_alloc(get_idx_range(neutrals));
@@ -128,18 +128,18 @@ static void TestDiffusiveNeutralsRateCoefficients()
 
     // building reaction rates
     DFieldMemSpX charge_exchange_rate_alloc(idx_range_fluidspx);
-    DFieldMemSpX ionization_rate_alloc(idx_range_fluidspx);
+    DFieldMemSpX ionisation_rate_alloc(idx_range_fluidspx);
     DFieldMemSpX recombination_rate_alloc(idx_range_fluidspx);
 
     DFieldSpX charge_exchange_rate = get_field(charge_exchange_rate_alloc);
-    DFieldSpX ionization_rate = get_field(ionization_rate_alloc);
+    DFieldSpX ionisation_rate = get_field(ionisation_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
     charge_exchange(
             charge_exchange_rate,
             get_const_field(kinsp_density),
             get_const_field(kinsp_temperature));
-    ionization(ionization_rate, get_const_field(kinsp_density), get_const_field(kinsp_temperature));
+    ionisation(ionisation_rate, get_const_field(kinsp_density), get_const_field(kinsp_temperature));
     recombination(
             recombination_rate,
             get_const_field(kinsp_density),
@@ -157,7 +157,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
             idx_range_fluidspx,
             0.,
             ddc::reducer::sum<double>(),
-            ionization_rate);
+            ionisation_rate);
 
     double mean_r_rate = ddc::parallel_transform_reduce(
             Kokkos::DefaultExecutionSpace(),

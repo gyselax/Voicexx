@@ -9,12 +9,12 @@
 
 #include <pdi.h>
 
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "geometry.hpp"
 #include "species_info.hpp"
 
 /**
- * This test initializes a discrete space for kinetic species 
+ * This test initialises a discrete space for kinetic species 
  * and fluid species, with corresponding masses and charges. 
  * The test checks if the masses() and charges() attributes 
  * of the discrete space correspond to the masses and charges
@@ -33,7 +33,7 @@ TEST(GeometryXM, KineticFluidSpecies)
     IdxRangeX meshX(SplineInterpPointsX::get_domain<GridX>());
     SplineXBuilder_1d const builder_x(meshX);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -49,7 +49,7 @@ TEST(GeometryXM, KineticFluidSpecies)
     kinetic_masses(my_ielec) = mass_elec;
     kinetic_masses(my_iion) = mass_ion;
 
-    // Fluid species index range initialization
+    // Fluid species index range initialisation
     IdxStepSp const nb_fluidspecies(2);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
 
@@ -121,7 +121,7 @@ TEST(GeometryXM, KineticFluidAdiabaticSpecies)
     IdxRangeX meshX(SplineInterpPointsX::get_domain<GridX>());
     SplineXBuilder_1d const builder_x(meshX);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -137,10 +137,10 @@ TEST(GeometryXM, KineticFluidAdiabaticSpecies)
     kinetic_masses(my_ielec) = mass_elec;
     kinetic_masses(my_iion) = mass_ion;
 
-    // adiabatic species initialization
+    // adiabatic species initialisation
     int nb_ion_adiabspecies = 1;
 
-    // Fluid species index range initialization
+    // Fluid species index range initialisation
     IdxStepSp const nb_fluidspecies(2);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
 

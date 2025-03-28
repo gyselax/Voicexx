@@ -28,7 +28,7 @@
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
 #include "input.hpp"
-#include "ionization.hpp"
+#include "ionisation.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
             SplineInterpPointsVx>(conf_voicexx, "vx"); // and the mesh in v
     IdxRangeXVx const meshXVx(mesh_x, mesh_vx); //merging the two
 
-    // Initialization of the spline builders
+    // Initialisation of the spline builders
     SplineXBuilder const builder_x(meshXVx);
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     IdxRangeSp idx_range_fluidsp;
     init_species_withfluid(idx_range_kinsp, idx_range_fluidsp, conf_voicexx);
 
-    // Initialization of kinetic species distribution function
+    // Initialisation of kinetic species distribution function
     IdxRangeSpVx const meshSpVx(idx_range_kinsp, mesh_vx);
     DFieldMemSpVx allfequilibrium(meshSpVx);
     MaxwellianEquilibrium const init_fequilibrium
@@ -131,12 +131,12 @@ int main(int argc, char** argv)
     IdxRangeSpXVx const meshSpXVx(idx_range_kinsp, meshXVx);
     DFieldMemSpXVx allfdistribu(meshSpXVx);
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
 
-    // Neutral species initialization
+    // Neutral species initialisation
     // We begin by constructing the neutral mesh
     Coord<X> min(PCpp_double(conf_voicexx, ".NeutralMesh.x_min"));
     Coord<X> max(PCpp_double(conf_voicexx, ".NeutralMesh.x_max"));
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
     std::vector<std::reference_wrapper<IRightHandSide const>> rhs_operators;
     std::vector<KrookSourceConstant> krook_source_constant_vector;
     std::vector<KrookSourceAdaptive> krook_source_adaptive_vector;
-    // Krook operators initialization
+    // Krook operators initialisation
     int const nb_rhsKrook(PCpp_len(conf_voicexx, ".Krook"));
     for (int ik = 0; ik < nb_rhsKrook; ++ik) {
         // --> Krook info
@@ -294,7 +294,7 @@ int main(int argc, char** argv)
 
     // The CX coefficient needs to be first constructed in order to write a correct initstate file. Check pdi_out_neutrals.yml.hpp for a closer look.
     ChargeExchangeRate charge_exchange(reaction_scaling_factor);
-    IonizationRate ionization(reaction_scaling_factor);
+    IonisationRate ionisation(reaction_scaling_factor);
     RecombinationRate recombination(reaction_scaling_factor);
 
     // splines to interpolate from one grid to another
@@ -311,7 +311,7 @@ int main(int argc, char** argv)
     if (PCpp_bool(conf_voicexx, ".DiffusiveSolver.on")) {
         ptr_neutral_solver = std::make_unique<PressureDiffusionSolver>(
                 charge_exchange,
-                ionization,
+                ionisation,
                 recombination,
                 mean_free_path,
                 spline_builder_on_Xn,
