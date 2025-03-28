@@ -10,9 +10,9 @@ KineticFluidCouplingSource::KineticFluidCouplingSource(
         double const density_coupling_coeff,
         double const momentum_coupling_coeff,
         double const energy_coupling_coeff,
-        IReactionRate const& ionization,
+        IReactionRate const& ionisation,
         IReactionRate const& recombination,
-        double const normalization_coeff,
+        double const normalisation_coeff,
         DConstFieldVx const& quadrature_coeffs,
         double const extent,
         double const stiffness,
@@ -20,9 +20,9 @@ KineticFluidCouplingSource::KineticFluidCouplingSource(
     : m_density_coupling_coeff(density_coupling_coeff)
     , m_momentum_coupling_coeff(momentum_coupling_coeff)
     , m_energy_coupling_coeff(energy_coupling_coeff)
-    , m_ionization(ionization)
+    , m_ionisation(ionisation)
     , m_recombination(recombination)
-    , m_normalization_coeff(normalization_coeff)
+    , m_normalisation_coeff(normalisation_coeff)
     , m_quadrature_coeffs(quadrature_coeffs)
     , m_mask(gridx)
 {
@@ -62,7 +62,7 @@ void KineticFluidCouplingSource::get_source_term(
         DFieldX density_source_neutral,
         DConstFieldSpX kinsp_density,
         DConstFieldSpMomX neutrals,
-        DConstFieldSpX ionization,
+        DConstFieldSpX ionisation,
         DConstFieldSpX recombination) const
 {
     IdxSp const iion(find_ion(get_idx_range<Species>(kinsp_density)));
@@ -77,7 +77,7 @@ void KineticFluidCouplingSource::get_source_term(
             get_idx_range(density_source_neutral),
             KOKKOS_LAMBDA(IdxX const ix) {
                 density_source_neutral(ix) = neutrals(ineutral, ix) * kinsp_density(ielec(), ix)
-                                                     * ionization(ispneutral, ix)
+                                                     * ionisation(ispneutral, ix)
                                              - kinsp_density(iion, ix) * kinsp_density(ielec(), ix)
                                                        * recombination(ispneutral, ix);
             });
@@ -92,7 +92,7 @@ void KineticFluidCouplingSource::get_derivative_neutrals(
     IdxRangeSpX dom_fluidspx(get_idx_range<Species, GridX>(neutrals));
     // compute diffusive model equation terms
     IdxMom const ineutral_density(0);
-    double const normalization_coeff_alpha0(m_normalization_coeff);
+    double const normalisation_coeff_alpha0(m_normalisation_coeff);
     // build rhs of diffusive model equation
     DConstFieldX mask(get_field(m_mask));
     IdxRangeSpMom const dom_msp(get_idx_range<Species, GridMom>(neutrals));
@@ -103,7 +103,7 @@ void KineticFluidCouplingSource::get_derivative_neutrals(
             KOKKOS_LAMBDA(IdxSpX const ifspx) {
                 IdxX const ix(ifspx);
                 dn(ifspx, ineutral_density) = -density_source_neutral(ix) * (1. - mask(ix))
-                                              / normalization_coeff_alpha0;
+                                              / normalisation_coeff_alpha0;
             });
 }
 
@@ -173,14 +173,14 @@ void KineticFluidCouplingSource::operator()(
     // building reaction rates
     IdxRangeSpX dom_fluidspx(get_idx_range<Species, GridX>(neutrals));
 
-    DFieldMemSpX ionization_rate_alloc(dom_fluidspx);
+    DFieldMemSpX ionisation_rate_alloc(dom_fluidspx);
     DFieldMemSpX recombination_rate_alloc(dom_fluidspx);
 
-    DFieldSpX ionization_rate = get_field(ionization_rate_alloc);
+    DFieldSpX ionisation_rate = get_field(ionisation_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
-    m_ionization(
-            ionization_rate,
+    m_ionisation(
+            ionisation_rate,
             get_const_field(kinsp_density),
             get_const_field(kinsp_temperature));
     m_recombination(
@@ -196,7 +196,7 @@ void KineticFluidCouplingSource::operator()(
             density_source_neutral,
             get_const_field(kinsp_density),
             get_const_field(neutrals),
-            get_const_field(ionization_rate),
+            get_const_field(ionisation_rate),
             get_const_field(recombination_rate));
 
     // S(v) velocity shape calculation for kinetic species
@@ -206,7 +206,7 @@ void KineticFluidCouplingSource::operator()(
     double density_coupling_coeff_proxy = m_density_coupling_coeff;
     double momentum_coupling_coeff_proxy = m_momentum_coupling_coeff;
     double energy_coupling_coeff_proxy = m_energy_coupling_coeff;
-    double const normalization_coeff_alpha0_proxy = m_normalization_coeff;
+    double const normalisation_coeff_alpha0_proxy = m_normalisation_coeff;
 
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
@@ -230,7 +230,7 @@ void KineticFluidCouplingSource::operator()(
                                              * Kokkos::exp(-coordvx_sq / (2 * neutral_temperature));
                 velocity_shape_source(ispxvx) = (density_source_neutral(ix)
                                                  / (Kokkos::sqrt(2 * M_PI * neutral_temperature)
-                                                    * normalization_coeff_alpha0_proxy))
+                                                    * normalisation_coeff_alpha0_proxy))
                                                         * density_source
                                                 + momentum_source + energy_source;
             });

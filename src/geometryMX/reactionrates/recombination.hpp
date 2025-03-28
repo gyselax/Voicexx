@@ -27,7 +27,7 @@ public:
      * Coefficients are fitted in semi-log space, while the rate vs. electron temperature polynomial is fitted in log-log space.
      * The polynomial fits data from the OPEN-ADAS database for Hydrogen.
      * 
-     * @param[in] norm_coeff_rate All rate coefficients are normalized so that CX is of order unity at normalized density (n) = 1 and normalized temperature (T) = 1 with n_0 = 1e20 and T_0 = 10 eV.
+     * @param[in] norm_coeff_rate All rate coefficients are normalised so that CX is of order unity at normalised density (n) = 1 and normalised temperature (T) = 1 with n_0 = 1e20 and T_0 = 10 eV.
      * These are typical values for a SOL plasma.
      * The norm_coeff_rate parameter shifts all the reaction rates to modify the source dynamics.
      */

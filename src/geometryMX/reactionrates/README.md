@@ -6,5 +6,5 @@ The interface IReactionRates describes reaction rate that depend on density and 
 Existing reaction rates that implements such interface are: 
 - ConstantRate
 - ChargeExchange
-- Ionization
+- Ionisation
 - Recombination

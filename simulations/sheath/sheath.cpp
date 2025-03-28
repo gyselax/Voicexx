@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
 
-    // Initialization of the distribution function
+    // Initialisation of the distribution function
     DFieldMemSpVx allfequilibrium(meshSpVx);
     MaxwellianEquilibrium const init_fequilibrium
             = MaxwellianEquilibrium::init_from_input(idx_range_kinsp, conf_voicexx);
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
     std::vector<std::reference_wrapper<IRightHandSide const>> rhs_operators;
     std::vector<KrookSourceConstant> krook_source_constant_vector;
     std::vector<KrookSourceAdaptive> krook_source_adaptive_vector;
-    // Krook operators initialization
+    // Krook operators initialisation
     int const nb_rhsKrook(PCpp_len(conf_voicexx, ".Krook"));
     for (int ik = 0; ik < nb_rhsKrook; ++ik) {
         // --> Krook info

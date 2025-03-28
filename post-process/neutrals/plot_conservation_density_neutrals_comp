@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # SPDX-License-Identifier: MIT
-"""diagnostic of normalized density conservation equation:
+"""diagnostic of normalised density conservation equation:
     d(n)/dt + sqrt(m_e/m_i) d(n_eq u_i)/dx - alpha_0 d(D T_n d(n)/dx)/dx = S_n / alpha_0
-    with alpha_0 = omega_pe0 / (n_0 k_0) the normalization coefficient.
+    with alpha_0 = omega_pe0 / (n_0 k_0) the normalisation coefficient.
 """
 
 from argparse import ArgumentParser
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from gysdata_voice import DiskStore
 from plot_utils import plot_field1d, plot_field2d
 from math_utils import compute_moment, differentiate
-from neutrals_utils import get_charge_exchange_rate, get_ionization_rate, get_recombination_rate
+from neutrals_utils import get_charge_exchange_rate, get_ionisation_rate, get_recombination_rate
 from utils import compute_fluid_velocity, compute_temperature, compute_krook_neutrals
 
 if __name__ == '__main__':
@@ -62,8 +62,8 @@ if __name__ == '__main__':
     current_nspecies = 'neutrals'
     m_n = neutrals_masses.sel(speciesn=current_nspecies)
 
-    # Neutral temperature and normalization coefficients.
-    alpha_0 = ds['normalization_coeff_neutrals']
+    # Neutral temperature and normalisation coefficients.
+    alpha_0 = ds['normalisation_coeff_neutrals']
     moment_order = 'density'
     neutrals_mask = ds['krook_neutrals_mask']
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     neutrals_temperature = plasma_temperature.sel(species='ions')  # T_n = T_i
 
     k_cx = get_charge_exchange_rate(ds, plasma_temperature.sel(species='ions'))
-    k_i = get_ionization_rate(
+    k_i = get_ionisation_rate(
         ds, plasma_temperature.sel(species='electrons'), density_e)
     k_r = get_recombination_rate(
         ds, plasma_temperature.sel(species='electrons'), density_e)

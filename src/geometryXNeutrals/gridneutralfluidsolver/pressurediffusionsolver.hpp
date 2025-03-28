@@ -28,13 +28,13 @@
  *
  * where @f$n_i@f$ (resp. @f$n_e@f$) is the ion (resp. electron) density and @f$m_n@f$ stands
  * for the mass of neutrals. The @f$K_i@f$, @f$K_r@f$ and @f$K_{cx}@f$ coefficients
- * represent the reaction rates of ionization, recombination and charge-exchange reactions.
+ * represent the reaction rates of ionisation, recombination and charge-exchange reactions.
  *
  * The density source term @f$S_n@f$ is chosen to be 0 her, and will be solved
  * by the plasma-neutrals coupling operator.
  *
  *
- * The pressure-diffusive equation is normalized to the relevant normalization quantities:
+ * The pressure-diffusive equation is normalised to the relevant normalisation quantities:
  * - densities to a reference density @f$n_0@f$;
  * - temperatures to a reference temperature @f$T_0@f$;
  * - time to the electron plasma frequency @f$\omega_{pe0} = \sqrt{n_0 e^2/(m_e \varepsilon_0)}@f$;
@@ -54,7 +54,7 @@ class PressureDiffusionSolver : public IGridNeutralFluidSolver
 {
 private:
     IReactionRate const& m_charge_exchange;
-    IReactionRate const& m_ionization;
+    IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
 
     double const m_mean_free_path;
@@ -74,7 +74,7 @@ public:
     /**
      * @brief Creates an instance of the DiffusiveNeutralSolver class.
      * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
-     * @param[in] ionization An object that represents ionization reaction rate.
+     * @param[in] ionisation An object that represents ionisation reaction rate.
      * @param[in] mean_free_path The mean free path between two charge-exchange reactions.
      * @param[in] spline_x_builder_on_Xn A one-dimensional spline builder on GridNeutrals
      * @param[in] spline_x_evaluator_on_Xn A one-dimensional spline evaluator on GridNeutrals
@@ -84,7 +84,7 @@ public:
      */
     PressureDiffusionSolver(
             IReactionRate const& charge_exchange,
-            IReactionRate const& ionization,
+            IReactionRate const& ionisation,
             IReactionRate const& recombination,
             double const mean_free_path,
             SplineXNeutralsBuilder const& spline_builder_on_Xn,

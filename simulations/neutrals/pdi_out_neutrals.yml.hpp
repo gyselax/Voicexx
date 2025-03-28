@@ -54,17 +54,17 @@ metadata:
     size: [ '$fdistribu_eq_extents[0]', '$fdistribu_eq_extents[1]' ]
   collintra_nustar0 : double
   collinter_nustar0 : double
-  normalization_coeff_neutrals : double
+  normalisation_coeff_neutrals : double
   norm_coeff_rate_neutrals : double
   charge_exchange_coefficients:
     type: array
     subtype: double
     size: [ 5 ]
-  ionization_slope_coefficients:
+  ionisation_slope_coefficients:
     type: array
     subtype: double
     size: [ 6 ]
-  ionization_intercept_coefficients:
+  ionisation_intercept_coefficients:
     type: array
     subtype: double
     size: [ 6 ]
@@ -157,11 +157,11 @@ data:
     type: array
     subtype: double
     size: [ '$charge_exchange_rate_extents[0]' , '$charge_exchange_rate_extents[1]' ]
-  ionization_rate_extents: { type: array, subtype: int64, size: 2 }
-  ionization_rate:
+  ionisation_rate_extents: { type: array, subtype: int64, size: 2 }
+  ionisation_rate:
     type: array
     subtype: double
-    size: [ '$ionization_rate_extents[0]' , '$ionization_rate_extents[1]' ]
+    size: [ '$ionisation_rate_extents[0]' , '$ionisation_rate_extents[1]' ]
   recombination_rate_extents: { type: array, subtype: int64, size: 2 }
   recombination_rate:
     type: array
@@ -199,8 +199,8 @@ plugins:
       on_event: [i_rate_coeff_pol_expose]
       collision_policy: write_into
       write:
-        - ionization_slope_coefficients
-        - ionization_intercept_coefficients
+        - ionisation_slope_coefficients
+        - ionisation_intercept_coefficients
     - file: 'VOICEXX_initstate.h5'
       on_event: [r_rate_coeff_pol_expose]
       collision_policy: write_into
@@ -220,7 +220,7 @@ plugins:
         - nbstep_diag
         - collintra_nustar0
         - collinter_nustar0
-        - normalization_coeff_neutrals
+        - normalisation_coeff_neutrals
         - norm_coeff_rate_neutrals
 
         - Nkinspecies
@@ -267,7 +267,7 @@ plugins:
       on_event: [reaction_rate_expose]
       when: '${iter} % ${nbstep_diag} = 0'
       collision_policy: write_into
-      write: [charge_exchange_rate, ionization_rate, recombination_rate]
+      write: [charge_exchange_rate, ionisation_rate, recombination_rate]
     - file: 'VOICEXX_${iter_saved:05}.h5'
       on_event: [diff_conv_expose]
       when: '${iter} % ${nbstep_diag} = 0'

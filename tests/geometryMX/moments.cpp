@@ -8,19 +8,19 @@
 
 #include <pdi.h>
 
-#include "constantfluidinitialization.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "geometry.hpp"
 #include "species_info.hpp"
 
 /**
- * This test initializes a discrete space for moments (density,
- * particle_flux, stress) and initializes a neutral species
+ * This test initialises a discrete space for moments (density,
+ * particle_flux, stress) and initialises a neutral species
  * defined on the moment space and a spatial dimension with constant values
  * for the density, particle flux and stress. The test checks if the
- * initialization works properly.
+ * initialisation works properly.
  */
-TEST(GeometryXM, MomentsInitialization)
+TEST(GeometryXM, MomentsInitialisation)
 {
     CoordX const x_min(0.0);
     CoordX const x_max(1.0);
@@ -33,7 +33,7 @@ TEST(GeometryXM, MomentsInitialization)
     IdxRangeX meshX(SplineInterpPointsX::get_domain<GridX>());
     SplineXBuilder_1d const builder_x(meshX);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -49,7 +49,7 @@ TEST(GeometryXM, MomentsInitialization)
     kinetic_masses(ielec) = mass_elec;
     kinetic_masses(iion) = mass_ion;
 
-    // Neutral species index range initialization
+    // Neutral species index range initialisation
     IdxStepSp const nb_fluidspecies(1);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
     IdxSp const ifluid = idx_range_fluidsp.front();
@@ -92,7 +92,7 @@ TEST(GeometryXM, MomentsInitialization)
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(3);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
@@ -101,7 +101,7 @@ TEST(GeometryXM, MomentsInitialization)
     IdxMom iparticle_flux(1);
     IdxMom istress(2);
 
-    // Neutral species initialization
+    // Neutral species initialisation
     DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
     DFieldSpMomX neutrals = get_field(neutrals_alloc);
 
@@ -116,7 +116,7 @@ TEST(GeometryXM, MomentsInitialization)
     moments_init(ifluid, iparticle_flux) = fluid_particle_flux_init;
     moments_init(ifluid, istress) = fluid_stress_init;
 
-    ConstantFluidInitialization fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
 
     auto neutrals_host = ddc::create_mirror_view_and_copy(neutrals);

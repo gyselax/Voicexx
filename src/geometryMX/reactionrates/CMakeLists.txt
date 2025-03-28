@@ -5,7 +5,7 @@ foreach(GEOMETRY_VARIANT IN LISTS GEOMETRY_XVx_VARIANTS_LIST)
 add_library("reactionrates_${GEOMETRY_VARIANT}" STATIC
     constantrate.cpp
     charge_exchange.cpp
-    ionization.cpp
+    ionisation.cpp
     recombination.cpp
 )
 

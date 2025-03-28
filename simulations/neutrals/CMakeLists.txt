@@ -18,10 +18,10 @@ target_link_libraries(neutrals_${GEOMETRY_VARIANT}
         gslx::io
         gslx::utils
         gslx::rhs_${GEOMETRY_VARIANT}
-        voicexx::initialization_neutrals_${GEOMETRY_VARIANT}
+        voicexx::initialisation_neutrals_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
         voicexx::time_integration_hybrid_${GEOMETRY_VARIANT}
-        voicexx::fluidinitialization_${GEOMETRY_VARIANT}
+        voicexx::fluidinitialisation_${GEOMETRY_VARIANT}
         voicexx::fluidsolver_${GEOMETRY_VARIANT}
 
         paraconf::paraconf
