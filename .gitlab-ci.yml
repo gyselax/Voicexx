@@ -127,7 +127,7 @@ cppcheck_static_analysis:
     git diff --name-only ${CI_MERGE_REQUEST_DIFF_BASE_SHA} > changed_files.txt
     CHANGED_FILES=$(awk '{printf("%s ",$0)} END { printf "\n" }' changed_files.txt)
     set +e
-    python3 gyselalibxx/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES} --default-geometry=geometryXVx --home-dir=${CI_PROJECT_DIR}
+    python3 gyselalibxx/bin/ci_tools/gyselalib_static_analysis.py ${CHANGED_FILES} --default-geometry=geometryXVx --home-dir=${CI_PROJECT_DIR}
   allow_failure:
     exit_codes: [1, 2] # Allow failure due to style or error but not fatal
 
@@ -144,7 +144,24 @@ markdown_best_practices:
     MARKDOWN_FILES=$(find . -name "*.md" -not -path "./gyselalibxx/*")
     echo $MARKDOWN_FILES
     set +e
-    python3 gyselalibxx/ci_tools/markdown_linter.py ${MARKDOWN_FILES}
+    python3 gyselalibxx/bin/ci_tools/markdown_linter.py ${MARKDOWN_FILES}
   allow_failure:
     exit_codes: 2
 
+spelling:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  stage: static_analysis
+  needs: []
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script: |
+    apt-get update -qy
+    apt-get install -y wget
+    mkdir typos
+    cd typos
+    wget -qO- https://github.com/crate-ci/typos/releases/download/v1.30.3/typos-v1.30.3-x86_64-unknown-linux-musl.tar.gz | gunzip | tar xvf -
+    cd ..
+  script: |
+    cp gyselalibxx/.typos.toml .typos.toml
+    ./typos/typos ./CMakeLists.txt ./ci_tools ./pre-process ./post-process ./README.md ./simulations ./src ./tests/
