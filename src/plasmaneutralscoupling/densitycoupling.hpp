@@ -9,20 +9,20 @@
 
 /**
  * @brief A class that describes a source of particles due to neutrals.
- * 
- * The KineticFluidCouplingSource class solves the following evolution equations: 
+ *
+ * The KineticFluidCouplingSource class solves the following evolution equations:
  * @f$df/dt = S_n,N(x) * S_v(x,v)@f$
  * where @f$S_n,N(x)@f$ is what we call the density_source_neutral
  * @f$dn_N/dt = - S_n,N(x)@f$
  * Where @f$S_n,N(x) = n_N(x) n_e(x) K_i(x) - n_i(x) n_e(x) K_r(x)@f$
  * @f$S_v(x,v)@f$ is the sum of order 0 to 2 Hermite polynomials times a Maxwellian velocity distribution function.
- * 
  *
- * The velocity_shape_source @f$S_v(x,v)@f$ defines the velocity profile of the source in the parallel velocity direction. 
- * It is the sum of a source that injects only density, a source that injects only momentum and a source that injects only energy. 
- * If the density and energy parameters are equal to one (usual case), the resulting velocity_shape is maxwellian. 
- * 
- * The complete description of the operator can be found in [rhs docs](https://github.com/gyselax/gyselalibxx/blob/main/doc/geometryXVx/kinetic_source.pdf). 
+ *
+ * The velocity_shape_source @f$S_v(x,v)@f$ defines the velocity profile of the source in the parallel velocity direction.
+ * It is the sum of a source that injects only density, a source that injects only momentum and a source that injects only energy.
+ * If the density and energy parameters are equal to one (usual case), the resulting velocity_shape is maxwellian.
+ *
+ * The complete description of the operator can be found in [rhs docs](https://github.com/gyselax/gyselalibxx/blob/main/doc/geometryXVx/kinetic_source.pdf).
  */
 class GridNeutralDensityCoupling : public IGridNeutralCoupling
 {
@@ -41,7 +41,7 @@ private:
 public:
     /**
      * @brief Creates an instance of the KineticFluidCouplingSource class.
-     * 
+     *
      * @param[in] density_coupling_coeff The coefficient of the density source.
      * @param[in] momentum_coupling_coeff The coefficient of the momentum source.
      * @param[in] energy_coupling_coeff The coefficient of the energy source.
@@ -79,13 +79,13 @@ public:
     /**
      * @brief Computes the source term density_source_neutral(x), with is the result
      * of the sink due to ionization and the source due to recombination
-     * 
+     *
      * @param[in, out] density_source_neutral The source term.
      * @param[in] kinsp_density The computed plasma densities.
      * @param[in] neutrals The neutral density.
      * @param[in] ionization The ionization rate.
      * @param[in] recombination The recombination rate.
-     * 
+     *
     */
     void get_source_term(
             DFieldSpXn density_source_neutral,
@@ -96,11 +96,11 @@ public:
 
     /**
      * @brief the derivative of the neutral density due to the source term
-     * 
+     *
      * @param[in, out] dn The infinitesimal variation of the neutral density.
      * @param[in] neutrals The neutral density.
      * @param[in] density_source_neutral The density source term.
-     * 
+     *
     */
     void get_derivative_neutrals(
             DFieldSpMomXn dn,
@@ -110,7 +110,7 @@ public:
 
     /**
      * @brief Computes df for the equation df/dt = density_source_neutral(x) * velocity_shape_source(x,v).
-     * 
+     *
      * @param[in, out] df The infinitesimal variation of the distribution function.
      * @param[in] allfdistribu The distribution function.
      * @param[in] velocity_shape_source The velocity shape of the source.
