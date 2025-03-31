@@ -9,7 +9,7 @@ set(BASIC_GEOMETRY_XVx_VARIANTS_LIST xperiod_vx xnonperiod_vx)
 foreach(GEOMETRY_VARIANT IN LISTS BASIC_GEOMETRY_XVx_VARIANTS_LIST)
 
 add_executable(unit_tests_geometryXNeutrals_${GEOMETRY_VARIANT}
-    ../main.cpp
+    ../../main.cpp
     predcorr_hybrid.cpp
 )
 
@@ -44,8 +44,8 @@ if (${ACTIVATE_RESTART_TESTS})
             "$<TARGET_FILE:neutrals_owngrid_xnonperiod_vx>"
             "$<TARGET_FILE:Python3::Interpreter>"
             "restart"
-            "1e-15"
-            "1e-15")
+            "${RELATIVE_RESTART_TOLERANCE}"
+            "${ABSOLUTE_RESTART_TOLERANCE}")
         set_property(TEST TestSimulationGridXNeutralsRestart_xnonperiod_vx PROPERTY TIMEOUT 200)
         set_property(TEST TestSimulationGridXNeutralsRestart_xnonperiod_vx PROPERTY COST 100)
 endif()

@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+add_subdirectory(geometryXNeutrals)
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 include(GoogleTest)
@@ -50,8 +52,19 @@ if (${ACTIVATE_RESTART_TESTS})
             "$<TARGET_FILE:neutrals_xnonperiod_vx>"
             "$<TARGET_FILE:Python3::Interpreter>"
             "restart"
-            "1e-15"
-            "1e-15")
+            "${RELATIVE_RESTART_TOLERANCE}"
+            "${ABSOLUTE_RESTART_TOLERANCE}")
         set_property(TEST TestSimulationNeutralsRestart_xnonperiod_vx PROPERTY TIMEOUT 200)
         set_property(TEST TestSimulationNeutralsRestart_xnonperiod_vx PROPERTY COST 100)
+
+    add_test(NAME TestSimulationGridXNeutralsRestart_xnonperiod_vx
+        COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/test_neutrals_restart.sh"
+            "${PROJECT_SOURCE_DIR}"
+            "$<TARGET_FILE:neutrals_owngrid_xnonperiod_vx>"
+            "$<TARGET_FILE:Python3::Interpreter>"
+            "restart"
+            "${RELATIVE_RESTART_TOLERANCE}"
+            "${ABSOLUTE_RESTART_TOLERANCE}")
+        set_property(TEST TestSimulationGridXNeutralsRestart_xnonperiod_vx PROPERTY TIMEOUT 200)
+        set_property(TEST TestSimulationGridXNeutralsRestart_xnonperiod_vx PROPERTY COST 100)
 endif()
