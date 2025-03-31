@@ -77,7 +77,7 @@ TEST(GeometryXNeutrals, PredCorrHybrid)
     SplineVxBuilder const builder_vx(meshXVx);
     SplineVxBuilder_1d const builder_vx_poisson(meshVx);
 
-    // Kinetic species index range initialization
+    // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
     IdxRangeSp const idx_range_kinsp(IdxSp(0), nb_kinspecies);
 
@@ -93,7 +93,7 @@ TEST(GeometryXNeutrals, PredCorrHybrid)
     kinetic_masses(ielec) = mass_elec;
     kinetic_masses(iion) = mass_ion;
 
-    // Fluid species index range initialization
+    // Fluid species index range initialisation
     IdxStepSp const nb_fluidspecies(1);
     IdxRangeSp const idx_range_fluidsp(IdxSp(idx_range_kinsp.back() + 1), nb_fluidspecies);
 
@@ -135,7 +135,7 @@ TEST(GeometryXNeutrals, PredCorrHybrid)
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    // Initialization of kinetic species distribution function
+    // Initialisation of kinetic species distribution function
     DFieldMemSpXVx allfdistribu_alloc(IdxRangeSpXVx(idx_range_kinsp, meshX, meshVx));
     DFieldSpXVx allfdistribu = get_field(allfdistribu_alloc);
 
@@ -166,7 +166,7 @@ TEST(GeometryXNeutrals, PredCorrHybrid)
                  std::move(init_perturb_amplitude));
     init(allfdistribu);
 
-    // Moments index range initialization
+    // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(3);
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
@@ -175,7 +175,7 @@ TEST(GeometryXNeutrals, PredCorrHybrid)
     IdxMom iflux(1);
     IdxMom istress(2);
 
-    // Initialization of fluid species moments
+    // Initialisation of fluid species moments
     DFieldMemSpMomXn fluid_moments_alloc(
             IdxRangeSpMomXn(idx_range_fluidsp, meshM, mesh_x_neutrals));
     DFieldSpMomXn fluid_moments = get_field(fluid_moments_alloc);
@@ -230,7 +230,7 @@ TEST(GeometryXNeutrals, PredCorrHybrid)
     QNSolver const poisson(poisson_solver, rhs);
 
     ConstantRate const charge_exchange(0.0);
-    ConstantRate const ionization(0.0);
+    ConstantRate const ionisation(0.0);
     ConstantRate const recombination(0.0);
 
     NullGridNeutralCoupling const kineticfluidcoupling;
