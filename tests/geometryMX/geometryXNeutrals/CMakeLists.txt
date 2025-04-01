@@ -39,7 +39,7 @@ endforeach()
 
 if (${ACTIVATE_RESTART_TESTS})
     add_test(NAME TestSimulationGridXNeutralsRestart_xnonperiod_vx
-        COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/../geometryMX/test_neutrals_restart.sh"
+        COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/../test_neutrals_restart.sh"
             "${PROJECT_SOURCE_DIR}"
             "$<TARGET_FILE:neutrals_owngrid_xnonperiod_vx>"
             "$<TARGET_FILE:Python3::Interpreter>"
