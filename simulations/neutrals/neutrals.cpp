@@ -21,7 +21,6 @@
 #include "collisions_intra.hpp"
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "diffusiveneutralsolver.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
@@ -42,6 +41,7 @@
 #include "qnsolver.hpp"
 #include "recombination.hpp"
 #include "restartinitialisationwithneutrals.hpp"
+#include "samegridfluidsolver.hpp"
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
@@ -285,7 +285,7 @@ int main(int argc, char** argv)
     double const neutrals_wall_stiffness = PCpp_double(conf_voicexx, ".NeutralKrook.stiffness");
     double const neutrals_wall_amplitude = PCpp_double(conf_voicexx, ".NeutralKrook.amplitude");
 
-    DiffusiveNeutralSolver const neutralsolver(
+    SameGridFluidSolver const neutralsolver(
             charge_exchange,
             ionisation,
             recombination,

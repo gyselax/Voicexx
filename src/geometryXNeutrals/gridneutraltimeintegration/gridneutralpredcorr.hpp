@@ -5,7 +5,7 @@
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
 #include "iboltzmannsolver.hpp"
-#include "igridneutralfluidsolver.hpp"
+#include "ifluidsolver.hpp"
 #include "igridneutraltimesolver.hpp"
 #include "iplasmaneutralscoupling.hpp"
 #include "iqnsolver.hpp"
@@ -29,7 +29,7 @@ class GridNeutralPredCorr : public IGridNeutralTimeSolver
 private:
     IBoltzmannSolver const& m_boltzmann_solver;
 
-    IGridNeutralFluidSolver const& m_fluid_solver;
+    IFluidSolver<GridXNeutrals> const& m_fluid_solver;
 
     IQNSolver const& m_poisson_solver;
 
@@ -45,7 +45,7 @@ public:
      */
     GridNeutralPredCorr(
             IBoltzmannSolver const& boltzmann_solver,
-            IGridNeutralFluidSolver const& fluid_solver,
+            IFluidSolver<GridXNeutrals> const& fluid_solver,
             IQNSolver const& poisson_solver,
             IPlasmaNeutralsCoupling<GridXNeutrals> const& kinetic_fluid_coupling);
 

@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
-#include <cmath>
 
 #include <ddc/ddc.hpp>
-#include <ddc/kernels/splines.hpp>
+#include <ddc/pdi.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include <pdi.h>
 
 #include "Lagrange_interpolator.hpp"
 #include "bsl_advection_vx.hpp"
@@ -26,11 +23,9 @@
 #include "predcorr.hpp"
 #include "predcorr_hybrid.hpp"
 #include "qnsolver.hpp"
-#include "quadrature.hpp"
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "spline_interpolator.hpp"
-#include "splitrighthandsidesolver.hpp"
 #include "splitvlasovsolver.hpp"
 
 /**
@@ -256,7 +251,7 @@ TEST(GeometryXM, PredCorrHybrid)
     predcorr(allfdistribu_predcorr, time_start, deltat, nb_iter);
 
     // construction of predcorr with fluid species
-    NullFluidSolver const fluidsolver(idx_range_fluidsp);
+    NullFluidSolver<GridX> const fluidsolver(idx_range_fluidsp);
     PredCorrHybrid const predcorr_hybrid(vlasov, fluidsolver, poisson, kineticfluidcoupling);
     predcorr_hybrid(allfdistribu, fluid_moments, time_start, deltat, nb_iter);
 

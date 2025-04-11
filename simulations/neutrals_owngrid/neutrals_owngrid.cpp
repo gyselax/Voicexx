@@ -36,7 +36,7 @@
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals_owngrid.yml.hpp"
-#include "nullgridneutralfluidsolver.hpp"
+#include "nullfluidsolver.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "qnsolver.hpp"
@@ -49,12 +49,12 @@
 #include "splitvlasovsolver.hpp"
 
 // used for the fact that we have a different grid for the neutrals
+#include "diffgridsfluidsolver.hpp"
 #include "gridneutralconstantinit.hpp"
 #include "gridneutralpredcorr.hpp"
 #include "gridneutralrestartinit.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
-#include "pressurediffusionsolver.hpp"
 
 using std::chrono::steady_clock;
 
@@ -307,9 +307,9 @@ int main(int argc, char** argv)
 
     // depending if we want to solve the transport for the neutral species
     // we choose the corresponding neutral solver
-    std::unique_ptr<IGridNeutralFluidSolver> ptr_neutral_solver;
+    std::unique_ptr<IFluidSolver<GridXNeutrals>> ptr_neutral_solver;
     if (PCpp_bool(conf_voicexx, ".DiffusiveSolver.on")) {
-        ptr_neutral_solver = std::make_unique<PressureDiffusionSolver>(
+        ptr_neutral_solver = std::make_unique<DiffGridsFluidSolver>(
                 charge_exchange,
                 ionisation,
                 recombination,
@@ -320,7 +320,7 @@ int main(int argc, char** argv)
                 interpolator_from_X_to_Xn,
                 get_const_field(quadrature_coeffs_neutrals));
     } else {
-        ptr_neutral_solver = std::make_unique<NullGridNeutralSolver>(idx_range_fluidsp);
+        ptr_neutral_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
     }
 
     // for the moment we don't have any coupling
