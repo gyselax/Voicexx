@@ -52,9 +52,9 @@
 #include "diffgridsfluidsolver.hpp"
 #include "gridneutralconstantinit.hpp"
 #include "gridneutralpredcorr.hpp"
-#include "gridneutralrestartinit.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
+#include "restartinitialisationwithneutrals.hpp"
 
 using std::chrono::steady_clock;
 
@@ -167,7 +167,7 @@ int main(int argc, char** argv)
         fluid_init(neutrals);
 
     } else {
-        GridNeutralRestartInit const restart(iter_start, time_start);
+        RestartInitialisationWithNeutrals<GridXNeutrals> const restart(iter_start, time_start);
         restart(get_field(allfdistribu), get_field(neutrals));
     }
 
