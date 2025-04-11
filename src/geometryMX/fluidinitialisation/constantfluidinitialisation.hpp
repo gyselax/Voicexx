@@ -14,7 +14,7 @@ class ConstantFluidInitialisation : public IFluidInitialisation
 public:
     /**
      * @brief Creates an instance of the ConstantFluidInitialisation class.
-     * @param[in] moments The fluid moments the fluid species should be initialised with. 
+     * @param[in] moments The fluid moments the fluid species should be initialised with.
      */
     ConstantFluidInitialisation(host_t<DConstFieldSpMom> moments);
 

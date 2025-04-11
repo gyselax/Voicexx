@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
-#include <cmath>
 
 #include <ddc/ddc.hpp>
-#include <ddc/kernels/splines.hpp>
+#include <ddc/pdi.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include <pdi.h>
 
 #include "Lagrange_interpolator.hpp"
 #include "bsl_advection_vx.hpp"
@@ -16,7 +13,6 @@
 #include "chargedensitycalculator.hpp"
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "diffusiveneutralsolver.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
@@ -28,12 +24,11 @@
 #include "predcorr.hpp"
 #include "predcorr_hybrid.hpp"
 #include "qnsolver.hpp"
-#include "quadrature.hpp"
 #include "recombination.hpp"
+#include "samegridfluidsolver.hpp"
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "spline_interpolator.hpp"
-#include "splitrighthandsidesolver.hpp"
 #include "splitvlasovsolver.hpp"
 #include "trapezoid_quadrature.hpp"
 
@@ -234,7 +229,7 @@ static void TestKineticFluidCoupling()
     double const neutrals_wall_stiffness = 1.;
     double const neutrals_wall_amplitude = 0.;
 
-    DiffusiveNeutralSolver const fluidsolver(
+    SameGridFluidSolver const fluidsolver(
             charge_exchange,
             ionisation,
             recombination,
@@ -267,7 +262,6 @@ static void TestKineticFluidCoupling()
     PredCorrHybrid const predcorr_hybrid(vlasov, fluidsolver, poisson, kineticfluidcoupling);
     predcorr_hybrid(allfdistribu, fluid_moments, time_start, deltat, nb_iter);
 
-    auto allfdistribu_host = ddc::create_mirror_view_and_copy(allfdistribu);
     auto fluid_moments_host = ddc::create_mirror_view_and_copy(fluid_moments);
 
     // analytical solution

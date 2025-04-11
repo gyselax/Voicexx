@@ -14,10 +14,10 @@ public:
     /**
      * @brief Operator for solving the Boltzmann-Poisson-fluid system.
      * @param[in, out] allfdistribu On input : the initial value of the distribution function.
-     *                              On output : the value of the distribution function after solving 
+     *                              On output : the value of the distribution function after solving
      *                              the Boltzmann-Poisson-fluid system a given number of iterations.
      * @param[in, out] fluid_moments On input : a field referencing the fluid species.
-     *                               On output : the fluid species after solving 
+     *                               On output : the fluid species after solving
      *                               the Boltzmann-Poisson-fluid system a given number of iterations.
      * @param[in] time_start The physical time at the start of the simulation.
      * @param[in] dt The timestep.

@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
-#include <cmath>
 
 #include <ddc/ddc.hpp>
+#include <ddc/pdi.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include <pdi.h>
 
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"

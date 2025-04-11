@@ -1,22 +1,16 @@
 // SPDX-License-Identifier: MIT
-#include <cmath>
 
 #include <ddc/ddc.hpp>
-#include <ddc/kernels/splines.hpp>
+#include <ddc/pdi.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <pdi.h>
-
 #include "charge_exchange.hpp"
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "diffusiveneutralsolver.hpp"
 #include "geometry.hpp"
 #include "ionisation.hpp"
-#include "maxwellianequilibrium.hpp"
-#include "quadrature.hpp"
 #include "recombination.hpp"
 #include "species_info.hpp"
 
@@ -107,9 +101,6 @@ static void TestDiffusiveNeutralsRateCoefficients()
     ddc::parallel_fill(moments_init, 1.);
     ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
-
-    DFieldMemSpMomX derivative_alloc(get_idx_range(neutrals));
-    DFieldSpMomX derivative = get_field(derivative_alloc);
 
     DFieldMemSpX kinsp_density_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
     DFieldMemSpX kinsp_velocity_alloc(IdxRangeSpX(idx_range_kinsp, meshX));

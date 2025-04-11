@@ -1,19 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-#include <cmath>
-#include <cstdio>
-
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
 #include "ddc_alias_inline_functions.hpp"
+#include "diffgridsfluidsolver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
-#include "pressurediffusionsolver.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
 
-PressureDiffusionSolver::PressureDiffusionSolver(
+DiffGridsFluidSolver::DiffGridsFluidSolver(
         IReactionRate const& charge_exchange,
         IReactionRate const& ionisation,
         IReactionRate const& recombination,
@@ -36,7 +33,7 @@ PressureDiffusionSolver::PressureDiffusionSolver(
 {
 }
 
-IdxSp PressureDiffusionSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
+IdxSp DiffGridsFluidSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
 {
     bool ion_found = false;
     IdxSp iion;
@@ -54,7 +51,7 @@ IdxSp PressureDiffusionSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
     return iion;
 }
 
-void PressureDiffusionSolver::get_derivative(
+void DiffGridsFluidSolver::get_derivative(
         DFieldSpMomXn dn,
         DConstFieldSpMomXn neutrals,
         DConstFieldSpX density,
@@ -227,7 +224,7 @@ void PressureDiffusionSolver::get_derivative(
             .with("n_eq_ui", n_eq_ui_host);
 }
 
-DFieldSpMomXn PressureDiffusionSolver::operator()(
+DFieldSpMomXn DiffGridsFluidSolver::operator()(
         DFieldSpMomXn const neutrals,
         DConstFieldSpXVx const allfdistribu,
         DConstFieldX const efield,
@@ -283,7 +280,7 @@ DFieldSpMomXn PressureDiffusionSolver::operator()(
 }
 
 // interpolate to the neutral grid
-void PressureDiffusionSolver::interpolate_on_neutral_grid(
+void DiffGridsFluidSolver::interpolate_on_neutral_grid(
         DFieldSpXn field_on_Xn,
         DConstFieldSpX field_on_X) const
 {

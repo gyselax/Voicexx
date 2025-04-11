@@ -14,7 +14,7 @@ public:
 
     /**
      * @brief Operator for computing the reaction rate from two Fields referencing density and temperature.
-     * 
+     *
      * @param[out] rate On input: the uninitialized value of a Field referencing a reaction rate.
      *                      On output: the value of reaction rate.
      * @param[in] density The density at which the reaction rate should be computed.

@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-#include <cmath>
-
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
@@ -9,13 +7,13 @@
 #include "geometry_neutrals.hpp"
 #include "gridneutralpredcorr.hpp"
 #include "iboltzmannsolver.hpp"
-#include "igridneutralfluidsolver.hpp"
+#include "ifluidsolver.hpp"
 #include "iplasmaneutralscoupling.hpp"
 #include "iqnsolver.hpp"
 
 GridNeutralPredCorr::GridNeutralPredCorr(
         IBoltzmannSolver const& boltzmann_solver,
-        IGridNeutralFluidSolver const& fluid_solver,
+        IFluidSolver<GridXNeutrals> const& fluid_solver,
         IQNSolver const& poisson_solver,
         IPlasmaNeutralsCoupling<GridXNeutrals> const& kinetic_fluid_coupling)
     : m_boltzmann_solver(boltzmann_solver)
