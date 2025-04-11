@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         fluid_init(neutrals);
 
     } else {
-        RestartInitialisationWithNeutrals const restart(iter_start, time_start);
+        RestartInitialisationWithNeutrals<GridX> const restart(iter_start, time_start);
         restart(get_field(allfdistribu), get_field(neutrals));
     }
     auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));
