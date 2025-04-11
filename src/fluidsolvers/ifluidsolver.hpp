@@ -3,13 +3,17 @@
 #pragma once
 
 #include "geometry.hpp"
-#include "geometry_neutrals.hpp"
 
 /**
- * @brief An abstract class for solving the transport of a fluid model on its own grid.
+ * @brief An abstract class for solving the transport of a fluid model on a given grid.
  */
-class IGridNeutralFluidSolver
+template <typename FluidGrid>
+class IFluidSolver
 {
+private:
+    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
+    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+
 public:
     /**
      * @brief Operator for solving the fluid model on one timestep.
@@ -21,9 +25,11 @@ public:
      * @param[in] dt The timestep.
      * @return a field referencing the fluid species after solving the fluid model on one timestep.
      */
-    virtual DFieldSpMomXn operator()(
-            DFieldSpMomXn fluid_moments,
+    virtual DFieldSpMomGrid operator()(
+            DFieldSpMomGrid fluid_moments,
             DConstFieldSpXVx allfdistribu,
             DConstFieldX efield,
             double dt) const = 0;
+
+    virtual ~IFluidSolver<FluidGrid>() = default;
 };

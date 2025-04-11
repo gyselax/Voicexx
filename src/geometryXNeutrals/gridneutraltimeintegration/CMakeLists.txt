@@ -20,9 +20,9 @@ target_link_libraries("gridneutraltimeintegration_${GEOMETRY_VARIANT}"
         gslx::poisson_${GEOMETRY_VARIANT}
         gslx::speciesinfo
         gslx::utils
+        voicexx::fluidsolver_${GEOMETRY_VARIANT}
         voicexx::geometry_neutrals_${GEOMETRY_VARIANT}
         voicexx::plasmaneutralscoupling_${GEOMETRY_VARIANT}
-        voicexx::gridneutralfluidsolver_${GEOMETRY_VARIANT}
 
 )
 

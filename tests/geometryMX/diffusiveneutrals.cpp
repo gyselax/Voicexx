@@ -1,21 +1,15 @@
 // SPDX-License-Identifier: MIT
-#include <cmath>
 
 #include <ddc/ddc.hpp>
-#include <ddc/kernels/splines.hpp>
+#include <ddc/pdi.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <pdi.h>
-
-#include "constantfluidinitialisation.hpp"
 #include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "diffusiveneutralsolver.hpp"
 #include "geometry.hpp"
-#include "maxwellianequilibrium.hpp"
-#include "quadrature.hpp"
+#include "samegridfluidsolver.hpp"
 #include "species_info.hpp"
 #include "trapezoid_quadrature.hpp"
 
@@ -151,7 +145,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
     double const neutrals_wall_amplitude = 0.;
 
     // Initialisation of the neutral solver
-    DiffusiveNeutralSolver const neutralsolver(
+    SameGridFluidSolver const neutralsolver(
             charge_exchange,
             ionisation,
             recombination,

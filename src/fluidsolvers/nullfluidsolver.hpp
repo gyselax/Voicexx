@@ -2,22 +2,34 @@
 #pragma once
 
 #include "geometry.hpp"
-#include "geometry_neutrals.hpp"
-#include "igridneutralfluidsolver.hpp"
+#include "ifluidsolver.hpp"
 
 /**
  * @brief A dummy class that solves a fluid model.
  * The fluid model leaves the moments of the fluid species unchanged.
  */
-class NullGridNeutralSolver : public IGridNeutralFluidSolver
+template <typename FluidGrid>
+class NullFluidSolver : public IFluidSolver<FluidGrid>
 {
+private:
+    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
+    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+
 public:
     /**
      * @brief The constructor for the class.
      *
      * @param[in] idx_range_fluidsp The moments index range on which the fluid species is defined.
      */
-    explicit NullGridNeutralSolver(IdxRangeSp const& idx_range_fluidsp);
+    explicit NullFluidSolver(IdxRangeSp const& idx_range_fluidsp)
+    {
+        // charged fluid species is not allowed for now
+        for (IdxSp const isp : idx_range_fluidsp) {
+            if (charge(isp) != 0.) {
+                throw std::runtime_error("Neutrals charge should be zero");
+            }
+        }
+    }
 
     /**
      * @brief Solves a dummy fluid model on a timestep dt.
@@ -29,9 +41,12 @@ public:
      * @param[in] dt The timestep.
      * @return a field referencing the fluid species after solving the dummy fluid model on one timestep.
      */
-    DFieldSpMomXn operator()(
-            DFieldSpMomXn fluid_moments,
+    DFieldSpMomGrid operator()(
+            DFieldSpMomGrid fluid_moments,
             DConstFieldSpXVx allfdistribu,
             DConstFieldX efield,
-            double dt) const override;
+            double dt) const override
+    {
+        return fluid_moments;
+    }
 };

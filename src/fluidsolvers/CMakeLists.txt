@@ -2,16 +2,16 @@
 
 foreach(GEOMETRY_VARIANT IN LISTS GEOMETRY_XVx_VARIANTS_LIST)
 
-add_library("gridneutralfluidsolver_${GEOMETRY_VARIANT}" STATIC
-    pressurediffusionsolver.cpp
-    nullgridneutralfluidsolver.cpp
+add_library("fluidsolver_${GEOMETRY_VARIANT}" STATIC
+    samegridfluidsolver.cpp
+    diffgridsfluidsolver.cpp
 )
 
-target_include_directories("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
+target_include_directories("fluidsolver_${GEOMETRY_VARIANT}"
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-target_link_libraries("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
+target_link_libraries("fluidsolver_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
         gslx::geometry_${GEOMETRY_VARIANT}
@@ -25,6 +25,6 @@ target_link_libraries("gridneutralfluidsolver_${GEOMETRY_VARIANT}"
         voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
 
-add_library("voicexx::gridneutralfluidsolver_${GEOMETRY_VARIANT}" ALIAS "gridneutralfluidsolver_${GEOMETRY_VARIANT}")
+add_library("voicexx::fluidsolver_${GEOMETRY_VARIANT}" ALIAS "fluidsolver_${GEOMETRY_VARIANT}")
 
 endforeach()

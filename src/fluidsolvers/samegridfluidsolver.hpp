@@ -3,38 +3,38 @@
 #pragma once
 
 #include "geometry.hpp"
-#include "ifluidtransportsolver.hpp"
+#include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"
 
 /**
  * @brief A class that solves a so-called "pressure-diffusive" fluid neutral model.
- * 
- * The equation of the model that describes the evolution of the density of 
+ *
+ * The equation of the model that describes the evolution of the density of
  * neutrals can be written in dimensional units as
- *  
+ *
  * @f$\partial_t n_n + \partial_x (n_{n,eq} u_i - D_p T_n \partial_x n_n) = S_n, @f$
- * 
- * where @f$n_n(x,t)@f$ is the time and space dependent neutral density, @f$T_n@f$ is the 
- * temperature of neutrals (considered constant) and @f$u_i(x)@f$ is the ion fluid velocity. 
- * 
- * In the above equation the following definitions are used: 
- * 
+ *
+ * where @f$n_n(x,t)@f$ is the time and space dependent neutral density, @f$T_n@f$ is the
+ * temperature of neutrals (considered constant) and @f$u_i(x)@f$ is the ion fluid velocity.
+ *
+ * In the above equation the following definitions are used:
+ *
  * @f$n_{n,eq} = \frac{n_i n_e K_r + n_n n_i K_{cx}}{n_i K_{cx} + n_e K_i}@f$
- * 
+ *
  * and
- * 
+ *
  * @f$D_p = \frac{1}{m_n (n_i K_{cx} + n_e K_i)}@f$
- * 
+ *
  * where @f$n_i@f$ (resp. @f$n_e@f$) is the ion (resp. electron) density and @f$m_n@f$ stands
- * for the mass of neutrals. The @f$K_i@f$, @f$K_r@f$ and @f$K_{cx}@f$ coefficients 
+ * for the mass of neutrals. The @f$K_i@f$, @f$K_r@f$ and @f$K_{cx}@f$ coefficients
  * represent the reaction rates of ionisation, recombination and charge-exchange reactions.
- * 
- * The density source term @f$S_n@f$ is 
- * 
+ *
+ * The density source term @f$S_n@f$ is
+ *
  * @f$S_n = n_i n_e K_r - n_n n_e K_i.@f$
- * 
- * The pressure-diffusive equation is normalised to the relevant normalisation quantities 
- * of the geometryXVx folder: 
+ *
+ * The pressure-diffusive equation is normalised to the relevant normalisation quantities
+ * of the geometryXVx folder:
  * - densities to a reference density @f$n_0@f$;
  * - temperatures to a reference temperature @f$T_0@f$;
  * - time normalised to the electron plasma frequency @f$\omega_{pe0} = \sqrt{n_0 e^2/(m_e \varepsilon_0)}@f$;
@@ -42,20 +42,20 @@
  * - ion mean velocity to the ion thermal velocity @f$v_{Ti0} = \sqrt{T_0/m_i}@f$;
  * - reaction rates to a reference rate @f$K_0@f$;
  * - masses to the electron mass @f$m_e@f$.
- * 
- * With these conventions the pressure-diffusive equation can be written with all quantities 
+ *
+ * With these conventions the pressure-diffusive equation can be written with all quantities
  * normalised as
- * 
+ *
  * @f$\partial_t n_n + \partial_x (\sqrt{\frac{m_e}{m_i}}n_{n,eq} u_i - \alpha_0 D_p T_n \partial_x n_n) = \alpha_0^{-1} S_n, @f$
- * 
+ *
  * Where @f$\alpha_0@f$ is a normalisation coefficient equal to @f$\alpha_0 = \omega_{pe0}/(n_0 K_0)@f$.
  * All the terms that appear in this normalised equation keep the same expression as when writing
  * the dimensional form of the model, except that quantities involved are normalised.
- * 
+ *
  * The pressure-diffusive model is solved using a RK2 time integrator.
- * Spatial derivatives are computed using splines polynomials. 
+ * Spatial derivatives are computed using splines polynomials.
  */
-class DiffusiveNeutralSolver : public IFluidTransportSolver
+class SameGridFluidSolver : public IFluidSolver<GridX>
 {
 private:
     IReactionRate const& m_charge_exchange;
@@ -89,7 +89,7 @@ public:
      * @param[in] mask_amplitude The amplitude of the wall for the neutrals
      * @param[in] gridx The grid on which to construct the wall
      */
-    DiffusiveNeutralSolver(
+    SameGridFluidSolver(
             IReactionRate const& charge_exchange,
             IReactionRate const& ionisation,
             IReactionRate const& recombination,
@@ -102,12 +102,10 @@ public:
             double const mask_amplitude,
             IdxRangeX const& gridx);
 
-    ~DiffusiveNeutralSolver() override = default;
-
     /**
-     * @brief Updates the neutral fluid moments according to the pressure-diffusive neutral model. 
-     * 
-     * Within the pressure-diffusive model only the neutral density is evolved thus it is the 
+     * @brief Updates the neutral fluid moments according to the pressure-diffusive neutral model.
+     *
+     * Within the pressure-diffusive model only the neutral density is evolved thus it is the
      * only fluid moments we consider.
      *
      * @param[inout] neutrals The fluid moments describing the neutrals.
@@ -124,13 +122,13 @@ public:
             double dt) const override;
 
     /**
-     * @brief Computes the expression of the time derivative of the neutral fluid moments. 
-     * 
-     * The expression of the time derivative is given by the equation of the pressure-diffusive 
+     * @brief Computes the expression of the time derivative of the neutral fluid moments.
+     *
+     * The expression of the time derivative is given by the equation of the pressure-diffusive
      * neutral model, that is to say
-     * 
+     *
      * @f$\partial_t n_n = - \partial_x (n_{n,eq} u_i - D_p T_n \partial_x n_n) + S_n@f$
-     * 
+     *
      * This function is used by the time integrator (RK2 for instance).
      *
      * @param[inout] dn The time derivative of neutral fluid moments.

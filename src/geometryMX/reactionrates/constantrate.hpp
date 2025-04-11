@@ -15,7 +15,7 @@ private:
 public:
     /**
      * @brief Creates an instance of the ConstantRate class.
-     * @param[in] value The constant value of the reaction rate. 
+     * @param[in] value The constant value of the reaction rate.
      */
     ConstantRate(double const value);
 
@@ -23,7 +23,7 @@ public:
 
     /**
      * @brief Operator for computing the reaction rate.
-     * 
+     *
      * @param[out] rate On input: the uninitialized value of a Field referencing a reaction rate.
      *                      On output: the field referencing a constant reaction rate.
      * @param[in] density A field referencing the density.

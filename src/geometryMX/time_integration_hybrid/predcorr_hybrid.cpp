@@ -4,13 +4,13 @@
 #include <ddc/pdi.hpp>
 
 #include "iboltzmannsolver.hpp"
-#include "ifluidtransportsolver.hpp"
+#include "ifluidsolver.hpp"
 #include "iqnsolver.hpp"
 #include "predcorr_hybrid.hpp"
 
 PredCorrHybrid::PredCorrHybrid(
         IBoltzmannSolver const& boltzmann_solver,
-        IFluidTransportSolver const& fluid_solver,
+        IFluidSolver<GridX> const& fluid_solver,
         IQNSolver const& poisson_solver,
         IPlasmaNeutralsCoupling<GridX> const& kinetic_fluid_coupling)
     : m_boltzmann_solver(boltzmann_solver)

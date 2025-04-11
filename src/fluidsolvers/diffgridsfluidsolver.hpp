@@ -4,7 +4,7 @@
 
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
-#include "igridneutralfluidsolver.hpp"
+#include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"
 
 /**
@@ -50,7 +50,7 @@
  * The pressure-diffusive model is solved using a RK2 time integrator.
  * Spatial derivatives are computed using splines polynomials.
  */
-class PressureDiffusionSolver : public IGridNeutralFluidSolver
+class DiffGridsFluidSolver : public IFluidSolver<GridXNeutrals>
 {
 private:
     IReactionRate const& m_charge_exchange;
@@ -82,7 +82,7 @@ public:
      * @param[in] interpolator_from_X_to_Xn A one-dimensional spline evaluator with splines on X which can be evaluated on Xn
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      */
-    PressureDiffusionSolver(
+    DiffGridsFluidSolver(
             IReactionRate const& charge_exchange,
             IReactionRate const& ionisation,
             IReactionRate const& recombination,

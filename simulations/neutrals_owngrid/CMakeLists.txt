@@ -20,10 +20,10 @@ target_link_libraries(neutrals_owngrid_${GEOMETRY_VARIANT}
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::rhs_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
+        voicexx::fluidsolver_${GEOMETRY_VARIANT}
         voicexx::geometry_neutrals_${GEOMETRY_VARIANT}
         voicexx::gridneutralrestartinit_${GEOMETRY_VARIANT}
         voicexx::gridneutralfluidinit_${GEOMETRY_VARIANT}
-        voicexx::gridneutralfluidsolver_${GEOMETRY_VARIANT}
         voicexx::gridneutraltimeintegration_${GEOMETRY_VARIANT}
 
         paraconf::paraconf

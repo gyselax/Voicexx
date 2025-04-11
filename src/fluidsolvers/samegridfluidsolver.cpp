@@ -3,17 +3,12 @@
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
-#include <pdi.h>
-
-#include "ddc/create_mirror.hpp"
-
-#include "Kokkos_Core.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "diffusiveneutralsolver.hpp"
 #include "mask_tanh.hpp"
 #include "rk2.hpp"
+#include "samegridfluidsolver.hpp"
 
-DiffusiveNeutralSolver::DiffusiveNeutralSolver(
+SameGridFluidSolver::SameGridFluidSolver(
         IReactionRate const& charge_exchange,
         IReactionRate const& ionisation,
         IReactionRate const& recombination,
@@ -53,7 +48,7 @@ DiffusiveNeutralSolver::DiffusiveNeutralSolver(
     ddc::expose_to_pdi("krook_neutrals_mask", mask_host);
 }
 
-IdxSp DiffusiveNeutralSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
+IdxSp SameGridFluidSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
 {
     bool ion_found = false;
     IdxSp iion;
@@ -71,7 +66,7 @@ IdxSp DiffusiveNeutralSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
     return iion;
 }
 
-void DiffusiveNeutralSolver::get_derivative(
+void SameGridFluidSolver::get_derivative(
         DFieldSpMomX dn,
         DConstFieldSpMomX neutrals,
         DConstFieldSpX density,
@@ -238,13 +233,13 @@ void DiffusiveNeutralSolver::get_derivative(
             .with("convection_term", conv_term_host);
 }
 
-DFieldSpMomX DiffusiveNeutralSolver::operator()(
+DFieldSpMomX SameGridFluidSolver::operator()(
         DFieldSpMomX const neutrals,
         DConstFieldSpXVx const allfdistribu,
         DConstFieldX const efield,
         double const dt) const
 {
-    Kokkos::Profiling::pushRegion("DiffusiveNeutralSolver");
+    Kokkos::Profiling::pushRegion("SameGridFluidSolver");
     RK2<DFieldMemSpMomX> timestepper(get_idx_range(neutrals));
 
     // moments computation
