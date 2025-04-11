@@ -21,7 +21,7 @@ target_link_libraries("gridneutraltimeintegration_${GEOMETRY_VARIANT}"
         gslx::speciesinfo
         gslx::utils
         voicexx::geometry_neutrals_${GEOMETRY_VARIANT}
-        voicexx::gridneutralcoupling_${GEOMETRY_VARIANT}
+        voicexx::plasmaneutralscoupling_${GEOMETRY_VARIANT}
         voicexx::gridneutralfluidsolver_${GEOMETRY_VARIANT}
 
 )

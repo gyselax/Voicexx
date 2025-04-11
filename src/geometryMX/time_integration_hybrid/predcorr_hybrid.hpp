@@ -3,13 +3,12 @@
 #pragma once
 
 #include "geometry.hpp"
-#include "ikineticfluidcoupling.hpp"
+#include "iplasmaneutralscoupling.hpp"
 #include "itimesolver_hybrid.hpp"
 
 class IQNSolver;
 class IBoltzmannSolver;
 class IFluidTransportSolver;
-class IKineticFluidCoupling;
 
 /**
  * @brief A class that solves a Boltzmann-Poisson system of equations coupled to a fluid particles model using a predictor-corrector scheme.
@@ -33,7 +32,7 @@ private:
 
     IQNSolver const& m_poisson_solver;
 
-    IKineticFluidCoupling const& m_kinetic_fluid_coupling;
+    IPlasmaNeutralsCoupling<GridX> const& m_kinetic_fluid_coupling;
 
 public:
     /**
@@ -47,7 +46,7 @@ public:
             IBoltzmannSolver const& boltzmann_solver,
             IFluidTransportSolver const& fluid_solver,
             IQNSolver const& poisson_solver,
-            IKineticFluidCoupling const& kinetic_fluid_coupling);
+            IPlasmaNeutralsCoupling<GridX> const& kinetic_fluid_coupling);
 
     ~PredCorrHybrid() override = default;
 

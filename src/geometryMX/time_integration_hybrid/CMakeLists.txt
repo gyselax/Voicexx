@@ -20,7 +20,7 @@ target_link_libraries("time_integration_hybrid_${GEOMETRY_VARIANT}"
         gslx::speciesinfo
         gslx::utils
         voicexx::fluidsolver_${GEOMETRY_VARIANT}
-        voicexx::fluidrhs_${GEOMETRY_VARIANT}
+        voicexx::plasmaneutralscoupling_${GEOMETRY_VARIANT}
 
 )
 

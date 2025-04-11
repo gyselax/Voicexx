@@ -19,10 +19,9 @@
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
-#include "ikineticfluidcoupling.hpp"
-#include "kinetic_fluid_coupling_source.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
+#include "noenergytransfercoupling.hpp"
 #include "nullfluidsolver.hpp"
 #include "predcorr.hpp"
 #include "predcorr_hybrid.hpp"
@@ -231,7 +230,7 @@ TEST(GeometryXM, PredCorrHybrid)
     // kinetic fluid coupling term
     double const neutrals_wall_extent = 0.;
     double const neutrals_wall_stiffness = 1.;
-    KineticFluidCouplingSource const kineticfluidcoupling(
+    NoEnergyExchangeCoupling const kineticfluidcoupling(
             1.0,
             0.0,
             0.0,

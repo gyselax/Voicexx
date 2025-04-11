@@ -28,13 +28,13 @@
 #include "input.hpp"
 #include "ionisation.hpp"
 #include "irighthandside.hpp"
-#include "kinetic_fluid_coupling_source.hpp"
 #include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
 #include "krook_source_constant.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals.yml.hpp"
+#include "noenergytransfercoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "pdi_out_neutrals.yml.hpp"
@@ -298,7 +298,7 @@ int main(int argc, char** argv)
             neutrals_wall_amplitude,
             mesh_x);
 
-    KineticFluidCouplingSource const kineticfluidcoupling(
+    NoEnergyExchangeCoupling const kineticfluidcoupling(
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.momentum_coupling_coeff"),
             PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.energy_coupling_coeff"),

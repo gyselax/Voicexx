@@ -52,7 +52,7 @@
 #include "gridneutralconstantinit.hpp"
 #include "gridneutralpredcorr.hpp"
 #include "gridneutralrestartinit.hpp"
-#include "nullgridneutralcoupling.hpp"
+#include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
 #include "pressurediffusionsolver.hpp"
 
@@ -324,7 +324,7 @@ int main(int argc, char** argv)
     }
 
     // for the moment we don't have any coupling
-    NullGridNeutralCoupling const kineticfluidcoupling;
+    NullPlasmaNeutralsCoupling<GridXNeutrals> const kineticfluidcoupling;
 
     GridNeutralPredCorr const
             predcorr(boltzmann, *ptr_neutral_solver, poisson, kineticfluidcoupling);
