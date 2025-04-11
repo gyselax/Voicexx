@@ -5,9 +5,9 @@
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
 #include "iboltzmannsolver.hpp"
-#include "igridneutralcoupling.hpp"
 #include "igridneutralfluidsolver.hpp"
 #include "igridneutraltimesolver.hpp"
+#include "iplasmaneutralscoupling.hpp"
 #include "iqnsolver.hpp"
 
 /**
@@ -33,7 +33,7 @@ private:
 
     IQNSolver const& m_poisson_solver;
 
-    IGridNeutralCoupling const& m_kinetic_fluid_coupling;
+    IPlasmaNeutralsCoupling<GridXNeutrals> const& m_kinetic_fluid_coupling;
 
 public:
     /**
@@ -47,7 +47,7 @@ public:
             IBoltzmannSolver const& boltzmann_solver,
             IGridNeutralFluidSolver const& fluid_solver,
             IQNSolver const& poisson_solver,
-            IGridNeutralCoupling const& kinetic_fluid_coupling);
+            IPlasmaNeutralsCoupling<GridXNeutrals> const& kinetic_fluid_coupling);
 
     /**
      * @brief Solves the Boltzmann-Poisson-fluid system.

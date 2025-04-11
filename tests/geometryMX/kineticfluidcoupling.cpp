@@ -22,9 +22,9 @@
 #include "geometry.hpp"
 #include "ionisation.hpp"
 #include "irighthandside.hpp"
-#include "kinetic_fluid_coupling_source.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
+#include "noenergytransfercoupling.hpp"
 #include "predcorr.hpp"
 #include "predcorr_hybrid.hpp"
 #include "qnsolver.hpp"
@@ -248,7 +248,7 @@ static void TestKineticFluidCoupling()
             meshX);
 
     // kinetic fluid coupling term
-    KineticFluidCouplingSource const kineticfluidcoupling(
+    NoEnergyExchangeCoupling const kineticfluidcoupling(
             1.,
             0.,
             0.,

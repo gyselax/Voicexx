@@ -3,6 +3,5 @@
 add_subdirectory(fluidinitialisation)
 add_subdirectory(fluidtransportsolver)
 add_subdirectory(reactionrates)
-add_subdirectory(kineticfluidcoupling)
 add_subdirectory(restartinitialisation)
 add_subdirectory(time_integration_hybrid)

@@ -4,6 +4,5 @@ The `geometryMX` folder contains all the code describing methods which are speci
 
 - [fluidinitialisation](./fluidinitialisation/README.md) : Initialisation methods for fluid species. 
 - [fluidtransportsolver](./fluidtransportsolver/README.md) : Solver for fluid models transport.
-- [kineticfluidcoupling](./kineticfluidcoupling/README.md) : Solver for sources in fluid and kinetic equations. 
 - [reactionrates](./reactionrates/README.md) : Reaction rate calculations.
 - [restartinitialisation](./restartinitialisation/README.md) : Restart a simulation with neutrals.

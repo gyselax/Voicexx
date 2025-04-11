@@ -9,15 +9,15 @@
 #include "geometry_neutrals.hpp"
 #include "gridneutralpredcorr.hpp"
 #include "iboltzmannsolver.hpp"
-#include "igridneutralcoupling.hpp"
 #include "igridneutralfluidsolver.hpp"
+#include "iplasmaneutralscoupling.hpp"
 #include "iqnsolver.hpp"
 
 GridNeutralPredCorr::GridNeutralPredCorr(
         IBoltzmannSolver const& boltzmann_solver,
         IGridNeutralFluidSolver const& fluid_solver,
         IQNSolver const& poisson_solver,
-        IGridNeutralCoupling const& kinetic_fluid_coupling)
+        IPlasmaNeutralsCoupling<GridXNeutrals> const& kinetic_fluid_coupling)
     : m_boltzmann_solver(boltzmann_solver)
     , m_fluid_solver(fluid_solver)
     , m_poisson_solver(poisson_solver)

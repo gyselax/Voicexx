@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-#include <cmath>
-
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
@@ -14,7 +12,7 @@ PredCorrHybrid::PredCorrHybrid(
         IBoltzmannSolver const& boltzmann_solver,
         IFluidTransportSolver const& fluid_solver,
         IQNSolver const& poisson_solver,
-        IKineticFluidCoupling const& kinetic_fluid_coupling)
+        IPlasmaNeutralsCoupling<GridX> const& kinetic_fluid_coupling)
     : m_boltzmann_solver(boltzmann_solver)
     , m_fluid_solver(fluid_solver)
     , m_poisson_solver(poisson_solver)

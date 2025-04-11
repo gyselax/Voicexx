@@ -1,12 +1,12 @@
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
-#include "kinetic_fluid_coupling_source.hpp"
 #include "mask_tanh.hpp"
+#include "noenergytransfercoupling.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
 
-KineticFluidCouplingSource::KineticFluidCouplingSource(
+NoEnergyExchangeCoupling::NoEnergyExchangeCoupling(
         double const density_coupling_coeff,
         double const momentum_coupling_coeff,
         double const energy_coupling_coeff,
@@ -41,7 +41,7 @@ KineticFluidCouplingSource::KineticFluidCouplingSource(
             m_energy_coupling_coeff);
 }
 
-IdxSp KineticFluidCouplingSource::find_ion(IdxRangeSp const dom_kinsp) const
+IdxSp NoEnergyExchangeCoupling::find_ion(IdxRangeSp const dom_kinsp) const
 {
     bool ion_found = false;
     IdxSp iion;
@@ -58,7 +58,7 @@ IdxSp KineticFluidCouplingSource::find_ion(IdxRangeSp const dom_kinsp) const
     return iion;
 }
 
-void KineticFluidCouplingSource::get_source_term(
+void NoEnergyExchangeCoupling::get_source_term(
         DFieldX density_source_neutral,
         DConstFieldSpX kinsp_density,
         DConstFieldSpMomX neutrals,
@@ -83,7 +83,7 @@ void KineticFluidCouplingSource::get_source_term(
             });
 }
 
-void KineticFluidCouplingSource::get_derivative_neutrals(
+void NoEnergyExchangeCoupling::get_derivative_neutrals(
         DFieldSpMomX dn,
         DConstFieldSpMomX neutrals,
         DConstFieldX density_source_neutral) const
@@ -95,8 +95,6 @@ void KineticFluidCouplingSource::get_derivative_neutrals(
     double const normalisation_coeff_alpha0(m_normalisation_coeff);
     // build rhs of diffusive model equation
     DConstFieldX mask(get_field(m_mask));
-    IdxRangeSpMom const dom_msp(get_idx_range<Species, GridMom>(neutrals));
-    IdxSpMom ineutral(dom_msp.front());
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             dom_fluidspx,
@@ -107,7 +105,7 @@ void KineticFluidCouplingSource::get_derivative_neutrals(
             });
 }
 
-void KineticFluidCouplingSource::get_derivative_allfdistribu(
+void NoEnergyExchangeCoupling::get_derivative_allfdistribu(
         DFieldSpXVx df,
         DConstFieldSpXVx allfdistribu,
         DConstFieldSpXVx velocity_shape_source) const
@@ -125,7 +123,7 @@ void KineticFluidCouplingSource::get_derivative_allfdistribu(
             });
 }
 
-void KineticFluidCouplingSource::operator()(
+void NoEnergyExchangeCoupling::operator()(
         DFieldSpXVx const allfdistribu,
         DFieldSpMomX neutrals,
         double const dt) const
