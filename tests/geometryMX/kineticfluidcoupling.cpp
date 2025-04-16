@@ -168,7 +168,7 @@ static void TestKineticFluidCoupling()
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 0.);
-    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
 
 #ifdef PERIODIC_RDIMX

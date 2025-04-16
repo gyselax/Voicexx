@@ -5,11 +5,16 @@
 
 /**
  * @brief An abstract class that allows for initialising a fluid species.
+ * The template is used to precise the grid on which the species should be initialised.
  */
+template <typename FluidGrid>
 class IFluidInitialisation
 {
 public:
     virtual ~IFluidInitialisation() = default;
+
+    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
+    using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
 
     /**
      * @brief Operator for initialising a neutral species.
@@ -17,5 +22,5 @@ public:
      *                                 On output: the initialised fluid species.
      * @return A field referencing the initialised fluid species.
      */
-    virtual DFieldSpMomX operator()(DFieldSpMomX fluid_moments) const = 0;
+    virtual DFieldSpMomGrid operator()(DFieldSpMomGrid fluid_moments) const = 0;
 };

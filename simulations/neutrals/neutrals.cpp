@@ -142,7 +142,7 @@ int main(int argc, char** argv)
                     (isp - idx_range_fluidsp.front()).value());
             ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
         }
-        ConstantFluidInitialisation fluid_init(get_const_field(moments_init_host));
+        ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init_host));
         fluid_init(neutrals);
 
     } else {

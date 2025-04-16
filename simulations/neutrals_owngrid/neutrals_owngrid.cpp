@@ -22,6 +22,7 @@
 #include "chargedensitycalculator.hpp"
 #include "collisions_inter.hpp"
 #include "collisions_intra.hpp"
+#include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
@@ -50,7 +51,6 @@
 
 // used for the fact that we have a different grid for the neutrals
 #include "diffgridsfluidsolver.hpp"
-#include "gridneutralconstantinit.hpp"
 #include "gridneutralpredcorr.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
                     (isp - idx_range_fluidsp.front()).value());
             ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
         }
-        GridNeutralConstantInit fluid_init(get_const_field(moments_init_host));
+        ConstantFluidInitialisation<GridXNeutrals> fluid_init(get_const_field(moments_init_host));
         fluid_init(neutrals);
 
     } else {
