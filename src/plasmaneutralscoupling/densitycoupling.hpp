@@ -4,8 +4,8 @@
 #include "ddc_aliases.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
-#include "igridneutralcoupling.hpp"
-#include "ireactionrate_gridneutral.hpp"
+#include "iplasmaneutralscoupling.hpp"
+#include "ireactionrate.hpp"
 
 /**
  * @brief A class that describes a source of particles due to neutrals.
@@ -24,14 +24,14 @@
  *
  * The complete description of the operator can be found in [rhs docs](https://github.com/gyselax/gyselalibxx/blob/main/doc/geometryXVx/kinetic_source.pdf).
  */
-class GridNeutralDensityCoupling : public IGridNeutralCoupling
+class DensityCoupling : public IPlasmaNeutralsCoupling<GridXNeutrals>
 {
 private:
     double const m_density_coupling_coeff;
     double const m_momentum_coupling_coeff;
     double const m_energy_coupling_coeff;
-    IGridNeutralReactionRate const& m_ionization;
-    IGridNeutralReactionRate const& m_recombination;
+    IReactionRate const& m_ionization;
+    IReactionRate const& m_recombination;
     double const m_mean_free_path;
     DConstFieldVx const m_quadrature_coeffs;
 
@@ -53,12 +53,12 @@ public:
      * @param[in] mask_stiffnes The stiffnes of the mask for the neutrals fluid.
      * @param[in] gridx The grid on which to construct the wall.
      */
-    GridNeutralDensityCoupling(
+    DensityCoupling(
             double density_coupling_coeff,
             double momentum_coupling_coeff,
             double energy_coupling_coeff,
-            IGridNeutralReactionRate const& ionization,
-            IGridNeutralReactionRate const& recombination,
+            IReactionRate const& ionization,
+            IReactionRate const& recombination,
             SplineXBuilder_1d const& spline_builder_on_X,
             SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
             double const mean_free_path,

@@ -2,19 +2,19 @@
 #include <ddc/pdi.hpp>
 
 #include "ddc_alias_inline_functions.hpp"
+#include "densitycoupling.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
-#include "gridneutraldensitycoupling.hpp"
-#include "ireactionrate_gridneutral.hpp"
+#include "ireactionrate.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
 
-GridNeutralDensityCoupling::GridNeutralDensityCoupling(
+DensityCoupling::DensityCoupling(
         double const density_coupling_coeff,
         double const momentum_coupling_coeff,
         double const energy_coupling_coeff,
-        IGridNeutralReactionRate const& ionization,
-        IGridNeutralReactionRate const& recombination,
+        IReactionRate const& ionization,
+        IReactionRate const& recombination,
         SplineXBuilder_1d const& spline_builder_on_X,
         SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
         double const mean_free_path,
@@ -40,7 +40,7 @@ GridNeutralDensityCoupling::GridNeutralDensityCoupling(
             m_energy_coupling_coeff);
 }
 
-IdxSp GridNeutralDensityCoupling::find_ion(IdxRangeSp const dom_kinsp) const
+IdxSp DensityCoupling::find_ion(IdxRangeSp const dom_kinsp) const
 {
     bool ion_found = false;
     IdxSp iion;
@@ -57,7 +57,7 @@ IdxSp GridNeutralDensityCoupling::find_ion(IdxRangeSp const dom_kinsp) const
     return iion;
 }
 
-void GridNeutralDensityCoupling::get_source_term(
+void DensityCoupling::get_source_term(
         DFieldSpXn density_source_neutral,
         DConstFieldSpX kinsp_density,
         DConstFieldSpMomXn neutrals,
@@ -95,7 +95,7 @@ void GridNeutralDensityCoupling::get_source_term(
                                     * recombination_onXn(ispxn);
             });
 }
-void GridNeutralDensityCoupling::get_plasma_source(
+void DensityCoupling::get_plasma_source(
         DFieldSpXVx plasma_source,
         DConstFieldSpX kinsp_temperature,
         DConstFieldSpXn neutral_density_source_on_Xn) const
@@ -135,7 +135,7 @@ void GridNeutralDensityCoupling::get_plasma_source(
             });
 }
 
-void GridNeutralDensityCoupling::get_derivative_neutrals(
+void DensityCoupling::get_derivative_neutrals(
         DFieldSpMomXn dn,
         DConstFieldSpMomXn neutrals,
         DConstFieldSpXn density_source_neutral,
@@ -153,7 +153,7 @@ void GridNeutralDensityCoupling::get_derivative_neutrals(
             });
 }
 
-void GridNeutralDensityCoupling::get_derivative_allfdistribu(
+void DensityCoupling::get_derivative_allfdistribu(
         DFieldSpXVx df,
         DConstFieldSpXVx allfdistribu,
         DConstFieldSpXVx velocity_shape_source) const
@@ -164,7 +164,7 @@ void GridNeutralDensityCoupling::get_derivative_allfdistribu(
             KOKKOS_LAMBDA(IdxSpXVx const ispxvx) { df(ispxvx) = velocity_shape_source(ispxvx); });
 }
 
-void GridNeutralDensityCoupling::operator()(
+void DensityCoupling::operator()(
         DFieldSpXVx const allfdistribu,
         DFieldSpMomXn neutrals,
         double const dt) const
@@ -292,9 +292,8 @@ void GridNeutralDensityCoupling::operator()(
 }
 
 // interpolate to the neutral grid
-void GridNeutralDensityCoupling::interpolate_on_neutral_grid(
-        DFieldSpXn field_on_Xn,
-        DConstFieldSpX field_on_X) const
+void DensityCoupling::interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X)
+        const
 {
     SplineX_GridXnEvaluator interpolator = m_interpolator_from_X_to_Xn;
     ddc::for_each(get_idx_range<Species>(field_on_X), [&](IdxSp const isp) {

@@ -23,12 +23,13 @@
 #include "collisions_intra.hpp"
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
+#include "densitycoupling.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
-#include "igridneutralcoupling.hpp"
 #include "input.hpp"
+#include "iplasmaneutralscoupling.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
@@ -37,7 +38,7 @@
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals_owngrid.yml.hpp"
 #include "nullfluidsolver.hpp"
-#include "nullplasmaneutralcoupling.hpp"
+#include "nullplasmaneutralscoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "qnsolver.hpp"
@@ -53,6 +54,7 @@
 #include "diffgridsfluidsolver.hpp"
 #include "ionisation.hpp"
 #include "densitycoupling.hpp"
+#include "diffgridsfluidsolver.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
 #include "predcorr_hybrid.hpp"
@@ -268,8 +270,9 @@ int main(int argc, char** argv)
     SplitVlasovSolver const vlasov(advection_x, advection_vx);
     SplitRightHandSideSolver const boltzmann(vlasov, rhs_operators);
 
-    DFieldMemVx const quadrature_coeffs_alloc(neumann_spline_quadrature_coefficients<
-                                              Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx));
+    DFieldMemVx const quadrature_coeffs_alloc(
+            neumann_spline_quadrature_coefficients<
+                    Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx));
     ChargeDensityCalculator rhs(get_const_field(quadrature_coeffs_alloc));
 
     // Create the objects needed for the Poisson solver. These objects must not go out of scope
@@ -341,20 +344,20 @@ int main(int argc, char** argv)
 
     // depending if we want the plasma and the neutrals to exchange,
     // we choose the coupling
-    std::unique_ptr<IGridNeutralCoupling> ptr_kinfluidcoupling;
+    std::unique_ptr<IPlasmaNeutralsCoupling<GridXNeutrals>> ptr_kinfluidcoupling;
     if (PCpp_bool(conf_voicexx, ".KineticFluidCoupling.on")) {
-        ptr_kinfluidcoupling = std::make_unique<GridNeutralDensityCoupling>(
+        ptr_kinfluidcoupling = std::make_unique<DensityCoupling>(
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.density_coupling_coeff"),
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.momentum_coupling_coeff"),
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.energy_coupling_coeff"),
-                ionization,
+                ionisation,
                 recombination,
                 spline_builder_on_X,
                 interpolator_from_X_to_Xn,
                 mean_free_path,
                 get_const_field(quadrature_coeffs_alloc));
     } else {
-        ptr_kinfluidcoupling = std::make_unique<NullGridNeutralCoupling>();
+        ptr_kinfluidcoupling = std::make_unique<NullPlasmaNeutralsCoupling<GridXNeutrals>>();
     }
 
     PredCorrHybrid<GridXNeutrals> const
@@ -380,7 +383,8 @@ int main(int argc, char** argv)
             ddc::discrete_space<Species>().masses()[idx_range_fluidsp]);
     ddc::expose_to_pdi("temperature_normalisation", temperature_normalisation);
     ddc::expose_to_pdi("density_normalisation", density_normalisation);
-    ddc::expose_to_pdi("k_cx_0", charge_exchange.get_Kcx0());
+    // uncomment when reaction rates are merged
+    // ddc::expose_to_pdi("k_cx_0", charge_exchange.get_Kcx0());
     ddc::expose_to_pdi("mean_free_path", mean_free_path);
     ddc::PdiEvent("initial_state").with("fdistribu_eq", allfequilibrium_host);
 
