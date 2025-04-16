@@ -173,7 +173,7 @@ TEST(GeometryXM, PredCorrHybrid)
     ddc::parallel_fill(moments_init[iflux], 0.);
     ddc::parallel_fill(moments_init[istress], 1.);
 
-    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
 
 #ifdef PERIODIC_RDIMX

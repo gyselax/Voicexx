@@ -99,7 +99,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 1.);
-    ConstantFluidInitialisation fluid_init(get_const_field(moments_init));
+    ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
 
     DFieldMemSpX kinsp_density_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
