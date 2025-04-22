@@ -70,15 +70,22 @@ private:
     IdxSp find_ion(IdxRangeSp const idx_range_kinsp) const;
 
 public:
+    /**
+     * @brief Interpolate a field from GridX to GridXNeutral.
+     * @param[out] field_on_Xn The field interpolated
+     * @param[in] field_on_X The field to interpolate
+     */
     void interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X) const;
+
     /**
      * @brief Creates an instance of the DiffusiveNeutralSolver class.
      * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
      * @param[in] ionisation An object that represents ionisation reaction rate.
+     * @param[in] recombination An object that represents recombination reaction rate.
      * @param[in] mean_free_path The mean free path between two charge-exchange reactions.
-     * @param[in] spline_x_builder_on_Xn A one-dimensional spline builder on GridNeutrals
-     * @param[in] spline_x_evaluator_on_Xn A one-dimensional spline evaluator on GridNeutrals
-     * @param[in] spline_x_builder_on_X A one-dimensional spline builder on GridX
+     * @param[in] spline_builder_on_Xn A one-dimensional spline builder on GridNeutrals
+     * @param[in] spline_evaluator_on_Xn A one-dimensional spline evaluator on GridNeutrals
+     * @param[in] spline_builder_on_X A one-dimensional spline builder on GridX
      * @param[in] interpolator_from_X_to_Xn A one-dimensional spline evaluator with splines on X which can be evaluated on Xn
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      */
@@ -90,7 +97,7 @@ public:
             SplineXNeutralsBuilder const& spline_builder_on_Xn,
             SplineXn_GridXnEvaluator const& spline_evaluator_on_Xn,
             SplineXBuilder_1d const& spline_builder_on_X,
-            SplineX_GridXnEvaluator const& intepolator_from_X_to_Xn,
+            SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
             DConstFieldVx const& quadrature_coeffs);
 
     /**
@@ -118,7 +125,7 @@ public:
      * The expression of the time derivative is given by the equation of the pressure-diffusive
      * neutral model, that is to say
      *
-     * @f$\partial_t n_n = - \partial_x (n_{n,eq} u_i - D_p T_n \partial_x n_n)
+     * @f$\partial_t n_n = - \partial_x (n_{n,eq} u_i - D_p T_n \partial_x n_n)@f$
      *
      * This function is used by the time integrator (RK2 for instance).
      *
