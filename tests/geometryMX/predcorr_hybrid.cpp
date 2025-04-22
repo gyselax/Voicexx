@@ -59,12 +59,8 @@ TEST(GeometryXM, PredCorrHybrid)
     IdxRangeVx meshVx(SplineInterpPointsVx::get_domain<GridVx>());
     IdxRangeXVx meshXVx(meshX, meshVx);
 
-    SplineXBuilder const builder_x(meshXVx);
-#ifndef PERIODIC_RDIMX
-    SplineXBuilder_1d const builder_x_poisson(meshX);
-#endif
-    SplineVxBuilder const builder_vx(meshXVx);
-    SplineVxBuilder_1d const builder_vx_poisson(meshVx);
+    SplineXBuilder const builder_x(meshX);
+    SplineVxBuilder const builder_vx(meshVx);
 
     // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
@@ -186,10 +182,8 @@ TEST(GeometryXM, PredCorrHybrid)
 
     // Creating operators
     SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
-#ifndef PERIODIC_RDIMX
-    SplineXEvaluator_1d const spline_x_evaluator_poisson(bv_x_min, bv_x_max);
-#endif
-    PreallocatableSplineInterpolator const spline_x_interpolator(builder_x, spline_x_evaluator);
+    PreallocatableSplineInterpolator const
+            spline_x_interpolator(builder_x, spline_x_evaluator, meshXVx);
 
     IdxStepVx static constexpr gwvx {0};
     LagrangeInterpolator<GridVx, BCond::DIRICHLET, BCond::DIRICHLET, GridX, GridVx> const
@@ -207,13 +201,13 @@ TEST(GeometryXM, PredCorrHybrid)
     SplitVlasovSolver const vlasov(advection_x, advection_vx);
 
     DFieldMemVx const quadrature_coeffs = neumann_spline_quadrature_coefficients<
-            Kokkos::DefaultExecutionSpace>(meshVx, builder_vx_poisson);
+            Kokkos::DefaultExecutionSpace>(meshVx, builder_vx);
 
     ChargeDensityCalculator rhs(get_const_field(quadrature_coeffs));
 #ifdef PERIODIC_RDIMX
     FFTPoissonSolver<IdxRangeX> poisson_solver(meshX);
 #else
-    FEM1DPoissonSolver const poisson_solver(builder_x_poisson, spline_x_evaluator_poisson);
+    FEM1DPoissonSolver const poisson_solver(builder_x, spline_x_evaluator);
 #endif
     QNSolver const poisson(poisson_solver, rhs);
 

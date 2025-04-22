@@ -98,9 +98,8 @@ int main(int argc, char** argv)
     IdxRangeXVx const meshXVx(mesh_x, mesh_vx); //merging the two
 
     // Initialisation of the spline builders
-    SplineXBuilder const builder_x(meshXVx);
-    SplineVxBuilder const builder_vx(meshXVx);
-    SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
+    SplineXBuilder const builder_x(mesh_x);
+    SplineVxBuilder const builder_vx(mesh_vx);
 
     IdxRangeSp idx_range_kinsp;
     IdxRangeSp idx_range_fluidsp;
@@ -174,8 +173,10 @@ int main(int argc, char** argv)
     ddc::ConstantExtrapolationRule<Vx> bv_vx_min(ddc::coordinate(mesh_vx.front()));
     ddc::ConstantExtrapolationRule<Vx> bv_vx_max(ddc::coordinate(mesh_vx.back()));
     SplineVxEvaluator const spline_vx_evaluator(bv_vx_min, bv_vx_max);
-    PreallocatableSplineInterpolator const spline_x_interpolator(builder_x, spline_x_evaluator);
-    PreallocatableSplineInterpolator const spline_vx_interpolator(builder_vx, spline_vx_evaluator);
+    PreallocatableSplineInterpolator const
+            spline_x_interpolator(builder_x, spline_x_evaluator, meshXVx);
+    PreallocatableSplineInterpolator const
+            spline_vx_interpolator(builder_vx, spline_vx_evaluator, meshXVx);
 
     BslAdvectionSpatial<GeometryXVx, GridX> const advection_x(spline_x_interpolator);
     BslAdvectionVelocity<GeometryXVx, GridVx> const advection_vx(spline_vx_interpolator);
@@ -248,9 +249,8 @@ int main(int argc, char** argv)
     SplitVlasovSolver const vlasov(advection_x, advection_vx);
     SplitRightHandSideSolver const boltzmann(vlasov, rhs_operators);
 
-    DFieldMemVx const quadrature_coeffs_alloc(
-            neumann_spline_quadrature_coefficients<
-                    Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx_poisson));
+    DFieldMemVx const quadrature_coeffs_alloc(neumann_spline_quadrature_coefficients<
+                                              Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx));
     ChargeDensityCalculator rhs(get_const_field(quadrature_coeffs_alloc));
 
     // Create the objects needed for the Poisson solver. These objects must not go out of scope
@@ -258,9 +258,7 @@ int main(int argc, char** argv)
 #if defined(PERIODIC_RDIMX) && !defined(INPUT_MESH)
     FFTPoissonSolver<IdxRangeX, IdxRangeX, Kokkos::DefaultExecutionSpace> poisson_solver(mesh_x);
 #else
-    SplineXBuilder_1d const builder_x_poisson(mesh_x);
-    SplineXEvaluator_1d const spline_x_evaluator_poisson(bv_x_min, bv_x_max);
-    FEM1DPoissonSolver poisson_solver(builder_x_poisson, spline_x_evaluator_poisson);
+    FEM1DPoissonSolver poisson_solver(builder_x, spline_x_evaluator);
 #endif
     QNSolver const poisson(poisson_solver, rhs);
 
@@ -275,9 +273,6 @@ int main(int argc, char** argv)
     IonisationRate ionisation(norm_coeff_rate);
     RecombinationRate recombination(norm_coeff_rate);
 
-    SplineXBuilder_1d const spline_x_builder_neutrals(mesh_x);
-    SplineXEvaluator_1d const spline_x_evaluator_neutrals(bv_x_min, bv_x_max);
-
     DFieldMemVx const quadrature_coeffs_neutrals(
             trapezoid_quadrature_coefficients<Kokkos::DefaultExecutionSpace>(mesh_vx));
 
@@ -290,8 +285,8 @@ int main(int argc, char** argv)
             ionisation,
             recombination,
             normalisation_coeff,
-            spline_x_builder_neutrals,
-            spline_x_evaluator_neutrals,
+            builder_x,
+            spline_x_evaluator,
             get_const_field(quadrature_coeffs_neutrals),
             neutrals_wall_extent,
             neutrals_wall_stiffness,

@@ -17,7 +17,7 @@ DiffGridsFluidSolver::DiffGridsFluidSolver(
         double const mean_free_path,
         SplineXNeutralsBuilder const& spline_builder_on_Xn,
         SplineXn_GridXnEvaluator const& spline_evaluator_on_Xn,
-        SplineXBuilder_1d const& spline_builder_on_X,
+        SplineXBuilder const& spline_builder_on_X,
         SplineX_GridXnEvaluator const& intepolator_from_X_to_Xn,
         DConstFieldVx const& quadrature_coeffs)
 
