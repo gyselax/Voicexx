@@ -44,8 +44,6 @@ static void TestDiffusiveNeutralsRateCoefficients()
     ddc::init_discrete_space<GridVx>(SplineInterpPointsVx::get_sampling<GridVx>());
 
     IdxRangeX meshX(SplineInterpPointsX::get_domain<GridX>());
-    IdxRangeVx meshVx(SplineInterpPointsVx::get_domain<GridVx>());
-    IdxRangeXVx meshXVx(meshX, meshVx);
 
     // Kinetic and neutral species index range initialisation
     IdxStepSp const nb_kinspecies(2);

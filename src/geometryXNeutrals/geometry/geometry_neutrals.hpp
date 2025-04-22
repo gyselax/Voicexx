@@ -31,8 +31,7 @@ using SplineXNeutralsBuilder = ddc::SplineBuilder<
         GridXNeutrals,
         SplineXNeutralsBoundary,
         SplineXNeutralsBoundary,
-        ddc::SplineSolver::LAPACK,
-        GridXNeutrals>;
+        ddc::SplineSolver::LAPACK>;
 using SplineXn_GridXnEvaluator = ddc::SplineEvaluator<
         Kokkos::DefaultExecutionSpace,
         Kokkos::DefaultExecutionSpace::memory_space,
@@ -40,12 +39,12 @@ using SplineXn_GridXnEvaluator = ddc::SplineEvaluator<
         GridXNeutrals,
 #ifdef PERIODIC_RDIMX
         ddc::PeriodicExtrapolationRule<X>,
-        ddc::PeriodicExtrapolationRule<X>,
+        ddc::PeriodicExtrapolationRule<X>
 #else
         ddc::ConstantExtrapolationRule<X>,
-        ddc::ConstantExtrapolationRule<X>,
+        ddc::ConstantExtrapolationRule<X>
 #endif
-        GridXNeutrals>;
+        >;
 
 using SplineX_GridXnEvaluator = ddc::SplineEvaluator<
         Kokkos::DefaultExecutionSpace,
@@ -54,12 +53,12 @@ using SplineX_GridXnEvaluator = ddc::SplineEvaluator<
         GridXNeutrals,
 #ifdef PERIODIC_RDIMX
         ddc::PeriodicExtrapolationRule<X>,
-        ddc::PeriodicExtrapolationRule<X>,
+        ddc::PeriodicExtrapolationRule<X>
 #else
         ddc::ConstantExtrapolationRule<X>,
-        ddc::ConstantExtrapolationRule<X>,
+        ddc::ConstantExtrapolationRule<X>
 #endif
-        GridXNeutrals>;
+        >;
 
 
 using IdxXn = Idx<GridXNeutrals>;
