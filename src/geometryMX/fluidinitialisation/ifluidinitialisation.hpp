@@ -10,11 +10,12 @@
 template <typename FluidGrid>
 class IFluidInitialisation
 {
-public:
-    virtual ~IFluidInitialisation() = default;
-
+private:
     using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
     using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
+
+public:
+    virtual ~IFluidInitialisation() = default;
 
     /**
      * @brief Operator for initialising a neutral species.

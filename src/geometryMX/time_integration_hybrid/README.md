@@ -9,7 +9,7 @@ Code for time integrators that solves a Boltzmann-Poisson system for the electro
 - Using the distribution function at time $t+\Delta t$, solve Quasi-Neutrality equation for the electrostatic potential at time $t+\Delta t$;
 - Solve the fluid model for the fluid species fluid moments at time $t+\Delta t$.
 
-For more information about the Boltzmann-Poisson time integrator, see [time\_integration](./../time_integration/README.md).
+For more information about the Boltzmann-Poisson time integrator, see [timestepper](https://github.com/gyselax/gyselalibxx/src/timestepper/README.md).
 
 The implemented time integrators that take into account fluid species are:
 - PredCorrHybrid

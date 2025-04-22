@@ -85,7 +85,7 @@ public:
      * @param[in] spline_x_evaluator A one-dimensional spline evaluator.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      * @param[in] mask_extent The extent of the wall for the neutrals
-     * @param[in] mask_stiffnes The stiffness of the wall for the neutrals
+     * @param[in] mask_stiffness The stiffness of the wall for the neutrals
      * @param[in] mask_amplitude The amplitude of the wall for the neutrals
      * @param[in] gridx The grid on which to construct the wall
      */
