@@ -105,12 +105,8 @@ int main(int argc, char** argv)
     IdxRangeXVx const meshXVx(mesh_x, mesh_vx); //merging the two
 
     // Initialisation of the spline builders
-    SplineXBuilder const builder_x(meshXVx);
-    SplineVxBuilder const builder_vx(meshXVx);
-    SplineVxBuilder_1d const builder_vx_poisson(mesh_vx);
-
-    // this one is used to map quantities from the plasma mesh to the neutral mesh
-    SplineXBuilder_1d const spline_builder_on_X(mesh_x);
+    SplineXBuilder const builder_x(mesh_x);
+    SplineVxBuilder const builder_vx(mesh_vx);
 
     // Initialise the two IdxRangeSp for kinetic species and fluid species
     IdxRangeSp idx_range_kinsp;
@@ -185,19 +181,19 @@ int main(int argc, char** argv)
     ddc::PeriodicExtrapolationRule<X> bv_x_min;
     ddc::PeriodicExtrapolationRule<X> bv_x_max;
     SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
-    SplineXEvaluator_1d const plasma_evaluator(bv_x_min, bv_x_max);
 #else
     ddc::ConstantExtrapolationRule<X> bv_x_min(ddc::coordinate(mesh_x.front()));
     ddc::ConstantExtrapolationRule<X> bv_x_max(ddc::coordinate(mesh_x.back()));
     SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
-    SplineXEvaluator_1d const plasma_evaluator(bv_x_min, bv_x_max);
 #endif
 
     ddc::ConstantExtrapolationRule<Vx> bv_vx_min(ddc::coordinate(mesh_vx.front()));
     ddc::ConstantExtrapolationRule<Vx> bv_vx_max(ddc::coordinate(mesh_vx.back()));
     SplineVxEvaluator const spline_vx_evaluator(bv_vx_min, bv_vx_max);
-    PreallocatableSplineInterpolator const spline_x_interpolator(builder_x, spline_x_evaluator);
-    PreallocatableSplineInterpolator const spline_vx_interpolator(builder_vx, spline_vx_evaluator);
+    PreallocatableSplineInterpolator const
+            spline_x_interpolator(builder_x, spline_x_evaluator, meshXVx);
+    PreallocatableSplineInterpolator const
+            spline_vx_interpolator(builder_vx, spline_vx_evaluator, meshXVx);
 
     BslAdvectionSpatial<GeometryXVx, GridX> const advection_x(spline_x_interpolator);
     BslAdvectionVelocity<GeometryXVx, GridVx> const advection_vx(spline_vx_interpolator);
@@ -269,9 +265,8 @@ int main(int argc, char** argv)
     SplitVlasovSolver const vlasov(advection_x, advection_vx);
     SplitRightHandSideSolver const boltzmann(vlasov, rhs_operators);
 
-    DFieldMemVx const quadrature_coeffs_alloc(
-            neumann_spline_quadrature_coefficients<
-                    Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx_poisson));
+    DFieldMemVx const quadrature_coeffs_alloc(neumann_spline_quadrature_coefficients<
+                                              Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx));
     ChargeDensityCalculator rhs(get_const_field(quadrature_coeffs_alloc));
 
     // Create the objects needed for the Poisson solver. These objects must not go out of scope
@@ -279,9 +274,7 @@ int main(int argc, char** argv)
 #if defined(PERIODIC_RDIMX) && !defined(INPUT_MESH)
     FFTPoissonSolver<IdxRangeX, IdxRangeX, Kokkos::DefaultExecutionSpace> poisson_solver(mesh_x);
 #else
-    SplineXBuilder_1d const builder_x_poisson(mesh_x);
-    SplineXEvaluator_1d const spline_x_evaluator_poisson(bv_x_min, bv_x_max);
-    FEM1DPoissonSolver poisson_solver(builder_x_poisson, spline_x_evaluator_poisson);
+    FEM1DPoissonSolver poisson_solver(builder_x, spline_x_evaluator);
 #endif
     QNSolver const poisson(poisson_solver, rhs);
 
@@ -316,7 +309,7 @@ int main(int argc, char** argv)
                 mean_free_path,
                 spline_builder_on_Xn,
                 spline_evaluator_on_Xn,
-                spline_builder_on_X,
+                builder_x,
                 interpolator_from_X_to_Xn,
                 get_const_field(quadrature_coeffs_neutrals));
     } else {

@@ -27,7 +27,7 @@ TEST(GeometryXM, KineticFluidSpecies)
     ddc::init_discrete_space<GridX>(SplineInterpPointsX::get_sampling<GridX>());
 
     IdxRangeX meshX(SplineInterpPointsX::get_domain<GridX>());
-    SplineXBuilder_1d const builder_x(meshX);
+    SplineXBuilder const builder_x(meshX);
 
     // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);
@@ -115,7 +115,7 @@ TEST(GeometryXM, KineticFluidAdiabaticSpecies)
     ddc::init_discrete_space<GridX>(SplineInterpPointsX::get_sampling<GridX>());
 
     IdxRangeX meshX(SplineInterpPointsX::get_domain<GridX>());
-    SplineXBuilder_1d const builder_x(meshX);
+    SplineXBuilder const builder_x(meshX);
 
     // Kinetic species index range initialisation
     IdxStepSp const nb_kinspecies(2);

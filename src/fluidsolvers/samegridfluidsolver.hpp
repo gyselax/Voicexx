@@ -64,8 +64,8 @@ private:
 
     double const m_normalisation_coeff;
 
-    SplineXBuilder_1d const& m_spline_x_builder;
-    SplineXEvaluator_1d const& m_spline_x_evaluator;
+    SplineXBuilder const& m_spline_x_builder;
+    SplineXEvaluator const& m_spline_x_evaluator;
 
     DConstFieldVx const m_quadrature_coeffs;
 
@@ -94,8 +94,8 @@ public:
             IReactionRate const& ionisation,
             IReactionRate const& recombination,
             double const normalisation_coeff,
-            SplineXBuilder_1d const& spline_x_builder,
-            SplineXEvaluator_1d const& spline_x_evaluator,
+            SplineXBuilder const& spline_x_builder,
+            SplineXEvaluator const& spline_x_evaluator,
             DConstFieldVx const& quadrature_coeffs,
             double const mask_extent,
             double const mask_stiffness,
