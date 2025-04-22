@@ -51,9 +51,9 @@
 
 // used for the fact that we have a different grid for the neutrals
 #include "diffgridsfluidsolver.hpp"
-#include "gridneutralpredcorr.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
+#include "predcorr_hybrid.hpp"
 #include "restartinitialisationwithneutrals.hpp"
 
 using std::chrono::steady_clock;
@@ -319,7 +319,7 @@ int main(int argc, char** argv)
     // for the moment we don't have any coupling
     NullPlasmaNeutralsCoupling<GridXNeutrals> const kineticfluidcoupling;
 
-    GridNeutralPredCorr const
+    PredCorrHybrid<GridXNeutrals> const
             predcorr(boltzmann, *ptr_neutral_solver, poisson, kineticfluidcoupling);
 
     // Starting the code

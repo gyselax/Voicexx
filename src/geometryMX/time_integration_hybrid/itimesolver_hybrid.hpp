@@ -6,8 +6,13 @@
 /**
  * @brief An abstract class for solving a Boltzmann-Poisson system of equations coupled to a fluid model.
  */
+template <typename FluidGrid>
 class ITimeSolverHybrid
 {
+private:
+    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
+    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+
 public:
     virtual ~ITimeSolverHybrid() = default;
 
@@ -26,7 +31,7 @@ public:
      */
     virtual DFieldSpXVx operator()(
             DFieldSpXVx allfdistribu,
-            DFieldSpMomX fluid_moments,
+            DFieldSpMomGrid fluid_moments,
             double time_start,
             double dt,
             int steps = 1) const = 0;

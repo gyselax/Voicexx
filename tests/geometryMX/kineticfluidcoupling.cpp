@@ -250,7 +250,7 @@ static void TestKineticFluidCoupling()
     int const nb_iter(20);
     double const deltat(0.1);
 
-    PredCorrHybrid const predcorr_hybrid(vlasov, fluidsolver, poisson, kineticfluidcoupling);
+    PredCorrHybrid<GridX> const predcorr_hybrid(vlasov, fluidsolver, poisson, kineticfluidcoupling);
     predcorr_hybrid(allfdistribu, fluid_moments, time_start, deltat, nb_iter);
 
     auto fluid_moments_host = ddc::create_mirror_view_and_copy(fluid_moments);
