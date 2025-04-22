@@ -46,7 +46,7 @@ public:
      * @param[in] normalisation_coeff The normalisation coefficient of neutrals.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      * @param[in] mask_extent The extent of the mask for the neutrals fluid.
-     * @param[in] mask_stiffnes The stiffnes of the mask for the neutrals fluid.
+     * @param[in] mask_stiffness The stiffnes of the mask for the neutrals fluid.
      * @param[in] gridx The grid on which to construct the wall.
      */
     NoEnergyExchangeCoupling(

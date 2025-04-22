@@ -13,7 +13,7 @@
 template <typename FluidGrid>
 class ConstantFluidInitialisation : public IFluidInitialisation<FluidGrid>
 {
-public:
+private:
     using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
     using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
     using IdxSpMomGrid = Idx<Species, GridMom, FluidGrid>;
@@ -23,7 +23,7 @@ private:
 
 public:
     /**
-     * @brief A broadcast function used to initialise the fluid density.
+     * @brief A broadcast function used to initialise the fluid moments.
      * We only need this because of a nvcc bug.
      */
 
@@ -34,12 +34,21 @@ public:
         DConstFieldSpMom m_moments;
 
     public:
+        /** @brief Create an instance of BroadcastFn
+         *
+         * @param[in] fluid_moments The field to initialise.
+         * @param[in] moments The values it should be initialised with.
+         */
         BroadcastFn(DFieldSpMomGrid const fluid_moments, DConstFieldSpMom const moments)
             : m_fluid_moments(fluid_moments)
             , m_moments(moments)
         {
         }
 
+        /** @brief Initialise the fluid moments at a given index
+         *
+         * @param[in] ispmx The index we are looking at
+         */
         KOKKOS_FUNCTION void operator()(IdxSpMomGrid const ispmx) const
         {
             IdxSpMom ispm(ispmx);
@@ -56,8 +65,6 @@ public:
     {
         ddc::parallel_deepcopy(get_field(m_moments_alloc), moments);
     }
-
-    ~ConstantFluidInitialisation() override = default;
 
     /**
      * @brief Initialises the fluid species with a constant moments.

@@ -25,10 +25,11 @@ private:
     int m_iter_start; /* iteration number to perform the restart from */
     double& m_time_start; /* corresponding simulation time */
 
-public:
+private:
     using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
     using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
 
+public:
     /**
      * @brief Create an initialisation object.
      * @param[in] iter_start An integer representing the number of iteration already performed
@@ -47,7 +48,7 @@ public:
      * @brief Triggers a PDI event to fill the distribution function with values from a hdf5 file.
      * @param[out] allfdistribu The distribution function initialised with the values
      *                          read from an external file.
-     * @param[out] fluidmoments The fluid moments initialised with the values
+     * @param[out] fluid_moments The fluid moments initialised with the values
      *                          read from an external file.
      * @return The initialised distribution function.
      */
