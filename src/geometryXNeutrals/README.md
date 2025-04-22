@@ -4,4 +4,3 @@ The `geometryXNeutrals` folder contains all the code describing methods which ar
 It is broken up into the following sub-folders:
 
 - [geometry](./geometry/README.md) : Aliases to work with this new grid.
-- [gridneutraltimeintegration](./gridneutraltimeintegration/README.md) : The time integration on gridXNeutrals

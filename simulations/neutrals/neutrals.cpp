@@ -305,7 +305,7 @@ int main(int argc, char** argv)
             neutrals_wall_stiffness,
             mesh_x);
 
-    PredCorrHybrid const predcorr(boltzmann, neutralsolver, poisson, kineticfluidcoupling);
+    PredCorrHybrid<GridX> const predcorr(boltzmann, neutralsolver, poisson, kineticfluidcoupling);
 
     // Starting the code
     ddc::expose_to_pdi("Nx_spline_cells", ddc::discrete_space<BSplinesX>().ncells());
