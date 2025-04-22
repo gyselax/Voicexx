@@ -5,3 +5,4 @@ The `geometryMX` folder contains all the code describing methods which are speci
 - [fluidinitialisation](./fluidinitialisation/README.md) : Initialisation methods for fluid species.
 - [fluidrestart](./fluidrestart/README.md) : Restart a simulation with neutrals.
 - [reactionrates](./reactionrates/README.md) : Reaction rate calculations.
+- [time\_integration\_hybrid](./time_integration_hybrid/README.md) : Time steppers for plasma with a neutral fluid
