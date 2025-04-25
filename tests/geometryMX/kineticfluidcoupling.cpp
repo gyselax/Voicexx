@@ -16,6 +16,7 @@
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "ionisation.hpp"
 #include "irighthandside.hpp"
 #include "maxwellianequilibrium.hpp"
@@ -155,7 +156,8 @@ static void TestKineticFluidCoupling()
 
     // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
-    IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
+    IdxRangeMom const meshM(GeometryMX::density_idx, nb_fluid_moments);
+    assert(GeometryMX::is_valid(meshM));
     ddc::init_discrete_space<GridMom>();
 
     // Initialisation of fluid species moments

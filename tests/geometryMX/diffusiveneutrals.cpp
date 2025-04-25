@@ -9,6 +9,7 @@
 #include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "samegridfluidsolver.hpp"
 #include "species_info.hpp"
 #include "trapezoid_quadrature.hpp"
@@ -110,7 +111,8 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
     // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
-    IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
+    IdxRangeMom const meshM(GeometryMX::density_idx, nb_fluid_moments);
+    assert(GeometryMX::is_valid(meshM));
     ddc::init_discrete_space<GridMom>();
 
     // Neutral species initialisation

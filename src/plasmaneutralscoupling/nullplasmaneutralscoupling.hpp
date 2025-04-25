@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 #include <cmath>
+#include <stdexcept>
 
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "iplasmaneutralscoupling.hpp"
 
 /**
@@ -35,5 +37,8 @@ public:
     void operator()(DFieldSpXVx const allfdistribu, DFieldSpMomGrid const neutrals, double const dt)
             const override
     {
+        if (!GeometryMX::is_valid(ddc::get_domain<GridMom>(neutrals))) {
+            throw std::runtime_error("Fluid moments not valid");
+        }
     }
 };

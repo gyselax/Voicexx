@@ -1,6 +1,7 @@
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
+#include "geometry_moments.hpp"
 #include "mask_tanh.hpp"
 #include "noenergytransfercoupling.hpp"
 #include "rk2.hpp"
@@ -131,6 +132,11 @@ void NoEnergyExchangeCoupling::operator()(
     Kokkos::Profiling::pushRegion("KineticFluidCouplingSource");
     RK2<DFieldMemSpMomX> timestepper_neutrals(get_idx_range(neutrals));
     RK2<DFieldMemSpXVx> timestepper_kinetic(get_idx_range(allfdistribu));
+
+    // check if we have the right moments for the neutrals
+    if (!GeometryMX::is_only_density(ddc::get_domain<GridMom>(neutrals))) {
+        throw std::runtime_error("Fluid moments not valid");
+    }
 
     // useful params and index ranges
     IdxSp const iion(find_ion(get_idx_range<Species>(allfdistribu)));

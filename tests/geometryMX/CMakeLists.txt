@@ -30,6 +30,7 @@ target_link_libraries(unit_tests_geometryMX_${GEOMETRY_VARIANT}
         gslx::utils_${GEOMETRY_VARIANT}
         voicexx::fluidinitialisation_${GEOMETRY_VARIANT}
         voicexx::fluidsolver_${GEOMETRY_VARIANT}
+        voicexx::geometry_moments_${GEOMETRY_VARIANT}
         voicexx::time_integration_hybrid_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
 )

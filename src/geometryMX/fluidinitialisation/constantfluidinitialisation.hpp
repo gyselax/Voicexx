@@ -4,6 +4,7 @@
 
 #include "ddc_alias_inline_functions.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "ifluidinitialisation.hpp"
 
 /**
@@ -64,6 +65,9 @@ public:
         : m_moments_alloc(get_idx_range(moments))
     {
         ddc::parallel_deepcopy(get_field(m_moments_alloc), moments);
+        if (!GeometryMX::is_valid(ddc::get_domain<GridMom>(m_moments_alloc))) {
+            throw std::runtime_error("Invalid moments for the fluid species");
+        }
     }
 
     /**

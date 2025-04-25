@@ -12,6 +12,7 @@ target_link_libraries("fluidinitialisation_${GEOMETRY_VARIANT}" INTERFACE
         DDC::core
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::utils
+        voicexx::geometry_moments_${GEOMETRY_VARIANT}
 
 )
 
