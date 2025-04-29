@@ -18,7 +18,6 @@
 
 #include "bsl_advection_vx.hpp"
 #include "bsl_advection_x.hpp"
-#include "charge_exchange.hpp"
 #include "chargedensitycalculator.hpp"
 #include "collisions_inter.hpp"
 #include "collisions_intra.hpp"
@@ -29,7 +28,6 @@
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
 #include "input.hpp"
-#include "ionisation.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
@@ -41,7 +39,6 @@
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "qnsolver.hpp"
-#include "recombination.hpp"
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
@@ -50,10 +47,13 @@
 #include "splitvlasovsolver.hpp"
 
 // used for the fact that we have a different grid for the neutrals
+#include "charge_exchange.hpp"
 #include "diffgridsfluidsolver.hpp"
+#include "ionisation.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
 #include "predcorr_hybrid.hpp"
+#include "recombination.hpp"
 #include "restartinitialisationwithneutrals.hpp"
 
 using std::chrono::steady_clock;
@@ -280,15 +280,28 @@ int main(int argc, char** argv)
 
     // Initialisation of the neutrals
     double const mean_free_path = PCpp_double(conf_voicexx, ".DiffusiveSolver.mean_free_path");
-    double const reaction_scaling_factor
-            = PCpp_double(conf_voicexx, ".DiffusiveSolver.reaction_scaling_factor");
     double const temperature_normalisation = PCpp_double(conf_voicexx, ".DiffusiveSolver.T_0");
     double const density_normalisation = PCpp_double(conf_voicexx, ".DiffusiveSolver.n_0");
 
     // The CX coefficient needs to be first constructed in order to write a correct initstate file. Check pdi_out_neutrals.yml.hpp for a closer look.
-    ChargeExchangeRate charge_exchange(reaction_scaling_factor);
-    IonisationRate ionisation(reaction_scaling_factor);
-    RecombinationRate recombination(reaction_scaling_factor);
+    ChargeExchangeRate charge_exchange(density_normalisation, temperature_normalisation);
+    IonisationRate ionisation(
+            density_normalisation,
+            temperature_normalisation,
+            charge_exchange.get_Kcx0());
+    RecombinationRate recombination(
+            density_normalisation,
+            temperature_normalisation,
+            charge_exchange.get_Kcx0());
+    printf(" <====================================================>\n"
+           " The K_{cx,0} taken for this simulation is %fe-14.\n"
+           " It has been computed from n_0=%e and T_0=%e.\n"
+           " However the L_{cx,0} taken is %e.\n"
+           " <====================================================>\n",
+           charge_exchange.get_Kcx0(),
+           density_normalisation,
+           temperature_normalisation,
+           mean_free_path);
 
     // splines to interpolate from one grid to another
     SplineXNeutralsBuilder const spline_builder_on_Xn(mesh_x_neutrals);
@@ -340,7 +353,6 @@ int main(int argc, char** argv)
     ddc::expose_to_pdi(
             "neutrals_masses",
             ddc::discrete_space<Species>().masses()[idx_range_fluidsp]);
-    ddc::expose_to_pdi("reaction_scaling_factor", reaction_scaling_factor);
     ddc::expose_to_pdi("temperature_normalisation", temperature_normalisation);
     ddc::expose_to_pdi("density_normalisation", density_normalisation);
     ddc::expose_to_pdi("mean_free_path", mean_free_path);
