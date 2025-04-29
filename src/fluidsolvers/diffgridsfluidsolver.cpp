@@ -7,6 +7,7 @@
 #include "diffgridsfluidsolver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "ireactionrate.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
 

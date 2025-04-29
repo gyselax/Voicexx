@@ -2,7 +2,6 @@
 #pragma once
 
 #include "geometry.hpp"
-#include "view.hpp"
 
 /**
  * @brief An abstract interface representing a reaction rate that depends on temperature and density.
@@ -10,8 +9,6 @@
 class IReactionRate
 {
 public:
-    virtual ~IReactionRate() = default;
-
     /**
      * @brief Operator for computing the reaction rate from two Fields referencing density and temperature.
      *

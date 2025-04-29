@@ -16,11 +16,8 @@
 
 
 /**
- * This test initialises a neutral density with a flat spatial profile 
- * and constant quantities for the kinetic plasma species densities, temperature, etc.
- * Then the time derivative of the diffusive neutral model is computed using the solver, 
- * and analytically. The two expressions for the derivative are compared and the relative 
- * difference between the two is checked to be within a percent.
+ * This test initialises a plasma and a fluid species with flat profiles,
+ * compute the reaction rates and compare them to an analytical solution.
 */
 static void TestDiffusiveNeutralsRateCoefficients()
 {
@@ -87,6 +84,16 @@ static void TestDiffusiveNeutralsRateCoefficients()
     ddc::init_discrete_space<GridMom>();
 
     IdxRangeSpX idx_range_fluidspx = IdxRangeSpX(idx_range_fluidsp, meshX);
+
+    {
+        // we verify that we recover the right k_cx_0
+        double const n_0 = 1e20;
+        double const T_0_test = 2.2704067636837;
+        double const precision = 1e-13;
+        ChargeExchangeRate const charge_exchange(n_0, T_0_test);
+        EXPECT_NEAR(charge_exchange.get_Kcx0(), 1., precision);
+    }
+
 
     ChargeExchangeRate charge_exchange(1.);
     IonisationRate ionisation(1.);
@@ -163,11 +170,40 @@ static void TestDiffusiveNeutralsRateCoefficients()
     EXPECT_NEAR(mean_i_rate, 1.130359390036803, 1e-13);
     EXPECT_NEAR(mean_r_rate, 7.638123065868132e-06, 1e-13);
 
+    { // we verify that the choice of normalisation does not change the result
+        double const n_0 = 1e20;
+        double const T_0 = 10;
+        // 13 and 7 are chosen randomly. It should never change the result.
+        ChargeExchangeRate const cx_rate1(n_0, T_0);
+        for (double n_factor = 1e-5; n_factor < 1e6; n_factor *= 10) {
+            for (double T_factor = 0.1; T_factor < 1e3; T_factor *= 10) {
+                ChargeExchangeRate const cx_rate2(n_factor * n_0, T_factor * T_0);
+                IdxSpX const origin(0, 0);
+                IdxRangeSpX const test_range(origin, IdxStep<Species, GridX>(1, 1));
+                DFieldMemSpX cx_result1_alloc(test_range);
+                DFieldSpX cx_result1(get_field(cx_result1_alloc));
+                DFieldMemSpX cx_result2_alloc(test_range);
+                DFieldSpX cx_result2(get_field(cx_result2_alloc));
+                auto result_1_host = ddc::create_mirror_view_and_copy(cx_result1);
+                auto result_2_host = ddc::create_mirror_view_and_copy(cx_result2);
+                cx_rate1(
+                        cx_result1,
+                        get_const_field(kinsp_density),
+                        get_const_field(kinsp_temperature));
+                cx_rate2(
+                        cx_result2,
+                        get_const_field(kinsp_density),
+                        get_const_field(kinsp_temperature));
+                EXPECT_NEAR(result_1_host(origin), result_2_host(origin), 1e-13);
+            }
+        }
+    }
+
     PC_tree_destroy(&conf_pdi);
     PDI_finalize();
 }
 
-TEST(GeometryMX, NeutralsRateCoefficients)
+TEST(ReactionRate, NeutralsRateCoefficients)
 {
     TestDiffusiveNeutralsRateCoefficients();
 }

@@ -43,7 +43,6 @@ NeutralSpeciesInfo:
 DiffusiveSolver:
   on: True
   mean_free_path: 10 # between two charge-exchange reactions
-  reaction_scaling_factor: 1.
   n_0: 1e20 # density of normalisation
   T_0: 10 # temperature of normalisation, in eV
 
