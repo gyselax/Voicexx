@@ -78,17 +78,17 @@ public:
     void interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X) const;
 
     /**
- * @brief Creates an instance of the DiffusiveNeutralSolver class.
- * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
- * @param[in] ionisation An object that represents ionisation reaction rate.
- * @param[in] recombination An object that represents recombination reaction rate.
- * @param[in] mean_free_path The mean free path between two charge-exchange reactions.
- * @param[in] spline_builder_on_Xn A one-dimensional spline builder on GridNeutrals
- * @param[in] spline_evaluator_on_Xn A one-dimensional spline evaluator on GridNeutrals
- * @param[in] spline_builder_on_X A one-dimensional spline builder on GridX
- * @param[in] interpolator_from_X_to_Xn A one-dimensional spline evaluator with splines on X which can be evaluated on Xn
- * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
- */
+     * @brief Creates an instance of the DiffusiveNeutralSolver class.
+     * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
+     * @param[in] ionisation An object that represents ionisation reaction rate.
+     * @param[in] recombination An object that represents recombination reaction rate.
+     * @param[in] mean_free_path The mean free path between two charge-exchange reactions.
+     * @param[in] spline_builder_on_Xn A one-dimensional spline builder on GridNeutrals
+     * @param[in] spline_evaluator_on_Xn A one-dimensional spline evaluator on GridNeutrals
+     * @param[in] spline_builder_on_X A one-dimensional spline builder on GridX
+     * @param[in] interpolator_from_X_to_Xn A one-dimensional spline evaluator with splines on X which can be evaluated on Xn
+     * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
+     */
     DiffGridsFluidSolver(
             IReactionRate const& charge_exchange,
             IReactionRate const& ionisation,

@@ -19,8 +19,6 @@ public:
      */
     ConstantRate(double const value);
 
-    ~ConstantRate() override = default;
-
     /**
      * @brief Operator for computing the reaction rate.
      *
