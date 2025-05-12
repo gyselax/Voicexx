@@ -19,7 +19,7 @@
  * for the density, particle flux and stress. The test checks if the
  * initialisation works properly.
  */
-TEST(GeometryXM, MomentsInitialisation)
+TEST(GeometryMX, MomentsInitialisation)
 {
     CoordX const x_min(0.0);
     CoordX const x_max(1.0);

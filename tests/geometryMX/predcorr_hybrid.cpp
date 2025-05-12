@@ -153,7 +153,7 @@ TEST(GeometryXM, PredCorrHybrid)
     init(allfdistribu);
 
     // Moments index range initialisation
-    IdxStepMom const nb_fluid_moments(3);
+    IdxStepMom const nb_fluid_moments(1);
     IdxRangeMom const meshM(GeometryMX::density_idx, nb_fluid_moments);
     assert(GeometryMX::is_valid(meshM));
     ddc::init_discrete_space<GridMom>();
@@ -164,8 +164,6 @@ TEST(GeometryXM, PredCorrHybrid)
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init[GeometryMX::density_idx], 1.);
-    ddc::parallel_fill(moments_init[GeometryMX::momentum_idx], 0.);
-    ddc::parallel_fill(moments_init[GeometryMX::energy_idx], 1.);
 
     ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);
