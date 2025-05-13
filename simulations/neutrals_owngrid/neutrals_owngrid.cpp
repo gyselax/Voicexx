@@ -315,6 +315,11 @@ int main(int argc, char** argv)
     // we choose the corresponding neutral solver
     std::unique_ptr<IFluidSolver<GridXNeutrals>> ptr_neutral_solver;
     if (PCpp_bool(conf_voicexx, ".DiffusiveSolver.on")) {
+        std::string bc_flux_input
+                = PCpp_string(conf_voicexx, ".DiffusiveSolver.boundary_condition");
+        DiffGridsFluidSolver::NeutralFluxBoundaryCondition bc_flux
+                = DiffGridsFluidSolver::neutral_flux_boundary_condition(bc_flux_input);
+
         ptr_neutral_solver = std::make_unique<DiffGridsFluidSolver>(
                 charge_exchange,
                 ionisation,
@@ -324,7 +329,9 @@ int main(int argc, char** argv)
                 spline_evaluator_on_Xn,
                 builder_x,
                 interpolator_from_X_to_Xn,
-                get_const_field(quadrature_coeffs_neutrals));
+                get_const_field(quadrature_coeffs_neutrals),
+                bc_flux,
+                PCpp_double(conf_voicexx, ".DiffusiveSolver.recycling_coefficient"));
     } else {
         ptr_neutral_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
     }

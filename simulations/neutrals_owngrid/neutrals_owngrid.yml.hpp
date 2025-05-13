@@ -42,6 +42,8 @@ NeutralSpeciesInfo:
 
 DiffusiveSolver:
   on: True
+  boundary_condition : 'recycling' # possible values: 'recycling', 'zero flux', 'escaping neutrals'
+  recycling_coefficient : 0.5 # only relevant for recycling boundary condition
   mean_free_path: 10 # between two charge-exchange reactions
   n_0: 1e20 # density of normalisation
   T_0: 10 # temperature of normalisation, in eV
