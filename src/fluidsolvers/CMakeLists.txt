@@ -16,6 +16,7 @@ target_link_libraries("fluidsolver_${GEOMETRY_VARIANT}"
         DDC::core
         gslx::geometry_${GEOMETRY_VARIANT}
         gslx::interpolation
+        gslx::math_tools
         gslx::quadrature
         gslx::rhs_${GEOMETRY_VARIANT}
         gslx::speciesinfo
