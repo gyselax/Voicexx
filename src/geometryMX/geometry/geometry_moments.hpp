@@ -11,6 +11,8 @@ static constexpr IdxMom density_idx(0);
 static constexpr IdxMom momentum_idx(1);
 static constexpr IdxMom energy_idx(2);
 
+static constexpr IdxRangeMom first_three_moments(density_idx, IdxStepMom(3));
+
 inline bool is_valid(IdxRangeMom const& moments)
 {
     if (moments.size() <= 0 || moments.size() > 3) {

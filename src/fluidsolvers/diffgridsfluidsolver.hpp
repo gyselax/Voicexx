@@ -52,6 +52,9 @@
  */
 class DiffGridsFluidSolver : public IFluidSolver<GridXNeutrals>
 {
+private:
+    using IdxRangeMomSpX = IdxRange<GridMom, Species, GridX>;
+
 public:
     /**
      * @brief An enum class to store the type of boundary condition used
@@ -157,14 +160,10 @@ public:
      *
      * @param[inout] dn The time derivative of neutral fluid moments.
      * @param[in] n The fluid moments of the neutral species.
-     * @param[in] density The plasma density (for ion and electrons).
-     * @param[in] velocity The plasma mean velocity (for ion and electrons).
-     * @param[in] temperature The plasma temperature (for ion and electrons).
+     * @param[in] plasma_moments The plasma fluid moments (for ions and electrons).
      */
     void get_derivative(
             DFieldSpMomXn dn,
             DConstFieldSpMomXn n,
-            DConstFieldSpX density,
-            DConstFieldSpX velocity,
-            DConstFieldSpX temperature) const;
+            DConstField<IdxRangeMomSpX> plasma_moments) const;
 };
