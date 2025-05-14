@@ -7,12 +7,23 @@
 
 namespace GeometryMX {
 
-static constexpr IdxMom density_idx(0);
-static constexpr IdxMom momentum_idx(1);
-static constexpr IdxMom energy_idx(2);
+/**
+ * @brief An enum containing the three values 0, 1 and 2 corresponding to the index
+ * of the moments.
+ * This is an enum to be able to use it in device code.
+ */
+enum MomentIdx { density_moments = 0, momentum_moment = 1, energy_moment = 2 };
+
+static constexpr IdxMom density_idx(density_moments);
+static constexpr IdxMom momentum_idx(momentum_moment);
+static constexpr IdxMom energy_idx(energy_moment);
 
 static constexpr IdxRangeMom first_three_moments(density_idx, IdxStepMom(3));
 
+/**
+ * @brief Check whether the index range on the moments given is only containing the density
+ * @param[in] moments The index range to check
+ */
 inline bool is_valid(IdxRangeMom const& moments)
 {
     if (moments.size() <= 0 || moments.size() > 3) {
@@ -24,11 +35,19 @@ inline bool is_valid(IdxRangeMom const& moments)
     return true;
 }
 
+/**
+ * @brief Check whether the index range on the moments given is only containing the density
+ * @param[in] moments The index range to check
+ */
 inline bool is_only_density(IdxRangeMom const& moments)
 {
     return is_valid(moments) && moments.size() == 1;
 }
 
+/**
+ * @brief Check whether the index range on the moments given is only containing the density and the velocity
+ * @param[in] moments The index range to check
+ */
 inline bool is_density_and_flux(IdxRangeMom const& moments)
 {
     return is_valid(moments) && moments.size() == 2 && moments.back() == momentum_idx;

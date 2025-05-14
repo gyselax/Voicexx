@@ -138,7 +138,6 @@ void DiffGridsFluidSolver::get_derivative(
             = get_field(pressure_diffusion_coefficient_alloc); // \hat D
 
     IdxSp const iion(find_ion(get_idx_range<Species>(plasma_density)));
-    IdxMom const ineutral_density(0);
     double const sqrt_mass_ratio(Kokkos::sqrt(mass(ielec()) / mass(iion)));
     double const mean_free_path = m_mean_free_path;
 
@@ -151,7 +150,7 @@ void DiffGridsFluidSolver::get_derivative(
 
                 // in this for loop we construct the terms n_eff*u_i, p_N and \hat D
                 // we will take their derivatives afterwards
-                double density_neutrals = neutrals(ifspxn, ineutral_density);
+                double density_neutrals = neutrals(ifspxn, IdxMom(GeometryMX::density_moments));
                 double density_elec = density_on_Xn(ielec(), ixn);
                 double density_ions = density_on_Xn(iion, ixn);
                 double K_cx = charge_exchange_rate_on_Xn(ifspxn);
@@ -254,7 +253,8 @@ void DiffGridsFluidSolver::get_derivative(
             Kokkos::DefaultExecutionSpace(),
             idx_range_neutrals,
             KOKKOS_LAMBDA(IdxSpXn const ifspxn) {
-                dn(ifspxn, ineutral_density) = -sqrt_mass_ratio * div_particle_flux(ifspxn);
+                dn(ifspxn, IdxMom(GeometryMX::density_moments))
+                        = -sqrt_mass_ratio * div_particle_flux(ifspxn);
             }); // density source is not solved here, we only solve transport.
 
     // we expose to pdi the coefficients
