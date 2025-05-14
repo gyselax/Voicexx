@@ -15,7 +15,7 @@ DensityCoupling::DensityCoupling(
         double const energy_coupling_coeff,
         IReactionRate const& ionization,
         IReactionRate const& recombination,
-        SplineXBuilder_1d const& spline_builder_on_X,
+        SplineXBuilder const& spline_builder_on_X,
         SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
         double const mean_free_path,
         DConstFieldVx const& quadrature_coeffs)

@@ -35,7 +35,7 @@ private:
     double const m_mean_free_path;
     DConstFieldVx const m_quadrature_coeffs;
 
-    SplineXBuilder_1d const& m_spline_builder_on_X;
+    SplineXBuilder const& m_spline_builder_on_X;
     SplineX_GridXnEvaluator const& m_interpolator_from_X_to_Xn;
 
 public:
@@ -59,7 +59,7 @@ public:
             double energy_coupling_coeff,
             IReactionRate const& ionization,
             IReactionRate const& recombination,
-            SplineXBuilder_1d const& spline_builder_on_X,
+            SplineXBuilder const& spline_builder_on_X,
             SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
             double const mean_free_path,
             DConstFieldVx const& quadrature_coeffs);

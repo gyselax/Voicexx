@@ -51,10 +51,9 @@
 
 // used for the fact that we have a different grid for the neutrals
 #include "charge_exchange.hpp"
-#include "diffgridsfluidsolver.hpp"
-#include "ionisation.hpp"
 #include "densitycoupling.hpp"
 #include "diffgridsfluidsolver.hpp"
+#include "ionisation.hpp"
 #include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
 #include "predcorr_hybrid.hpp"
@@ -270,9 +269,8 @@ int main(int argc, char** argv)
     SplitVlasovSolver const vlasov(advection_x, advection_vx);
     SplitRightHandSideSolver const boltzmann(vlasov, rhs_operators);
 
-    DFieldMemVx const quadrature_coeffs_alloc(
-            neumann_spline_quadrature_coefficients<
-                    Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx));
+    DFieldMemVx const quadrature_coeffs_alloc(neumann_spline_quadrature_coefficients<
+                                              Kokkos::DefaultExecutionSpace>(mesh_vx, builder_vx));
     ChargeDensityCalculator rhs(get_const_field(quadrature_coeffs_alloc));
 
     // Create the objects needed for the Poisson solver. These objects must not go out of scope
