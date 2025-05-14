@@ -141,6 +141,7 @@ void DiffGridsFluidSolver::get_derivative(
     double const sqrt_mass_ratio(Kokkos::sqrt(mass(ielec()) / mass(iion)));
     double const mean_free_path = m_mean_free_path;
 
+    DConstFieldSpXn neutrals_density = neutrals[GeometryMX::density_idx];
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_neutrals,
@@ -150,7 +151,7 @@ void DiffGridsFluidSolver::get_derivative(
 
                 // in this for loop we construct the terms n_eff*u_i, p_N and \hat D
                 // we will take their derivatives afterwards
-                double density_neutrals = neutrals(ifspxn, IdxMom(GeometryMX::density_moment));
+                double density_neutrals = neutrals_density(ifspxn);
                 double density_elec = density_on_Xn(ielec(), ixn);
                 double density_ions = density_on_Xn(iion, ixn);
                 double K_cx = charge_exchange_rate_on_Xn(ifspxn);
@@ -248,13 +249,14 @@ void DiffGridsFluidSolver::get_derivative(
     }
     }
 
-    // compute the neutral derivative
+    // Compute the neutral derivative
+    // As the equations for the other moments are not solved, we only slice the density
+    DFieldSpXn dn_sliced = dn[GeometryMX::density_idx];
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_neutrals,
             KOKKOS_LAMBDA(IdxSpXn const ifspxn) {
-                dn(ifspxn, IdxMom(GeometryMX::density_moment))
-                        = -sqrt_mass_ratio * div_particle_flux(ifspxn);
+                dn_sliced(ifspxn) = -sqrt_mass_ratio * div_particle_flux(ifspxn);
             }); // density source is not solved here, we only solve transport.
 
     // we expose to pdi the coefficients
