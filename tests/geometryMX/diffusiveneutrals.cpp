@@ -160,19 +160,19 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
             meshX);
 
     // Initialisation of the neutral density
-    host_t<DFieldMemSpMomX> neutrals_init_host(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    ddc::for_each(get_idx_range(neutrals_init_host), [&](IdxSpMomX const ispmx) {
+    host_t<DFieldMemMomSpX> neutrals_init_host(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    ddc::for_each(get_idx_range(neutrals_init_host), [&](IdxMomSpX const ispmx) {
         CoordX coordx(ddc::coordinate(ddc::select<GridX>(ispmx)));
         double const lx_2((x_max + x_min) / 2.);
         neutrals_init_host(ispmx) = std::exp(-0.5 * (coordx - lx_2) * (coordx - lx_2));
     });
 
-    DFieldMemSpMomX neutrals_alloc(get_idx_range(neutrals_init_host));
-    DFieldSpMomX neutrals = get_field(neutrals_alloc);
+    DFieldMemMomSpX neutrals_alloc(get_idx_range(neutrals_init_host));
+    DFieldMomSpX neutrals = get_field(neutrals_alloc);
     ddc::parallel_deepcopy(neutrals, neutrals_init_host);
 
-    DFieldMemSpMomX derivative_alloc(get_idx_range(neutrals));
-    DFieldSpMomX derivative = get_field(derivative_alloc);
+    DFieldMemMomSpX derivative_alloc(get_idx_range(neutrals));
+    DFieldMomSpX derivative = get_field(derivative_alloc);
 
     // Initialisation of the kinetic species
     DFieldMemSpX kinsp_density_alloc(IdxRangeSpX(idx_range_kinsp, meshX));
@@ -202,7 +202,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
     double error_l1(0);
     double max_derivative(0);
-    ddc::for_each(get_idx_range(neutrals), [&](IdxSpMomX const ispmx) {
+    ddc::for_each(get_idx_range(neutrals), [&](IdxMomSpX const ispmx) {
         double const neutral_val(neutrals_init_host(ispmx));
 
         double const lx_2((x_max + x_min) / 2.);

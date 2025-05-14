@@ -12,8 +12,8 @@ template <typename FluidGrid>
 class NullFluidSolver : public IFluidSolver<FluidGrid>
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = DField<IdxRangeMomSpGrid>;
 
 public:
     /**
@@ -41,8 +41,8 @@ public:
      * @param[in] dt The timestep.
      * @return a field referencing the fluid species after solving the dummy fluid model on one timestep.
      */
-    DFieldSpMomGrid operator()(
-            DFieldSpMomGrid fluid_moments,
+    DFieldMomSpGrid operator()(
+            DFieldMomSpGrid fluid_moments,
             DConstFieldSpXVx allfdistribu,
             DConstFieldX efield,
             double dt) const override

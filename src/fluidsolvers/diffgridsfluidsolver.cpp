@@ -62,8 +62,8 @@ IdxSp DiffGridsFluidSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
 }
 
 void DiffGridsFluidSolver::get_derivative(
-        DFieldSpMomXn dn,
-        DConstFieldSpMomXn neutrals,
+        DFieldMomSpXn dn,
+        DConstFieldMomSpXn neutrals,
         DConstField<IdxRangeMomSpX> plasma_moments) const
 {
     DConstFieldSpX plasma_density = plasma_moments[GeometryMX::density_idx];
@@ -273,14 +273,14 @@ void DiffGridsFluidSolver::get_derivative(
             .with("n_eq_ui", n_eq_ui_host);
 }
 
-DFieldSpMomXn DiffGridsFluidSolver::operator()(
-        DFieldSpMomXn const neutrals,
+DFieldMomSpXn DiffGridsFluidSolver::operator()(
+        DFieldMomSpXn const neutrals,
         DConstFieldSpXVx const allfdistribu,
         DConstFieldX const efield,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("DiffusiveNeutralSolver");
-    RK2<DFieldMemSpMomXn> timestepper(get_idx_range(neutrals));
+    RK2<DFieldMemMomSpXn> timestepper(get_idx_range(neutrals));
 
     // moments computation
     IdxRangeSpX idx_range_kspx(get_idx_range(allfdistribu));
@@ -315,7 +315,7 @@ DFieldSpMomXn DiffGridsFluidSolver::operator()(
                         = (momentum_flux - particle_flux * velocity(ispx)) / density(ispx);
             });
 
-    timestepper.update(neutrals, dt, [&](DFieldSpMomXn dn, DConstFieldSpMomXn n) {
+    timestepper.update(neutrals, dt, [&](DFieldMomSpXn dn, DConstFieldMomSpXn n) {
         get_derivative(dn, n, get_const_field(plasma_moments));
     });
     Kokkos::Profiling::popRegion();

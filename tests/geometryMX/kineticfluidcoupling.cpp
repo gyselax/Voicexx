@@ -161,8 +161,8 @@ static void TestKineticFluidCoupling()
     ddc::init_discrete_space<GridMom>();
 
     // Initialisation of fluid species moments
-    DFieldMemSpMomX fluid_moments_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX fluid_moments = get_field(fluid_moments_alloc);
+    DFieldMemMomSpX fluid_moments_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX fluid_moments = get_field(fluid_moments_alloc);
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 0.);
@@ -270,16 +270,16 @@ static void TestKineticFluidCoupling()
     double const X_1
             = N * (recombination_rate - ionisation_rate) / (recombination_rate + ionisation_rate);
 
-    DFieldMemSpMomX X_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX X = get_field(X_alloc);
-    DFieldMemSpMomX analytical_nN_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX analytical_nN = get_field(analytical_nN_alloc);
+    DFieldMemMomSpX X_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX X = get_field(X_alloc);
+    DFieldMemMomSpX analytical_nN_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX analytical_nN = get_field(analytical_nN_alloc);
     double const t_diag = nb_iter * deltat;
 
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             get_idx_range(X),
-            KOKKOS_LAMBDA(IdxSpMomX const ispmx) {
+            KOKKOS_LAMBDA(IdxMomSpX const ispmx) {
                 X(ispmx) = Kokkos::exp(alpha * t_diag)
                                    * Kokkos::
                                            pow((beta / alpha) * Kokkos::expm1(alpha * t_diag) + C,
@@ -290,7 +290,7 @@ static void TestKineticFluidCoupling()
 
     auto analytical_nN_host = ddc::create_mirror_view_and_copy(analytical_nN);
 
-    ddc::for_each(get_idx_range(fluid_moments_host), [&](IdxSpMomX const ispmx) {
+    ddc::for_each(get_idx_range(fluid_moments_host), [&](IdxMomSpX const ispmx) {
         EXPECT_NEAR(analytical_nN_host(ispmx), fluid_moments_host(ispmx), 1.5e-8);
     });
 

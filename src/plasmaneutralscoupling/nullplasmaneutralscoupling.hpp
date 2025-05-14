@@ -15,8 +15,8 @@ template <typename FluidGrid>
 class NullPlasmaNeutralsCoupling : public IPlasmaNeutralsCoupling<FluidGrid>
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = DField<IdxRangeMomSpGrid>;
 
 public:
     /**
@@ -34,7 +34,7 @@ public:
      * @param[in] dt The time step over which the collisions occur.
      *
      */
-    void operator()(DFieldSpXVx const allfdistribu, DFieldSpMomGrid const neutrals, double const dt)
+    void operator()(DFieldSpXVx const allfdistribu, DFieldMomSpGrid const neutrals, double const dt)
             const override
     {
         if (!GeometryMX::is_valid(ddc::get_domain<GridMom>(neutrals))) {

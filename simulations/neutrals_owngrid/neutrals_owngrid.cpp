@@ -141,8 +141,8 @@ int main(int argc, char** argv)
     ddc::init_discrete_space<GridXNeutrals>(
             SplineInterpPointsXNeutrals::get_sampling<GridXNeutrals>());
     IdxRangeXn mesh_x_neutrals = SplineInterpPointsXNeutrals::get_domain<GridXNeutrals>();
-    DFieldMemSpMomXn neutrals_alloc(IdxRangeSpMomXn(idx_range_fluidsp, meshM, mesh_x_neutrals));
-    DFieldSpMomXn neutrals = get_field(neutrals_alloc);
+    DFieldMemMomSpXn neutrals_alloc(IdxRangeMomSpXn(idx_range_fluidsp, meshM, mesh_x_neutrals));
+    DFieldMomSpXn neutrals = get_field(neutrals_alloc);
 
     if (iter_start == 0) { // if we start a new simulation
         // we need to add a perturbation otherwise it will stay at equilibrium

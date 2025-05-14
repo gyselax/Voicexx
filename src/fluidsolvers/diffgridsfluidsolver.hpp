@@ -3,6 +3,7 @@
 #pragma once
 
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "geometry_neutrals.hpp"
 #include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"
@@ -142,8 +143,8 @@ public:
      *
      * @return A field referencing the neutral fluid moments passed as argument.
      */
-    DFieldSpMomXn operator()(
-            DFieldSpMomXn neutrals,
+    DFieldMomSpXn operator()(
+            DFieldMomSpXn neutrals,
             DConstFieldSpXVx allfdistribu,
             DConstFieldX efield,
             double dt) const override;
@@ -163,7 +164,7 @@ public:
      * @param[in] plasma_moments The plasma fluid moments (for ions and electrons).
      */
     void get_derivative(
-            DFieldSpMomXn dn,
-            DConstFieldSpMomXn n,
+            DFieldMomSpXn dn,
+            DConstFieldMomSpXn n,
             DConstField<IdxRangeMomSpX> plasma_moments) const;
 };

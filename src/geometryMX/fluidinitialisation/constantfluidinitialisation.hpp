@@ -15,9 +15,9 @@ template <typename FluidGrid>
 class ConstantFluidInitialisation : public IFluidInitialisation<FluidGrid>
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
-    using IdxSpMomGrid = Idx<Species, GridMom, FluidGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = Field<double, IdxRangeMomSpGrid>;
+    using IdxMomSpGrid = Idx<GridMom, Species, FluidGrid>;
 
 private:
     DFieldMemSpMom m_moments_alloc;
@@ -30,7 +30,7 @@ public:
 
     class BroadcastFn
     {
-        DFieldSpMomGrid m_fluid_moments;
+        DFieldMomSpGrid m_fluid_moments;
 
         DConstFieldSpMom m_moments;
 
@@ -40,7 +40,7 @@ public:
          * @param[in] fluid_moments The field to initialise.
          * @param[in] moments The values it should be initialised with.
          */
-        BroadcastFn(DFieldSpMomGrid const fluid_moments, DConstFieldSpMom const moments)
+        BroadcastFn(DFieldMomSpGrid const fluid_moments, DConstFieldSpMom const moments)
             : m_fluid_moments(fluid_moments)
             , m_moments(moments)
         {
@@ -50,7 +50,7 @@ public:
          *
          * @param[in] ispmx The index we are looking at
          */
-        KOKKOS_FUNCTION void operator()(IdxSpMomGrid const ispmx) const
+        KOKKOS_FUNCTION void operator()(IdxMomSpGrid const ispmx) const
         {
             IdxSpMom ispm(ispmx);
             m_fluid_moments(ispmx) = m_moments(ispm);
@@ -76,7 +76,7 @@ public:
      *                             On output: a field referencing the fluid species initialised with constant moments.
      * @return A field referencing the initialised fluid species.
      */
-    DFieldSpMomGrid operator()(DFieldSpMomGrid const fluid_moments) const override
+    DFieldMomSpGrid operator()(DFieldMomSpGrid const fluid_moments) const override
     {
         DConstFieldSpMom moments(get_const_field(m_moments_alloc));
         BroadcastFn moments_broadcast(fluid_moments, moments);

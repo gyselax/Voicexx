@@ -159,8 +159,8 @@ TEST(GeometryXM, PredCorrHybrid)
     ddc::init_discrete_space<GridMom>();
 
     // Initialisation of fluid species moments
-    DFieldMemSpMomX fluid_moments_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX fluid_moments = get_field(fluid_moments_alloc);
+    DFieldMemMomSpX fluid_moments_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX fluid_moments = get_field(fluid_moments_alloc);
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init[GeometryMX::density_idx], 1.);

@@ -5,6 +5,26 @@
 
 #include "geometry.hpp"
 
+// we want to use GridMom as our first index as we will often pick
+// a specific fluid moment and slice at it
+using IdxMomSpX = Idx<GridMom, Species, GridX>;
+using IdxStepMomSpX = IdxStep<GridMom, Species, GridX>;
+using IdxRangeMomSpX = IdxRange<GridMom, Species, GridX>;
+
+template <class ElementType>
+using FieldMemMomSpX = FieldMem<ElementType, IdxRangeMomSpX>;
+using DFieldMemMomSpX = FieldMemMomSpX<double>;
+
+template <class ElementType>
+using FieldMomSpX = Field<ElementType, IdxRangeMomSpX>;
+
+using DFieldMomSpX = FieldMomSpX<double>;
+
+template <class ElementType>
+using ConstFieldMomSpX = ConstField<ElementType, IdxRangeMomSpX>;
+
+using DConstFieldMomSpX = ConstFieldMomSpX<double>;
+
 namespace GeometryMX {
 
 /**
