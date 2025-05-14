@@ -12,11 +12,11 @@ namespace GeometryMX {
  * of the moments.
  * This is an enum to be able to use it in device code.
  */
-enum MomentIdx { density_moments = 0, momentum_moment = 1, energy_moment = 2 };
+enum MomentIdx { density_moment = 0, velocity_moment = 1, temperature_moment = 2 };
 
-static constexpr IdxMom density_idx(density_moments);
-static constexpr IdxMom momentum_idx(momentum_moment);
-static constexpr IdxMom energy_idx(energy_moment);
+static constexpr IdxMom density_idx(density_moment);
+static constexpr IdxMom velocity_idx(velocity_moment);
+static constexpr IdxMom temperature_idx(temperature_moment);
 
 static constexpr IdxRangeMom first_three_moments(density_idx, IdxStepMom(3));
 
@@ -50,6 +50,6 @@ inline bool is_only_density(IdxRangeMom const& moments)
  */
 inline bool is_density_and_flux(IdxRangeMom const& moments)
 {
-    return is_valid(moments) && moments.size() == 2 && moments.back() == momentum_idx;
+    return is_valid(moments) && moments.size() == 2 && moments.back() == velocity_idx;
 }
 } // namespace GeometryMX

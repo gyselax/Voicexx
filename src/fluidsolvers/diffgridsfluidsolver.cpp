@@ -67,8 +67,8 @@ void DiffGridsFluidSolver::get_derivative(
         DConstField<IdxRangeMomSpX> plasma_moments) const
 {
     DConstFieldSpX plasma_density = plasma_moments[GeometryMX::density_idx];
-    DConstFieldSpX plasma_velocity = plasma_moments[GeometryMX::momentum_idx];
-    DConstFieldSpX plasma_temperature = plasma_moments[GeometryMX::energy_idx];
+    DConstFieldSpX plasma_velocity = plasma_moments[GeometryMX::velocity_idx];
+    DConstFieldSpX plasma_temperature = plasma_moments[GeometryMX::temperature_idx];
     IdxRangeSpXn idx_range_neutrals(get_idx_range(neutrals));
     IdxRangeSpX idx_range_rates_on_X(
             get_idx_range<Species>(neutrals),
@@ -150,7 +150,7 @@ void DiffGridsFluidSolver::get_derivative(
 
                 // in this for loop we construct the terms n_eff*u_i, p_N and \hat D
                 // we will take their derivatives afterwards
-                double density_neutrals = neutrals(ifspxn, IdxMom(GeometryMX::density_moments));
+                double density_neutrals = neutrals(ifspxn, IdxMom(GeometryMX::density_moment));
                 double density_elec = density_on_Xn(ielec(), ixn);
                 double density_ions = density_on_Xn(iion, ixn);
                 double K_cx = charge_exchange_rate_on_Xn(ifspxn);
@@ -253,7 +253,7 @@ void DiffGridsFluidSolver::get_derivative(
             Kokkos::DefaultExecutionSpace(),
             idx_range_neutrals,
             KOKKOS_LAMBDA(IdxSpXn const ifspxn) {
-                dn(ifspxn, IdxMom(GeometryMX::density_moments))
+                dn(ifspxn, IdxMom(GeometryMX::density_moment))
                         = -sqrt_mass_ratio * div_particle_flux(ifspxn);
             }); // density source is not solved here, we only solve transport.
 
@@ -288,8 +288,8 @@ DFieldSpMomXn DiffGridsFluidSolver::operator()(
     DFieldMem<IdxRangeMomSpX> plasma_moments_alloc(idx_range_momkspx);
     DField<IdxRangeMomSpX> plasma_moments(plasma_moments_alloc);
     DFieldSpX density = plasma_moments[GeometryMX::density_idx];
-    DFieldSpX velocity = plasma_moments[GeometryMX::momentum_idx];
-    DFieldSpX temperature = plasma_moments[GeometryMX::energy_idx];
+    DFieldSpX velocity = plasma_moments[GeometryMX::velocity_idx];
+    DFieldSpX temperature = plasma_moments[GeometryMX::temperature_idx];
 
     DConstFieldVx quadrature_coeffs = m_quadrature_coeffs;
 
