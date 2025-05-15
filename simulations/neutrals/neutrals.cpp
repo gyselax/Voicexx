@@ -33,6 +33,7 @@
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals.yml.hpp"
+#include "neutralsolver.hpp"
 #include "noenergytransfercoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
@@ -305,6 +306,7 @@ int main(int argc, char** argv)
             neutrals_wall_stiffness,
             mesh_x);
 
+    NeutralSolver<GridX> const test_solver(neutralsolver, kineticfluidcoupling);
     PredCorrHybrid<GridX> const predcorr(boltzmann, neutralsolver, poisson, kineticfluidcoupling);
 
     // Starting the code

@@ -2,5 +2,6 @@
 add_subdirectory(geometryMX)
 add_subdirectory(geometryXNeutrals)
 add_subdirectory(fluidsolvers)
+add_subdirectory(neutralsolvers)
 add_subdirectory(plasmaneutralscoupling)
 add_subdirectory(reactionrates)
