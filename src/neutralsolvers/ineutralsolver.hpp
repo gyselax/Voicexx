@@ -3,8 +3,6 @@
 #pragma once
 
 #include "geometry.hpp"
-/*#include "ifluidsolver.hpp"*/
-/*#include "iplasmaneutralscoupling.hpp"*/
 
 /**
  * @brief An abstract class for solving the transport of neutrals and the interaction between the

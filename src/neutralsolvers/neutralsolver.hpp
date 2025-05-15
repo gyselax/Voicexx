@@ -56,7 +56,7 @@ public:
     DFieldSpMomGrid operator()(DFieldSpMomGrid neutrals, DFieldSpXVx allfdistribu, double dt)
             const override
     {
-        /*m_transport_solver(neutrals, get_const_field(allfdistribu), dt);*/
+        m_transport_solver(neutrals, get_const_field(allfdistribu), dt);
         m_plasma_neutrals_coupling(allfdistribu, neutrals, dt);
         return neutrals;
     }

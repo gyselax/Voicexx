@@ -7,8 +7,7 @@
 
 #include "geometry.hpp"
 #include "iboltzmannsolver.hpp"
-#include "ifluidsolver.hpp"
-#include "iplasmaneutralscoupling.hpp"
+#include "ineutralsolver.hpp"
 #include "iqnsolver.hpp"
 #include "itimesolver_hybrid.hpp"
 
@@ -35,27 +34,24 @@ private:
 
 private:
     IBoltzmannSolver const& m_boltzmann_solver;
-    IFluidSolver<FluidGrid> const& m_fluid_solver;
     IQNSolver const& m_poisson_solver;
-    IPlasmaNeutralsCoupling<FluidGrid> const& m_kinetic_fluid_coupling;
+    INeutralSolver<FluidGrid> const& m_neutral_solver;
 
 public:
     /**
      * @brief Creates an instance of the predictor-corrector class.
      * @param[in] boltzmann_solver A solver for a Boltzmann equation.
-     * @param[in] fluid_solver A solver for a fluid model.
      * @param[in] poisson_solver A solver for a Quasi-Neutrality equation.
-     * @param[in] kinetic_fluid_coupling A solver of the neutral source term in both the Boltzmann and fluid equations.
+     * @param[in] neutral_solver A solver for a fluid model and the
+     * neutral source term in both the Boltzmann and fluid equations.
      */
     PredCorrHybrid(
             IBoltzmannSolver const& boltzmann_solver,
-            IFluidSolver<FluidGrid> const& fluid_solver,
             IQNSolver const& poisson_solver,
-            IPlasmaNeutralsCoupling<FluidGrid> const& kinetic_fluid_coupling)
+            INeutralSolver<FluidGrid> const& neutral_solver)
         : m_boltzmann_solver(boltzmann_solver)
-        , m_fluid_solver(fluid_solver)
         , m_poisson_solver(poisson_solver)
-        , m_kinetic_fluid_coupling(kinetic_fluid_coupling)
+        , m_neutral_solver(neutral_solver)
     {
     }
 
@@ -139,13 +135,7 @@ public:
                     get_const_field(allfdistribu_half_t));
             // correction on a dt
             m_boltzmann_solver(allfdistribu, get_const_field(electric_field), dt);
-            m_fluid_solver(
-                    fluid_moments,
-                    get_const_field(allfdistribu),
-                    get_const_field(electric_field),
-                    dt);
-
-            m_kinetic_fluid_coupling(allfdistribu, fluid_moments, dt);
+            m_neutral_solver(fluid_moments, get_field(allfdistribu), dt);
         }
 
         double const final_time = time_start + iter * dt;
