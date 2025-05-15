@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: MIT
 
+add_subdirectory(fluidsolvers)
+add_subdirectory(plasmaneutralscoupling)
+
 foreach(GEOMETRY_VARIANT IN LISTS GEOMETRY_XVx_VARIANTS_LIST)
 
 add_library("neutralsolver_${GEOMETRY_VARIANT}" INTERFACE)
