@@ -21,14 +21,12 @@ public:
      *                               On output : a field referencing the fluid species updated
      *                                after solving the fluid model on one timestep.
      * @param[in] allfdistribu A constant field referencing the distribution function.
-     * @param[in] efield A constant field referencing the electric field.
      * @param[in] dt The timestep.
      * @return a field referencing the fluid species after solving the fluid model on one timestep.
      */
     virtual DFieldSpMomGrid operator()(
             DFieldSpMomGrid fluid_moments,
             DConstFieldSpXVx allfdistribu,
-            DConstFieldX efield,
             double dt) const = 0;
 
     virtual ~IFluidSolver<FluidGrid>() = default;

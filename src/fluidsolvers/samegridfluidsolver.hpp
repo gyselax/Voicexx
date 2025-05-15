@@ -110,16 +110,12 @@ public:
      *
      * @param[inout] neutrals The fluid moments describing the neutrals.
      * @param[in] allfdistribu A constant Field referencing the distribution function.
-     * @param[in] efield A constant Field referencing the electric field.
      * @param[in] dt The time step.
      *
      * @return A field referencing the neutral fluid moments passed as argument.
      */
-    DFieldSpMomX operator()(
-            DFieldSpMomX neutrals,
-            DConstFieldSpXVx allfdistribu,
-            DConstFieldX efield,
-            double dt) const override;
+    DFieldSpMomX operator()(DFieldSpMomX neutrals, DConstFieldSpXVx allfdistribu, double dt)
+            const override;
 
     /**
      * @brief Computes the expression of the time derivative of the neutral fluid moments.
