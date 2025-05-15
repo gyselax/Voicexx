@@ -48,7 +48,7 @@ public:
      * to the sources in density, momemtum and energy.
      *
      * @param[inout] neutrals The fluid moments describing the neutrals.
-     * @param[inout] allfdistribu A Field referencing the distribution function for the plasma.
+     * @param[inout] allfdistribu A field referencing the distribution function for the plasma.
      * @param[in] dt The time step.
      *
      * @return A field referencing the neutral fluid moments passed as argument.
