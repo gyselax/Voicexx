@@ -144,7 +144,7 @@ public:
      * @return A field referencing the neutral fluid moments passed as argument.
      */
     DFieldMomSpXn operator()(
-            DFieldMomSpXn neutrals,
+            DFieldMomSpXn neutrals_moments,
             DConstFieldSpXVx allfdistribu,
             DConstFieldX efield,
             double dt) const override;
@@ -163,8 +163,30 @@ public:
      * @param[in] n The fluid moments of the neutral species.
      * @param[in] plasma_moments The plasma fluid moments (for ions and electrons).
      */
-    void get_derivative(
-            DFieldMomSpXn dn,
-            DConstFieldMomSpXn n,
-            DConstField<IdxRangeMomSpX> plasma_moments) const;
+    void get_density_derivative(
+            DFieldSpXn const derivative_density_neutrals,
+            DConstFieldSpXn const density_neutrals,
+            DConstFieldMomSpXn const plasma_moments,
+            DConstFieldSpXn const charge_exchange,
+            DConstFieldSpXn const ionisation,
+            DConstFieldSpXn const recombination) const;
+
+    void compute_particle_flux(
+            DFieldSpXn const neutrals_particle_flux,
+            DConstFieldSpXn const neutrals_density,
+            DConstFieldMomSpXn const plasma_moments,
+            DConstFieldSpXn const charge_exchange,
+            DConstFieldSpXn const ionisation,
+            DConstFieldSpXn const recombination) const;
+
+    void compute_plasma_moments(
+            DFieldMomSpX const plasma_moments,
+            DConstFieldSpXVx const allfdistribu) const;
+
+    void compute_reaction_rates(
+            DFieldSpXn const charge_exchange,
+            DFieldSpXn const ionisation,
+            DFieldSpXn const recombination,
+            DConstFieldMomSpXn const neutrals_moment,
+            DConstFieldMomSpX const plasma_moments_on_X) const;
 };
