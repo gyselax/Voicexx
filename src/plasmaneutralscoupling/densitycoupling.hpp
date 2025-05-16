@@ -4,6 +4,7 @@
 #include "ddc_aliases.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "gridneutral_interpolator.hpp"
 #include "iplasmaneutralscoupling.hpp"
 #include "ireactionrate.hpp"
 
@@ -36,7 +37,7 @@ private:
     DConstFieldVx const m_quadrature_coeffs;
 
     SplineXBuilder const& m_spline_builder_on_X;
-    SplineX_GridXnEvaluator const& m_interpolator_from_X_to_Xn;
+    GridNeutralInterpolator const& m_interpolator_between_X_and_Xn;
 
 public:
     /**
@@ -60,7 +61,7 @@ public:
             IReactionRate const& ionization,
             IReactionRate const& recombination,
             SplineXBuilder const& spline_builder_on_X,
-            SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
+            GridNeutralInterpolator const& interpolator_between_X_and_Xn,
             double const mean_free_path,
             DConstFieldVx const& quadrature_coeffs);
 
@@ -73,7 +74,7 @@ public:
      * @param[in] dt The time step over which the collisions occur.
      *
      */
-    void operator()(DFieldSpXVx const allfdistribu, DFieldSpMomXn neutrals, double const dt)
+    void operator()(DFieldSpXVx const allfdistribu, DFieldMomSpXn neutrals, double const dt)
             const override;
 
     /**
@@ -90,7 +91,7 @@ public:
     void get_source_term(
             DFieldSpXn density_source_neutral,
             DConstFieldSpX kinsp_density,
-            DConstFieldSpMomXn neutrals,
+            DConstFieldMomSpXn neutrals,
             DConstFieldSpX ionization,
             DConstFieldSpX recombination) const;
 
@@ -103,8 +104,8 @@ public:
      *
     */
     void get_derivative_neutrals(
-            DFieldSpMomXn dn,
-            DConstFieldSpMomXn neutrals,
+            DFieldMomSpXn dn,
+            DConstFieldMomSpXn neutrals,
             DConstFieldSpXn density_source_neutral,
             double const sqrt_mass_ratio) const;
 

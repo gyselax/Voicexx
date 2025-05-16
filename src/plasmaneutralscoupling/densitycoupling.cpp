@@ -5,6 +5,7 @@
 #include "densitycoupling.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "gridneutral_interpolator.hpp"
 #include "ireactionrate.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
@@ -16,7 +17,7 @@ DensityCoupling::DensityCoupling(
         IReactionRate const& ionization,
         IReactionRate const& recombination,
         SplineXBuilder const& spline_builder_on_X,
-        SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
+        GridNeutralInterpolator const& interpolator_between_X_and_Xn,
         double const mean_free_path,
         DConstFieldVx const& quadrature_coeffs)
     : m_density_coupling_coeff(density_coupling_coeff)
@@ -27,7 +28,7 @@ DensityCoupling::DensityCoupling(
     , m_mean_free_path(mean_free_path)
     , m_quadrature_coeffs(quadrature_coeffs)
     , m_spline_builder_on_X(spline_builder_on_X)
-    , m_interpolator_from_X_to_Xn(interpolator_from_X_to_Xn)
+    , m_interpolator_between_X_and_Xn(interpolator_between_X_and_Xn)
 {
     ddc::expose_to_pdi(
             "kinetic_fluid_coupling_source_density_coupling_coeff",
@@ -60,7 +61,7 @@ IdxSp DensityCoupling::find_ion(IdxRangeSp const dom_kinsp) const
 void DensityCoupling::get_source_term(
         DFieldSpXn density_source_neutral,
         DConstFieldSpX kinsp_density,
-        DConstFieldSpMomXn neutrals,
+        DConstFieldMomSpXn neutrals,
         DConstFieldSpX ionization,
         DConstFieldSpX recombination) const
 {
@@ -77,9 +78,9 @@ void DensityCoupling::get_source_term(
     DFieldSpXn ionization_onXn = get_field(ionization_onXn_alloc);
     DFieldMemSpXn recombination_onXn_alloc(idx_range_rate_onXn);
     DFieldSpXn recombination_onXn = get_field(recombination_onXn_alloc);
-    interpolate_on_neutral_grid(kinsp_density_onXn, kinsp_density);
-    interpolate_on_neutral_grid(ionization_onXn, ionization);
-    interpolate_on_neutral_grid(recombination_onXn, recombination);
+    m_interpolator_between_X_and_Xn(kinsp_density_onXn, kinsp_density);
+    m_interpolator_between_X_and_Xn(ionization_onXn, ionization);
+    m_interpolator_between_X_and_Xn(recombination_onXn, recombination);
 
     IdxSp const iion(find_ion(get_idx_range<Species>(kinsp_density)));
     IdxMom idensity(0);
@@ -136,8 +137,8 @@ void DensityCoupling::get_plasma_source(
 }
 
 void DensityCoupling::get_derivative_neutrals(
-        DFieldSpMomXn dn,
-        DConstFieldSpMomXn neutrals,
+        DFieldMomSpXn dn,
+        DConstFieldMomSpXn neutrals,
         DConstFieldSpXn density_source_neutral,
         double const sqrt_mass_ratio) const
 {
@@ -166,7 +167,7 @@ void DensityCoupling::get_derivative_allfdistribu(
 
 void DensityCoupling::operator()(
         DFieldSpXVx const allfdistribu,
-        DFieldSpMomXn neutrals,
+        DFieldMomSpXn neutrals,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("KineticFluidCouplingSource");
@@ -274,14 +275,14 @@ void DensityCoupling::operator()(
     /*        });*/
 
     // do the actual time stepping
-    RK2<DFieldMemSpMomXn> timestepper_neutrals(get_idx_range(neutrals));
+    RK2<DFieldMemMomSpXn> timestepper_neutrals(get_idx_range(neutrals));
     RK2<DFieldMemSpXVx> timestepper_kinetic(get_idx_range(allfdistribu));
     timestepper_kinetic.update(allfdistribu, dt, [&](DFieldSpXVx df, DConstFieldSpXVx f) {
         get_derivative_allfdistribu(df, f, get_const_field(plasma_source));
     });
     IdxSp const iion(find_ion(get_idx_range<Species>(allfdistribu)));
     double const sqrt_mass_ratio(Kokkos::sqrt(mass(ielec()) / mass(iion)));
-    timestepper_neutrals.update(neutrals, dt, [&](DFieldSpMomXn dn, DConstFieldSpMomXn n) {
+    timestepper_neutrals.update(neutrals, dt, [&](DFieldMomSpXn dn, DConstFieldMomSpXn n) {
         get_derivative_neutrals(
                 dn,
                 n,
@@ -295,18 +296,4 @@ void DensityCoupling::operator()(
 void DensityCoupling::interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X)
         const
 {
-    SplineX_GridXnEvaluator interpolator = m_interpolator_from_X_to_Xn;
-    ddc::for_each(get_idx_range<Species>(field_on_X), [&](IdxSp const isp) {
-        DBSFieldMemX spline_coeff_alloc(get_spline_idx_range(m_spline_builder_on_X));
-        DBSFieldX spline_coeff(get_field(spline_coeff_alloc));
-        m_spline_builder_on_X(spline_coeff, get_const_field(field_on_X[isp]));
-
-        FieldMemXn<CoordX> coords_eval_alloc(get_idx_range<GridXNeutrals>(field_on_Xn));
-        FieldXn<CoordX> coords_eval = get_field(coords_eval_alloc);
-        ddc::parallel_for_each(
-                Kokkos::DefaultExecutionSpace(),
-                get_idx_range<GridXNeutrals>(field_on_Xn),
-                KOKKOS_LAMBDA(IdxXn const ixn) { coords_eval(ixn) = ddc::coordinate(ixn); });
-        interpolator(field_on_Xn[isp], get_const_field(coords_eval), get_const_field(spline_coeff));
-    });
 }

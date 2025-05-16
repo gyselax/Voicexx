@@ -350,7 +350,7 @@ int main(int argc, char** argv)
                 ionisation,
                 recombination,
                 builder_x,
-                interpolator_from_X_to_Xn,
+                interpolator_between_X_and_Xn,
                 mean_free_path,
                 get_const_field(quadrature_coeffs_alloc));
     } else {
