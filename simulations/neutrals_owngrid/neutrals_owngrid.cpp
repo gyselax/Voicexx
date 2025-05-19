@@ -158,7 +158,8 @@ int main(int argc, char** argv)
                     conf_voicexx,
                     ".NeutralSpeciesInfo[%d]",
                     (isp - idx_range_fluidsp.front()).value());
-            ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
+            moments_init_host(GeometryMX::density_idx, isp) = PCpp_double(conf_nisp, ".density_eq");
+            moments_init_host(GeometryMX::velocity_idx, isp) = 0;
         }
         ConstantFluidInitialisation<GridXNeutrals> fluid_init(get_const_field(moments_init_host));
         fluid_init(neutrals);
