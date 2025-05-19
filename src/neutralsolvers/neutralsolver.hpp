@@ -31,7 +31,7 @@ private:
 public:
     /**
      * @brief Creates an instance of the NeutralSolver class.
-     * @param[in] transport solver The solver for the neutrals transport
+     * @param[in] transport_solver The solver for the neutrals transport
      * @param[in] plasma_neutrals_coupling The solver for the source terms
      */
     NeutralSolver(
