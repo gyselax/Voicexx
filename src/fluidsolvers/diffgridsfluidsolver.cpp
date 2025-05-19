@@ -250,6 +250,12 @@ DFieldMomSpXn DiffGridsFluidSolver::operator()(
 {
     Kokkos::Profiling::pushRegion("DiffGridsFluidSolver");
 
+    if (!GeometryMX::is_density_and_flux(get_idx_range<GridMom>(neutrals_moments))) {
+        throw std::runtime_error(
+                "The neutrals fluid moments should contain the density, the fluid velocity, and "
+                "nothing more");
+    }
+
     // compute the plasma fluid moments
     IdxRangeSpX idx_range_kinsp_on_X(get_idx_range(allfdistribu));
     IdxRangeMomSpX idx_range_momkspx(GeometryMX::first_three_moments, idx_range_kinsp_on_X);
