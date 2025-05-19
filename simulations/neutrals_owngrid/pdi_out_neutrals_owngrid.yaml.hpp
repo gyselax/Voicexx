@@ -176,16 +176,6 @@ data:
     type: array
     subtype: double
     size: [ '$diff_coeff_extents[0]' , '$diff_coeff_extents[1]' ]
-  part_flux_extents: { type: array, subtype: int64, size: 2 }
-  part_flux:
-    type: array
-    subtype: double
-    size: [ '$part_flux_extents[0]' , '$part_flux_extents[1]' ]
-  flux_grad_extents: { type: array, subtype: int64, size: 2 }
-  flux_grad:
-    type: array
-    subtype: double
-    size: [ '$flux_grad_extents[0]' , '$flux_grad_extents[1]' ]
   n_eq_ui_extents: { type: array, subtype: int64, size: 2 }
   n_eq_ui:
     type: array
@@ -285,7 +275,7 @@ plugins:
       on_event: [diff_conv_expose]
       when: '${iter} % ${nbstep_diag} = 0'
       collision_policy: write_into
-      write: [pressure_grad, diff_coeff, part_flux, flux_grad, n_eq_ui]
+      write: [pressure_grad, diff_coeff, n_eq_ui]
     - file: 'VOICEXX_${iter_start:05}.h5'
       on_event: restart
       read: [time_saved, fdistribu, fluid_moments]

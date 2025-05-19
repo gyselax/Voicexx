@@ -147,12 +147,10 @@ void DiffGridsFluidSolver::compute_particle_flux(
     auto pressure_grad_host = ddc::create_mirror_view_and_copy(gradx_pressure);
     auto pressure_host = ddc::create_mirror_view_and_copy(neutral_pressure);
     auto diffusion_coeff_host = ddc::create_mirror_view_and_copy(pressure_diffusion_coefficient);
-    auto particle_flux_host = ddc::create_mirror_view_and_copy(neutrals_particle_flux);
     ddc::PdiEvent("diff_conv_expose")
             .with("pressure", pressure_host)
             .with("pressure_grad", pressure_grad_host)
             .with("diff_coeff", diffusion_coeff_host)
-            .with("part_flux", particle_flux_host)
             .with("n_eq_ui", n_eq_ui_host);
 }
 
