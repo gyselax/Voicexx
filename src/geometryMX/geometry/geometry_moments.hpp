@@ -39,6 +39,7 @@ static constexpr IdxMom velocity_idx(velocity_moment);
 static constexpr IdxMom temperature_idx(temperature_moment);
 
 static constexpr IdxRangeMom first_three_moments(density_idx, IdxStepMom(3));
+static constexpr IdxRangeMom first_two_moments(density_idx, IdxStepMom(2));
 
 /**
  * @brief Check whether the index range on the moments given is only containing the density
