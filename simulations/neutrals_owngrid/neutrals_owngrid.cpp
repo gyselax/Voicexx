@@ -28,7 +28,6 @@
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
-#include "igridneutralcoupling.hpp"
 #include "input.hpp"
 #include "iplasmaneutralscoupling.hpp"
 #include "irighthandside.hpp"
@@ -39,7 +38,7 @@
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals_owngrid.yml.hpp"
 #include "nullfluidsolver.hpp"
-#include "nullplasmaneutralcoupling.hpp"
+#include "nullplasmaneutralscoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "qnsolver.hpp"
@@ -55,7 +54,6 @@
 #include "densitycoupling.hpp"
 #include "diffgridsfluidsolver.hpp"
 #include "ionisation.hpp"
-#include "nullplasmaneutralscoupling.hpp"
 #include "pdi_out_neutrals_owngrid.yaml.hpp"
 #include "predcorr_hybrid.hpp"
 #include "recombination.hpp"
@@ -343,7 +341,7 @@ int main(int argc, char** argv)
 
     // depending if we want the plasma and the neutrals to exchange,
     // we choose the coupling
-    std::unique_ptr<DensityCoupling> ptr_kinfluidcoupling;
+    std::unique_ptr<IPlasmaNeutralsCoupling<GridXNeutrals>> ptr_kinfluidcoupling;
     if (PCpp_bool(conf_voicexx, ".KineticFluidCoupling.on")) {
         ptr_kinfluidcoupling = std::make_unique<DensityCoupling>(
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.density_coupling_coeff"),
