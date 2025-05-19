@@ -26,10 +26,10 @@ fluid_moments:
     dataset: 'fluid_moments'
   dimensions:
   - *timed
+  - &momentd
+    moment: { constant_coord: [ 'density', 'particle_flux' ] }
   - &speciesnd
     speciesn: { constant_coord: [ 'neutrals' ] }
-  - &momentd
-    moment: { constant_coord: [ 'density' ] }
   - &xnd
     xn:       { global_coord: ["VOICEXX_initstate.h5", MeshNeutrals ] }
 
@@ -46,15 +46,6 @@ diff_coeff:
   path:
     file: 'VOICEXX_\d+.h5'
     dataset: 'diff_coeff'
-  dimensions:
-  - *timed
-  - *speciesnd
-  - *xnd
-
-part_flux:
-  path:
-    file: 'VOICEXX_\d+.h5'
-    dataset: 'part_flux'
   dimensions:
   - *timed
   - *speciesnd
