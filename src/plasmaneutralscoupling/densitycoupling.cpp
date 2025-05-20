@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
+#include <stdexcept>
+
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
-#include "ddc_alias_inline_functions.hpp"
 #include "densitycoupling.hpp"
 #include "geometry.hpp"
 #include "geometry_moments.hpp"
@@ -89,26 +90,42 @@ void DensityCoupling::get_plasma_source_term(
         DConstFieldSpXn neutral_particle_source_on_Xn) const
 {
     // interpolate the particle source on GridX
-    IdxRangeSpX idx_range_particle_source(
-            get_idx_range<Species>(neutral_particle_source_on_Xn),
-            get_idx_range<GridX>(plasma_source_term));
+    IdxRangeSp neutrals_species(get_idx_range<Species>(neutral_particle_source_on_Xn));
+    if (neutrals_species.size() != 1) {
+        throw std::runtime_error(
+                "For the moments the coupling operator only works for one neutrals species");
+    }
+    IdxRangeSpX
+            idx_range_particle_source(neutrals_species, get_idx_range<GridX>(plasma_source_term));
     DFieldMemSpX particle_source_alloc(idx_range_particle_source);
     DFieldSpX particle_source = get_field(particle_source_alloc);
     m_interpolator_between_X_and_Xn(particle_source, neutral_particle_source_on_Xn);
+    DConstFieldX plasma_particle_source
+            = get_const_field(particle_source[neutrals_species.front()]);
 
-    /*IdxSp const iion(find_ion(get_idx_range<Species>(plasma_source_term)));*/
     /*double density_coupling_coeff_proxy = m_density_coupling_coeff;*/
     /*double momentum_coupling_coeff_proxy = m_momentum_coupling_coeff;*/
     /*double energy_coupling_coeff_proxy = m_energy_coupling_coeff;*/
     /*double mean_free_path_proxy = m_mean_free_path;*/
 
+    // ion species
+    IdxSp const iion(find_ion(get_idx_range<Species>(plasma_source_term)));
+    double const mass_ion = mass(iion);
+    DField<IdxRangeXVx> ions_source_term = plasma_source_term[iion];
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
-            get_idx_range(plasma_source_term),
-            KOKKOS_LAMBDA(IdxSpXVx const ispxvx) {
-                /*IdxX const ix(ispxvx);*/
-                /*IdxVx const ivx(ispxvx);*/
-                /*CoordVx const coordvx = ddc::coordinate(ivx);*/
+            get_idx_range(ions_source_term),
+            KOKKOS_LAMBDA(IdxXVx const ixvx) {
+                ions_source_term(ixvx) = 0;
+                IdxX const ix(ixvx);
+                IdxVx const ivx(ixvx);
+                CoordVx const coordvx = ddc::coordinate(ivx);
+                double const density_source = plasma_particle_source(ix); // S_{n,N}
+                double const momentum_source = 0; // S_{m,i}
+                double const velocity_source = momentum_source / density_source; // U_{N,i}
+                double const energy_source = 0; // S_{E,i}
+                double const temperature_source = 2 * (energy_source / density_source)
+                                                  - mass(iion) * velocity_source; // T_{N,i}
                 /*double const neutral_temperature = kinsp_temperature(iion, ix);*/
                 /*double const coordvx_sq = coordvx * coordvx;*/
                 /*double const density_source*/
@@ -121,13 +138,20 @@ void DensityCoupling::get_plasma_source_term(
                 /*double const energy_source = 2 * energy_coupling_coeff_proxy*/
                 /*                             * (-1 + coordvx_sq / neutral_temperature)*/
                 /*                             * Kokkos::exp(-coordvx_sq / (2 * neutral_temperature));*/
-                /*plasma_source_term(ispxvx) = -(density_source_neutral_on_Xn(ix)*/
-                /*                               / (Kokkos::sqrt(2 * M_PI * neutral_temperature)*/
-                /*                                  * normalization_coeff_alpha0_proxy))*/
-                /*                                     * density_source*/
-                /*                             + momentum_source + energy_source;*/
-                plasma_source_term(ispxvx) = 0;
+                ions_source_term(ixvx)
+                        = -(density_source
+                            / (Kokkos::sqrt(2 * M_PI * temperature_source / mass_ion)))
+                          * Kokkos::exp(
+                                  -(mass_ion * Kokkos::pow(coordvx - velocity_source, 2))
+                                  / (2 * temperature_source));
             });
+
+    // electron species
+    DField<IdxRangeXVx> electrons_source_term = plasma_source_term[ielec()];
+    ddc::parallel_for_each(
+            Kokkos::DefaultExecutionSpace(),
+            get_idx_range(ions_source_term),
+            KOKKOS_LAMBDA(IdxXVx const ixvx) { electrons_source_term(ixvx) = 0; });
 }
 
 void DensityCoupling::get_derivative_neutrals(
