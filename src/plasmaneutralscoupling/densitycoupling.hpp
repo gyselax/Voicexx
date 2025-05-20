@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
+
 #pragma once
 
-#include "ddc_aliases.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "geometry_neutrals.hpp"
 #include "gridneutral_interpolator.hpp"
 #include "iplasmaneutralscoupling.hpp"
@@ -31,7 +32,7 @@ private:
     double const m_density_coupling_coeff;
     double const m_momentum_coupling_coeff;
     double const m_energy_coupling_coeff;
-    IReactionRate const& m_ionization;
+    IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
     double const m_mean_free_path;
     DConstFieldVx const m_quadrature_coeffs;
@@ -46,7 +47,7 @@ public:
      * @param[in] density_coupling_coeff The coefficient of the density source.
      * @param[in] momentum_coupling_coeff The coefficient of the momentum source.
      * @param[in] energy_coupling_coeff The coefficient of the energy source.
-     * @param[in] ionization The rate of the ionization reaction.
+     * @param[in] ionisation The rate of the ionisation reaction.
      * @param[in] recombination The rate of the recombination reaction.
      * @param[in] normalization_coeff The normalization coefficient of neutrals.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
@@ -58,7 +59,7 @@ public:
             double density_coupling_coeff,
             double momentum_coupling_coeff,
             double energy_coupling_coeff,
-            IReactionRate const& ionization,
+            IReactionRate const& ionisation,
             IReactionRate const& recombination,
             SplineXBuilder const& spline_builder_on_X,
             GridNeutralInterpolator const& interpolator_between_X_and_Xn,
@@ -79,54 +80,54 @@ public:
 
     /**
      * @brief Computes the source term density_source_neutral(x), with is the result
-     * of the sink due to ionization and the source due to recombination
+     * of the sink due to ionisation and the source due to recombination
      *
      * @param[in, out] density_source_neutral The source term.
      * @param[in] kinsp_density The computed plasma densities.
      * @param[in] neutrals The neutral density.
-     * @param[in] ionization The ionization rate.
+     * @param[in] ionisation The ionisation rate.
      * @param[in] recombination The recombination rate.
      *
     */
-    void get_source_term(
+    void get_particle_source_term(
             DFieldSpXn density_source_neutral,
-            DConstFieldSpX kinsp_density,
-            DConstFieldMomSpXn neutrals,
-            DConstFieldSpX ionization,
-            DConstFieldSpX recombination) const;
+            DConstFieldSpXn kinsp_density,
+            DConstFieldSpXn density_neutrals,
+            DConstFieldSpXn ionisation,
+            DConstFieldSpXn recombination) const;
 
     /**
      * @brief the derivative of the neutral density due to the source term
      *
      * @param[in, out] dn The infinitesimal variation of the neutral density.
-     * @param[in] neutrals The neutral density.
-     * @param[in] density_source_neutral The density source term.
+     * @param[in] particle_source_neutrals The density source term.
      *
     */
-    void get_derivative_neutrals(
-            DFieldMomSpXn dn,
-            DConstFieldMomSpXn neutrals,
-            DConstFieldSpXn density_source_neutral,
-            double const sqrt_mass_ratio) const;
+    void get_derivative_neutrals(DFieldSpXn dn, DConstFieldSpXn particle_source_neutrals) const;
 
     /**
      * @brief Computes df for the equation df/dt = density_source_neutral(x) * velocity_shape_source(x,v).
      *
      * @param[in, out] df The infinitesimal variation of the distribution function.
-     * @param[in] allfdistribu The distribution function.
      * @param[in] velocity_shape_source The velocity shape of the source.
      *
     */
-    void get_derivative_allfdistribu(
-            DFieldSpXVx df,
-            DConstFieldSpXVx allfdistribu,
-            DConstFieldSpXVx velocity_shape_source) const;
+    void get_derivative_allfdistribu(DFieldSpXVx df, DConstFieldSpXVx plasma_source_term) const;
 
-    void get_plasma_source(
-            DFieldSpXVx plasma_source,
+    void get_plasma_source_term(
+            DFieldSpXVx plasma_source_term,
             DConstFieldSpX kinsp_temperature,
-            DConstFieldSpXn neutral_density_source_on_Xn) const;
-    void interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X) const;
+            DConstFieldSpXn neutral_particlw_source_on_Xn) const;
+
+    void compute_plasma_moments(
+            DFieldMomSpX const plasma_moments,
+            DConstFieldSpXVx const allfdistribu) const;
+
+    void compute_reaction_rates(
+            DFieldSpXn const ionisation,
+            DFieldSpXn const recombination,
+            DConstFieldMomSpXn const neutrals_moment,
+            DConstFieldMomSpX const plasma_moments_on_X) const;
 
 private:
     /**
