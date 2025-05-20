@@ -24,6 +24,10 @@ if __name__ == '__main__':
                         default=-1,
                         type=int,
                         help='time index')
+    parser.add_argument('--show_flux',
+                        action='store_true',
+                        default=False,
+                        help='display the particle flux')
 
     args = parser.parse_args()
 
@@ -63,9 +67,10 @@ if __name__ == '__main__':
 
     title = f'fluid moments {current_nspecies}, t={time_diag}, dt={dt}'
     data_dict = {f'$n_N, t={time_init}$': density_n.sel(time=time_init),
-                 f'$n_N, t={time_diag}$': density_n.sel(time=time_diag),
-                 f'$\Gamma_N, t={time_init}$': flux_n.sel(time=time_init),
-                 f'$\Gamma_N, t={time_diag}$': flux_n.sel(time=time_diag)}
+                 f'$n_N, t={time_diag}$': density_n.sel(time=time_diag)}
+    if args.show_flux:
+        data_dict[f'$\Gamma_N, t={time_init}$'] = flux_n.sel(time=time_init)
+        data_dict[f'$\Gamma_N, t={time_diag}$'] = flux_n.sel(time=time_diag)
 
     output_filename = Path.cwd() / f'fluid_moments_{current_nspecies}_t{time_diag}_dt{dt}.png'
     plot_field1d(data_dict, title, output_filename)
