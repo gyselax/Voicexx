@@ -5,6 +5,7 @@
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
+#include "ddc_alias_inline_functions.hpp"
 #include "densitycoupling.hpp"
 #include "geometry.hpp"
 #include "geometry_moments.hpp"
@@ -18,20 +19,20 @@ DensityCoupling::DensityCoupling(
         double const density_coupling_coeff,
         double const momentum_coupling_coeff,
         double const energy_coupling_coeff,
+        IReactionRate const& charge_exchange,
         IReactionRate const& ionisation,
         IReactionRate const& recombination,
-        SplineXBuilder const& spline_builder_on_X,
         GridNeutralInterpolator const& interpolator_between_X_and_Xn,
         double const mean_free_path,
         DConstFieldVx const& quadrature_coeffs)
     : m_density_coupling_coeff(density_coupling_coeff)
     , m_momentum_coupling_coeff(momentum_coupling_coeff)
     , m_energy_coupling_coeff(energy_coupling_coeff)
+    , m_charge_exchange(charge_exchange)
     , m_ionisation(ionisation)
     , m_recombination(recombination)
     , m_mean_free_path(mean_free_path)
     , m_quadrature_coeffs(quadrature_coeffs)
-    , m_spline_builder_on_X(spline_builder_on_X)
     , m_interpolator_between_X_and_Xn(interpolator_between_X_and_Xn)
 {
     ddc::expose_to_pdi(
@@ -63,7 +64,8 @@ IdxSp DensityCoupling::find_ion(IdxRangeSp const dom_kinsp) const
 }
 
 void DensityCoupling::get_particle_source_term(
-        DFieldSpXn density_source_neutral,
+        DFieldSpXn particle_source_on_Xn,
+        DFieldSpX particle_source_on_X,
         DConstFieldSpXn kinsp_density,
         DConstFieldSpXn density_neutrals,
         DConstFieldSpXn ionisation,
@@ -71,87 +73,114 @@ void DensityCoupling::get_particle_source_term(
 {
     IdxSp const iion(find_ion(get_idx_range<Species>(kinsp_density)));
     double const sqrt_mass_ratio(Kokkos::sqrt(mass(ielec()) / mass(iion)));
+    double const mean_free_path_proxy = m_mean_free_path;
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
-            get_idx_range(density_source_neutral),
+            get_idx_range(particle_source_on_Xn),
             KOKKOS_LAMBDA(IdxSpXn const ispxn) {
                 IdxXn ixn(ispxn);
-                density_source_neutral(ispxn)
+                particle_source_on_Xn(ispxn)
                         = -density_neutrals(ispxn) * kinsp_density(ielec(), ixn) * ionisation(ispxn)
                           + kinsp_density(iion, ixn) * kinsp_density(ielec(), ixn)
                                     * recombination(ispxn);
-                density_source_neutral(ispxn) *= sqrt_mass_ratio;
+                particle_source_on_Xn(ispxn) *= sqrt_mass_ratio / mean_free_path_proxy;
             });
+    m_interpolator_between_X_and_Xn(particle_source_on_X, get_const_field(particle_source_on_Xn));
 }
 
 void DensityCoupling::get_plasma_source_term(
         DFieldSpXVx plasma_source_term,
-        DConstFieldSpX kinsp_temperature,
-        DConstFieldSpXn neutral_particle_source_on_Xn) const
+        DConstFieldMomSpX plasma_moments,
+        DConstFieldX neutrals_density,
+        DConstFieldX neutrals_particle_flux,
+        DConstFieldX neutrals_particle_source,
+        DConstFieldX charge_exchange_rate,
+        DConstFieldX ionisation_rate,
+        DConstFieldX recombination_rate) const
 {
-    // interpolate the particle source on GridX
-    IdxRangeSp neutrals_species(get_idx_range<Species>(neutral_particle_source_on_Xn));
-    if (neutrals_species.size() != 1) {
-        throw std::runtime_error(
-                "For the moments the coupling operator only works for one neutrals species");
-    }
-    IdxRangeSpX
-            idx_range_particle_source(neutrals_species, get_idx_range<GridX>(plasma_source_term));
-    DFieldMemSpX particle_source_alloc(idx_range_particle_source);
-    DFieldSpX particle_source = get_field(particle_source_alloc);
-    m_interpolator_between_X_and_Xn(particle_source, neutral_particle_source_on_Xn);
-    DConstFieldX plasma_particle_source
-            = get_const_field(particle_source[neutrals_species.front()]);
-
     /*double density_coupling_coeff_proxy = m_density_coupling_coeff;*/
     /*double momentum_coupling_coeff_proxy = m_momentum_coupling_coeff;*/
     /*double energy_coupling_coeff_proxy = m_energy_coupling_coeff;*/
     /*double mean_free_path_proxy = m_mean_free_path;*/
 
-    // ion species
     IdxSp const iion(find_ion(get_idx_range<Species>(plasma_source_term)));
     double const mass_ion = mass(iion);
+    double const mass_elec = mass(ielec());
     DField<IdxRangeXVx> ions_source_term = plasma_source_term[iion];
+    DField<IdxRangeXVx> electrons_source_term = plasma_source_term[ielec()];
+    DConstFieldSpX plasma_density = plasma_moments[GeometryMX::density_idx];
+    DConstFieldSpX plasma_velocity = plasma_moments[GeometryMX::velocity_idx];
+    DConstFieldSpX plasma_temperature = plasma_moments[GeometryMX::temperature_idx];
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
-            get_idx_range(ions_source_term),
+            get_idx_range<GridX, GridVx>(plasma_source_term),
             KOKKOS_LAMBDA(IdxXVx const ixvx) {
-                ions_source_term(ixvx) = 0;
                 IdxX const ix(ixvx);
                 IdxVx const ivx(ixvx);
-                CoordVx const coordvx = ddc::coordinate(ivx);
-                double const density_source = plasma_particle_source(ix); // S_{n,N}
-                double const momentum_source = 0; // S_{m,i}
-                double const velocity_source = momentum_source / density_source; // U_{N,i}
-                double const energy_source = 0; // S_{E,i}
-                double const temperature_source = 2 * (energy_source / density_source)
-                                                  - mass(iion) * velocity_source; // T_{N,i}
-                /*double const neutral_temperature = kinsp_temperature(iion, ix);*/
-                /*double const coordvx_sq = coordvx * coordvx;*/
-                /*double const density_source*/
-                /*        = density_coupling_coeff_proxy*/
-                /*          * (1.5 - coordvx_sq / (2 * neutral_temperature))*/
-                /*          * Kokkos::exp(-coordvx_sq / (2 * neutral_temperature));*/
-                /*double const momentum_source*/
-                /*        = momentum_coupling_coeff_proxy * Kokkos::sqrt(2 / neutral_temperature)*/
-                /*          * coordvx * Kokkos::exp(-coordvx_sq / (2 * neutral_temperature));*/
-                /*double const energy_source = 2 * energy_coupling_coeff_proxy*/
-                /*                             * (-1 + coordvx_sq / neutral_temperature)*/
-                /*                             * Kokkos::exp(-coordvx_sq / (2 * neutral_temperature));*/
-                ions_source_term(ixvx)
-                        = -(density_source
-                            / (Kokkos::sqrt(2 * M_PI * temperature_source / mass_ion)))
-                          * Kokkos::exp(
-                                  -(mass_ion * Kokkos::pow(coordvx - velocity_source, 2))
-                                  / (2 * temperature_source));
+                double const coordvx = ddc::coordinate(ivx);
+                double const density_source = neutrals_particle_source(ix); // S_{n,N}
+                if (abs(density_source) < 1e-14) {
+                    ions_source_term(ixvx) = 0;
+                    electrons_source_term(ixvx) = 0;
+                } else {
+                    double const density_neutrals = neutrals_density(ix);
+                    double const density_ions = plasma_density(iion, ix);
+                    double const density_electrons = plasma_density(ielec(), ix);
+                    double const velocity_ions = plasma_velocity(iion, ix);
+                    double const temperature_ions = plasma_temperature(iion, ix);
+                    double const energy_ions = (mass_ion * velocity_ions * velocity_ions
+                                                + density_ions * temperature_ions)
+                                               / 2;
+                    double const K_cx = charge_exchange_rate(ix);
+                    double const K_i = ionisation_rate(ix);
+                    double const K_r = recombination_rate(ix);
+                    // ion species
+                    {
+                        double const R_E = 0.25;
+                        double const momentum_source
+                                = mass_ion
+                                  * (neutrals_particle_flux(ix)
+                                             * (density_ions * K_i + density_ions * K_cx)
+                                     - density_ions * density_electrons * K_r
+                                     + density_neutrals * density_ions * K_cx);
+                        double const velocity_source = momentum_source / density_source; // U_{N,i}
+                        double const energy_source
+                                = R_E * energy_ions * density_neutrals * density_electrons * K_i
+                                  - energy_ions * density_ions * density_electrons * K_r
+                                  - mass_ion * velocity_ions * velocity_ions * density_neutrals
+                                            * density_ions * K_cx / 2; // S_{E,i}
+                        double const temperature_source = 2 * (energy_source / density_source)
+                                                          - mass_ion * velocity_source; // T_{N,i}
+                        double const normalisation_term
+                                = -density_source
+                                  / Kokkos::sqrt(2 * M_PI * temperature_source / mass_ion);
+                        ions_source_term(ixvx)
+                                = normalisation_term
+                                  * Kokkos::exp(
+                                          -(mass_ion * Kokkos::pow(coordvx - velocity_source, 2))
+                                          / (2 * temperature_source));
+                    }
+                    // electron species
+                    {
+                        double const temperature_loss_ionisation = 1;
+                        double const temperature_loss_recombination = 1;
+                        double const energy_source
+                                = -temperature_loss_ionisation * density_electrons
+                                          * density_neutrals * K_i
+                                  - temperature_loss_recombination * density_electrons
+                                            * density_ions * K_r; // S_{E,e}
+                        double const temperature_source
+                                = 2 * (energy_source / density_source); // T_{N,e}
+                        double const normalisation_term
+                                = -density_source
+                                  / Kokkos::sqrt(2 * M_PI * temperature_source / mass_elec);
+                        electrons_source_term(ixvx) = normalisation_term
+                                                      * Kokkos::exp(
+                                                              -(mass_elec * Kokkos::pow(coordvx, 2))
+                                                              / (2 * temperature_source));
+                    }
+                }
             });
-
-    // electron species
-    DField<IdxRangeXVx> electrons_source_term = plasma_source_term[ielec()];
-    ddc::parallel_for_each(
-            Kokkos::DefaultExecutionSpace(),
-            get_idx_range(ions_source_term),
-            KOKKOS_LAMBDA(IdxXVx const ixvx) { electrons_source_term(ixvx) = 0; });
 }
 
 void DensityCoupling::get_derivative_neutrals(
@@ -159,13 +188,10 @@ void DensityCoupling::get_derivative_neutrals(
         DConstFieldSpXn particle_source_neutrals) const
 {
     IdxRangeSpXn range_neutrals_spxn(get_idx_range(particle_source_neutrals));
-    double mean_free_path_proxy = m_mean_free_path;
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             range_neutrals_spxn,
-            KOKKOS_LAMBDA(IdxSpXn const ifspx) {
-                dn(ifspx) = particle_source_neutrals(ifspx) / mean_free_path_proxy;
-            });
+            KOKKOS_LAMBDA(IdxSpXn const ifspx) { dn(ifspx) = particle_source_neutrals(ifspx); });
 }
 
 void DensityCoupling::get_derivative_allfdistribu(
@@ -179,20 +205,21 @@ void DensityCoupling::get_derivative_allfdistribu(
 }
 
 void DensityCoupling::compute_plasma_moments(
-        DFieldMomSpX const plasma_moments,
+        DFieldMomSpX const plasma_moments_on_X,
+        DFieldMomSpXn const plasma_moments_on_Xn,
         DConstFieldSpXVx const allfdistribu) const
 {
     IdxRangeSpX idx_range_kspx(get_idx_range(allfdistribu));
-    DFieldSpX density = plasma_moments[GeometryMX::density_idx];
-    DFieldSpX velocity = plasma_moments[GeometryMX::velocity_idx];
-    DFieldSpX temperature = plasma_moments[GeometryMX::temperature_idx];
+    DFieldSpX density_on_X = plasma_moments_on_X[GeometryMX::density_idx];
+    DFieldSpX velocity_on_X = plasma_moments_on_X[GeometryMX::velocity_idx];
+    DFieldSpX temperature_on_X = plasma_moments_on_X[GeometryMX::temperature_idx];
 
     DConstFieldVx quadrature_coeffs = m_quadrature_coeffs;
 
     IdxRangeVx const idx_range_vx(get_idx_range<GridVx>(allfdistribu));
 
     // fluid moments computation
-    ddc::parallel_fill(plasma_moments, 0.);
+    ddc::parallel_fill(plasma_moments_on_X, 0.);
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_kspx,
@@ -202,42 +229,51 @@ void DensityCoupling::compute_plasma_moments(
                 for (IdxVx const ivx : idx_range_vx) {
                     CoordVx const coordv = ddc::coordinate(ivx);
                     double const val(quadrature_coeffs(ivx) * allfdistribu(ispx, ivx));
-                    density(ispx) += val;
+                    density_on_X(ispx) += val;
                     particle_flux += val * coordv;
                     momentum_flux += val * coordv * coordv;
                 }
-                velocity(ispx) = particle_flux / density(ispx);
-                temperature(ispx)
-                        = (momentum_flux - particle_flux * velocity(ispx)) / density(ispx);
+                velocity_on_X(ispx) = particle_flux / density_on_X(ispx);
+                temperature_on_X(ispx) = (momentum_flux - particle_flux * velocity_on_X(ispx))
+                                         / density_on_X(ispx);
             });
+    m_interpolator_between_X_and_Xn(
+            plasma_moments_on_Xn[GeometryMX::density_idx],
+            get_const_field(density_on_X));
+    m_interpolator_between_X_and_Xn(
+            plasma_moments_on_Xn[GeometryMX::velocity_idx],
+            get_const_field(velocity_on_X));
+    m_interpolator_between_X_and_Xn(
+            plasma_moments_on_Xn[GeometryMX::temperature_idx],
+            get_const_field(temperature_on_X));
 }
 
 void DensityCoupling::compute_reaction_rates(
+        DFieldSpX const charge_exchange_on_X,
+        DFieldSpX const ionisation_on_X,
+        DFieldSpX const recombination_on_X,
+        DFieldSpXn const charge_exchange_on_Xn,
         DFieldSpXn const ionisation_on_Xn,
         DFieldSpXn const recombination_on_Xn,
-        DConstFieldMomSpXn const neutrals_moments,
+        DConstFieldMomSpXn const neutrals_moment_on_Xn,
         DConstFieldMomSpX const plasma_moments_on_X) const
 {
     IdxRangeSpX idx_range_rates_on_X(
-            get_idx_range<Species>(neutrals_moments),
+            get_idx_range<Species>(neutrals_moment_on_Xn),
             get_idx_range<GridX>(plasma_moments_on_X));
 
     // building reaction rates
     // pay attention, these are normalised to Kcx0=10^-14
-    DFieldMemSpX ionisation_rate_alloc(idx_range_rates_on_X);
-    DFieldMemSpX recombination_rate_alloc(idx_range_rates_on_X);
-
-    DFieldSpX ionisation_rate = get_field(ionisation_rate_alloc);
-    DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
-
     DConstFieldSpX plasma_density = plasma_moments_on_X[GeometryMX::density_idx];
     DConstFieldSpX plasma_temperature = plasma_moments_on_X[GeometryMX::temperature_idx];
 
-    m_ionisation(ionisation_rate, plasma_density, plasma_temperature);
-    m_recombination(recombination_rate, plasma_density, plasma_temperature);
+    m_charge_exchange(charge_exchange_on_X, plasma_density, plasma_temperature);
+    m_ionisation(ionisation_on_X, plasma_density, plasma_temperature);
+    m_recombination(recombination_on_X, plasma_density, plasma_temperature);
 
-    m_interpolator_between_X_and_Xn(ionisation_on_Xn, get_const_field(ionisation_rate));
-    m_interpolator_between_X_and_Xn(recombination_on_Xn, get_const_field(recombination_rate));
+    m_interpolator_between_X_and_Xn(charge_exchange_on_Xn, get_const_field(charge_exchange_on_X));
+    m_interpolator_between_X_and_Xn(ionisation_on_Xn, get_const_field(ionisation_on_X));
+    m_interpolator_between_X_and_Xn(recombination_on_Xn, get_const_field(recombination_on_X));
 }
 
 void DensityCoupling::operator()(
@@ -258,57 +294,96 @@ void DensityCoupling::operator()(
     IdxRangeMomSpX idx_range_momkspx(GeometryMX::first_three_moments, idx_range_kinsp_on_X);
     DFieldMem<IdxRangeMomSpX> plasma_moments_on_X_alloc(idx_range_momkspx);
     DFieldMomSpX plasma_moments_on_X(plasma_moments_on_X_alloc);
-    compute_plasma_moments(plasma_moments_on_X, get_const_field(allfdistribu));
-
-    // interpolate them on the neutrals grid
     IdxRangeMomSpXn idx_range_kinsp_on_Xn(
             GeometryMX::first_three_moments,
             get_idx_range<Species>(allfdistribu),
             get_idx_range<GridXNeutrals>(neutrals_moments));
     DFieldMemMomSpXn plasma_moments_on_Xn_alloc(idx_range_kinsp_on_Xn);
     DFieldMomSpXn plasma_moments_on_Xn(plasma_moments_on_Xn_alloc);
-    m_interpolator_between_X_and_Xn(
-            plasma_moments_on_Xn[GeometryMX::density_idx],
-            get_const_field(plasma_moments_on_X[GeometryMX::density_idx]));
-    m_interpolator_between_X_and_Xn(
-            plasma_moments_on_Xn[GeometryMX::velocity_idx],
-            get_const_field(plasma_moments_on_X[GeometryMX::velocity_idx]));
-    m_interpolator_between_X_and_Xn(
-            plasma_moments_on_Xn[GeometryMX::temperature_idx],
-            get_const_field(plasma_moments_on_X[GeometryMX::temperature_idx]));
+    compute_plasma_moments(
+            plasma_moments_on_X,
+            plasma_moments_on_Xn,
+            get_const_field(allfdistribu));
 
-    // compute the reaction rates (directly on the neutral grid)
-    IdxRangeSpXn idx_range_neutrals(get_idx_range(neutrals_moments));
-    DFieldMemSpXn i_rate_Xn_alloc(idx_range_neutrals);
-    DFieldMemSpXn r_rate_Xn_alloc(idx_range_neutrals);
+    // compute the reaction rates
+    IdxRangeSpXn idx_range_neutrals_on_Xn(get_idx_range(neutrals_moments));
+    DFieldMemSpXn i_rate_Xn_alloc(idx_range_neutrals_on_Xn);
+    DFieldMemSpXn r_rate_Xn_alloc(idx_range_neutrals_on_Xn);
+    DFieldMemSpXn cx_rate_Xn_alloc(idx_range_neutrals_on_Xn);
     DFieldSpXn ionisation_rate_on_Xn = get_field(i_rate_Xn_alloc);
     DFieldSpXn recombination_rate_on_Xn = get_field(r_rate_Xn_alloc);
+    DFieldSpXn charge_exchange_rate_on_Xn = get_field(cx_rate_Xn_alloc);
+    IdxRangeSp neutrals_species(get_idx_range<Species>(neutrals_moments));
+    IdxRangeSpX idx_range_neutrals_on_X(neutrals_species, get_idx_range<GridX>(allfdistribu));
+    DFieldMemSpX i_rate_X_alloc(idx_range_neutrals_on_X);
+    DFieldMemSpX r_rate_X_alloc(idx_range_neutrals_on_X);
+    DFieldMemSpX cx_rate_X_alloc(idx_range_neutrals_on_X);
+    DFieldSpX ionisation_rate_on_X = get_field(i_rate_X_alloc);
+    DFieldSpX recombination_rate_on_X = get_field(r_rate_X_alloc);
+    DFieldSpX charge_exchange_rate_on_X = get_field(cx_rate_X_alloc);
     compute_reaction_rates(
+            charge_exchange_rate_on_X,
+            ionisation_rate_on_X,
+            recombination_rate_on_X,
+            charge_exchange_rate_on_Xn,
             ionisation_rate_on_Xn,
             recombination_rate_on_Xn,
             get_const_field(neutrals_moments),
             get_const_field(plasma_moments_on_X));
 
-    // particle source term computation, on Xn
-    DFieldMemSpXn particle_source_neutral_Xn_alloc(
-            get_idx_range<Species, GridXNeutrals>(neutrals_moments));
-    DFieldSpXn particle_source_neutral_on_Xn = get_field(particle_source_neutral_Xn_alloc);
+    // compute the particle source term
+    DFieldMemSpXn particle_source_on_Xn_alloc(idx_range_neutrals_on_Xn);
+    DFieldSpXn particle_source_on_Xn = get_field(particle_source_on_Xn_alloc);
+    DFieldMemSpX particle_source_on_X_alloc(idx_range_neutrals_on_X);
+    DFieldSpX particle_source_on_X = get_field(particle_source_on_X_alloc);
     DFieldSpXn density_neutrals = neutrals_moments[GeometryMX::density_idx];
     get_particle_source_term(
-            particle_source_neutral_on_Xn,
+            particle_source_on_Xn,
+            particle_source_on_X,
             get_const_field(plasma_moments_on_Xn[GeometryMX::density_idx]),
             get_const_field(density_neutrals),
             get_const_field(ionisation_rate_on_Xn),
             get_const_field(recombination_rate_on_Xn));
 
-    // S(v) velocity shape calculation for kinetic species
+    //interpolate the neutrals fluid moments on gridX
+    IdxRangeMomSpX
+            idx_range_neutrals_on_MomX(GeometryMX::first_two_moments, idx_range_neutrals_on_X);
+    DFieldMemMomSpX neutrals_moments_on_X_alloc(idx_range_neutrals_on_MomX);
+    DFieldMomSpX neutrals_moments_on_X = get_field(neutrals_moments_on_X_alloc);
+    m_interpolator_between_X_and_Xn(
+            neutrals_moments_on_X[GeometryMX::density_idx],
+            get_const_field(neutrals_moments[GeometryMX::density_idx]));
+    m_interpolator_between_X_and_Xn(
+            neutrals_moments_on_X[GeometryMX::velocity_idx],
+            get_const_field(neutrals_moments[GeometryMX::velocity_idx]));
+
+    // slicing everything at the first neutrals species
+    if (neutrals_species.size() != 1) {
+        throw std::runtime_error(
+                "For the moments the coupling operator only works for one neutrals species");
+    }
+    IdxSp ineutrals = neutrals_species.front();
+    DConstFieldX plasma_particle_source = get_const_field(particle_source_on_X[ineutrals]);
+    DConstFieldX neutrals_density
+            = get_const_field(neutrals_moments_on_X[GeometryMX::density_idx][ineutrals]);
+    DConstFieldX neutrals_particle_flux
+            = get_const_field(neutrals_moments_on_X[GeometryMX::velocity_idx][ineutrals]);
+    DConstFieldX charge_exchange = get_const_field(charge_exchange_rate_on_X[ineutrals]);
+    DConstFieldX ionisation = get_const_field(ionisation_rate_on_X[ineutrals]);
+    DConstFieldX recombination = get_const_field(recombination_rate_on_X[ineutrals]);
+
+    // compute the plasma source term
     DFieldMemSpXVx plasma_source_alloc(get_idx_range(allfdistribu));
     DFieldSpXVx plasma_source = get_field(plasma_source_alloc);
-    DFieldSpX plasma_temperature_on_X = plasma_moments_on_X[GeometryMX::temperature_idx];
     get_plasma_source_term(
             plasma_source,
-            get_const_field(plasma_temperature_on_X),
-            get_const_field(particle_source_neutral_on_Xn));
+            get_const_field(plasma_moments_on_X),
+            neutrals_density,
+            neutrals_particle_flux,
+            plasma_particle_source,
+            charge_exchange,
+            ionisation,
+            recombination);
 
     // do the actual time stepping
     RK2<DFieldMemSpXVx> timestepper_kinetic(get_idx_range(allfdistribu));
@@ -318,7 +393,7 @@ void DensityCoupling::operator()(
 
     RK2<DFieldMemSpXn> timestepper_neutrals(get_idx_range(density_neutrals));
     timestepper_neutrals.update(density_neutrals, dt, [&](DFieldSpXn dn, DConstFieldSpXn n) {
-        get_derivative_neutrals(dn, get_const_field(particle_source_neutral_on_Xn));
+        get_derivative_neutrals(dn, get_const_field(particle_source_on_Xn));
     });
 
     Kokkos::Profiling::popRegion();

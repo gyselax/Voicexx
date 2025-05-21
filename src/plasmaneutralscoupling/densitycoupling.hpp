@@ -32,12 +32,11 @@ private:
     double const m_density_coupling_coeff;
     double const m_momentum_coupling_coeff;
     double const m_energy_coupling_coeff;
+    IReactionRate const& m_charge_exchange;
     IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
     double const m_mean_free_path;
     DConstFieldVx const m_quadrature_coeffs;
-
-    SplineXBuilder const& m_spline_builder_on_X;
     GridNeutralInterpolator const& m_interpolator_between_X_and_Xn;
 
 public:
@@ -59,9 +58,9 @@ public:
             double density_coupling_coeff,
             double momentum_coupling_coeff,
             double energy_coupling_coeff,
+            IReactionRate const& charge_exchange,
             IReactionRate const& ionisation,
             IReactionRate const& recombination,
-            SplineXBuilder const& spline_builder_on_X,
             GridNeutralInterpolator const& interpolator_between_X_and_Xn,
             double const mean_free_path,
             DConstFieldVx const& quadrature_coeffs);
@@ -90,7 +89,8 @@ public:
      *
     */
     void get_particle_source_term(
-            DFieldSpXn density_source_neutral,
+            DFieldSpXn particle_source_on_Xn,
+            DFieldSpX particle_source_on_X,
             DConstFieldSpXn kinsp_density,
             DConstFieldSpXn density_neutrals,
             DConstFieldSpXn ionisation,
@@ -116,17 +116,27 @@ public:
 
     void get_plasma_source_term(
             DFieldSpXVx plasma_source_term,
-            DConstFieldSpX kinsp_temperature,
-            DConstFieldSpXn neutral_particlw_source_on_Xn) const;
+            DConstFieldMomSpX plasma_moments,
+            DConstFieldX neutrals_density,
+            DConstFieldX neutrals_particle_flux,
+            DConstFieldX neutrals_particle_source,
+            DConstFieldX charge_exchange_rate,
+            DConstFieldX ionisation_rate,
+            DConstFieldX recombination_rate) const;
 
     void compute_plasma_moments(
-            DFieldMomSpX const plasma_moments,
+            DFieldMomSpX const plasma_moments_on_X,
+            DFieldMomSpXn const plasma_moments_on_Xn,
             DConstFieldSpXVx const allfdistribu) const;
 
     void compute_reaction_rates(
-            DFieldSpXn const ionisation,
-            DFieldSpXn const recombination,
-            DConstFieldMomSpXn const neutrals_moment,
+            DFieldSpX const charge_exchange_on_X,
+            DFieldSpX const ionisation_on_X,
+            DFieldSpX const recombination_on_X,
+            DFieldSpXn const charge_exchange_on_Xn,
+            DFieldSpXn const ionisation_on_Xn,
+            DFieldSpXn const recombination_on_Xn,
+            DConstFieldMomSpXn const neutrals_moment_on_Xn,
             DConstFieldMomSpX const plasma_moments_on_X) const;
 
 private:

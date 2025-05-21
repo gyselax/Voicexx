@@ -347,9 +347,9 @@ int main(int argc, char** argv)
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.density_coupling_coeff"),
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.momentum_coupling_coeff"),
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.energy_coupling_coeff"),
+                charge_exchange,
                 ionisation,
                 recombination,
-                builder_x,
                 interpolator_between_X_and_Xn,
                 mean_free_path,
                 get_const_field(quadrature_coeffs_alloc));
