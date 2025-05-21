@@ -16,6 +16,7 @@
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "noenergytransfercoupling.hpp"
@@ -152,22 +153,17 @@ TEST(GeometryXM, PredCorrHybrid)
     init(allfdistribu);
 
     // Moments index range initialisation
-    IdxStepMom const nb_fluid_moments(3);
-    IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
+    IdxStepMom const nb_fluid_moments(1);
+    IdxRangeMom const meshM(GeometryMX::density_idx, nb_fluid_moments);
+    assert(GeometryMX::is_valid(meshM));
     ddc::init_discrete_space<GridMom>();
 
-    IdxMom idensity(0);
-    IdxMom iflux(1);
-    IdxMom istress(2);
-
     // Initialisation of fluid species moments
-    DFieldMemSpMomX fluid_moments_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX fluid_moments = get_field(fluid_moments_alloc);
+    DFieldMemMomSpX fluid_moments_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX fluid_moments = get_field(fluid_moments_alloc);
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
-    ddc::parallel_fill(moments_init[idensity], 1.);
-    ddc::parallel_fill(moments_init[iflux], 0.);
-    ddc::parallel_fill(moments_init[istress], 1.);
+    ddc::parallel_fill(moments_init[GeometryMX::density_idx], 1.);
 
     ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init));
     fluid_init(fluid_moments);

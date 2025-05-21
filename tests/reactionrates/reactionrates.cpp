@@ -10,6 +10,7 @@
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "ionisation.hpp"
 #include "recombination.hpp"
 #include "species_info.hpp"
@@ -80,7 +81,7 @@ static void TestDiffusiveNeutralsRateCoefficients()
 
     // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(1);
-    IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
+    IdxRangeMom const meshM(GeometryMX::density_idx, nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
 
     IdxRangeSpX idx_range_fluidspx = IdxRangeSpX(idx_range_fluidsp, meshX);
@@ -99,8 +100,8 @@ static void TestDiffusiveNeutralsRateCoefficients()
     IonisationRate ionisation(1.);
     RecombinationRate recombination(1.);
 
-    DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX neutrals = get_field(neutrals_alloc);
+    DFieldMemMomSpX neutrals_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX neutrals = get_field(neutrals_alloc);
 
     host_t<DFieldMemSpMom> moments_init(IdxRangeSpMom(idx_range_fluidsp, meshM));
     ddc::parallel_fill(moments_init, 1.);

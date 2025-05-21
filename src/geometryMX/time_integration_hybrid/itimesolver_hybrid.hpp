@@ -10,8 +10,8 @@ template <typename FluidGrid>
 class ITimeSolverHybrid
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = DField<IdxRangeMomSpGrid>;
 
 public:
     virtual ~ITimeSolverHybrid() = default;
@@ -31,7 +31,7 @@ public:
      */
     virtual DFieldSpXVx operator()(
             DFieldSpXVx allfdistribu,
-            DFieldSpMomGrid fluid_moments,
+            DFieldMomSpGrid fluid_moments,
             double time_start,
             double dt,
             int steps = 1) const = 0;

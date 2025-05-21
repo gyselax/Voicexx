@@ -26,8 +26,8 @@ private:
     double& m_time_start; /* corresponding simulation time */
 
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = Field<double, IdxRangeMomSpGrid>;
 
 public:
     /**
@@ -52,7 +52,7 @@ public:
      *                          read from an external file.
      * @return The initialised distribution function.
      */
-    DFieldSpXVx operator()(DFieldSpXVx allfdistribu, DFieldSpMomGrid fluid_moments) const
+    DFieldSpXVx operator()(DFieldSpXVx allfdistribu, DFieldMomSpGrid fluid_moments) const
     {
         auto allfdistribu_host = ddc::create_mirror_view_and_copy(get_field(allfdistribu));
         auto fluid_moments_host = ddc::create_mirror_view_and_copy(get_field(fluid_moments));

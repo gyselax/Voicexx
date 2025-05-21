@@ -26,6 +26,7 @@
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "geometry_neutrals.hpp"
 #include "input.hpp"
 #include "irighthandside.hpp"
@@ -128,8 +129,6 @@ int main(int argc, char** argv)
     DFieldMemSpXVx allfdistribu(meshSpXVx);
 
     // Moments index range initialisation
-    IdxStepMom const nb_fluid_moments(1);
-    IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
 
     // Neutral species initialisation
@@ -141,8 +140,9 @@ int main(int argc, char** argv)
     ddc::init_discrete_space<GridXNeutrals>(
             SplineInterpPointsXNeutrals::get_sampling<GridXNeutrals>());
     IdxRangeXn mesh_x_neutrals = SplineInterpPointsXNeutrals::get_domain<GridXNeutrals>();
-    DFieldMemSpMomXn neutrals_alloc(IdxRangeSpMomXn(idx_range_fluidsp, meshM, mesh_x_neutrals));
-    DFieldSpMomXn neutrals = get_field(neutrals_alloc);
+    DFieldMemMomSpXn neutrals_alloc(
+            IdxRangeMomSpXn(GeometryMX::first_two_moments, idx_range_fluidsp, mesh_x_neutrals));
+    DFieldMomSpXn neutrals = get_field(neutrals_alloc);
 
     if (iter_start == 0) { // if we start a new simulation
         // we need to add a perturbation otherwise it will stay at equilibrium
@@ -151,13 +151,15 @@ int main(int argc, char** argv)
         init(get_field(allfdistribu));
 
         //neutrals get init according to the input file
-        host_t<DFieldMemSpMom> moments_init_host(IdxRangeSpMom(idx_range_fluidsp, meshM));
+        host_t<DFieldMemSpMom> moments_init_host(
+                IdxRangeSpMom(idx_range_fluidsp, GeometryMX::first_two_moments));
         for (IdxSp const isp : idx_range_fluidsp) {
             PC_tree_t const conf_nisp = PCpp_get(
                     conf_voicexx,
                     ".NeutralSpeciesInfo[%d]",
                     (isp - idx_range_fluidsp.front()).value());
-            ddc::parallel_fill(moments_init_host[isp], PCpp_double(conf_nisp, ".density_eq"));
+            moments_init_host(GeometryMX::density_idx, isp) = PCpp_double(conf_nisp, ".density_eq");
+            moments_init_host(GeometryMX::velocity_idx, isp) = 0;
         }
         ConstantFluidInitialisation<GridXNeutrals> fluid_init(get_const_field(moments_init_host));
         fluid_init(neutrals);

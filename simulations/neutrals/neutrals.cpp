@@ -123,8 +123,8 @@ int main(int argc, char** argv)
     IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
     ddc::init_discrete_space<GridMom>();
     // Neutral species initialisation
-    DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, mesh_x));
-    DFieldSpMomX neutrals = get_field(neutrals_alloc);
+    DFieldMemMomSpX neutrals_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, mesh_x));
+    DFieldMomSpX neutrals = get_field(neutrals_alloc);
 
     if (iter_start == 0) { // if we start a new simulation
         // we need to add a perturbation otherwise it will stay at equilibrium

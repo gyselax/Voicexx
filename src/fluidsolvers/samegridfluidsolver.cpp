@@ -4,6 +4,7 @@
 #include <ddc/pdi.hpp>
 
 #include "ddc_alias_inline_functions.hpp"
+#include "geometry_moments.hpp"
 #include "mask_tanh.hpp"
 #include "rk2.hpp"
 #include "samegridfluidsolver.hpp"
@@ -67,8 +68,8 @@ IdxSp SameGridFluidSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
 }
 
 void SameGridFluidSolver::get_derivative(
-        DFieldSpMomX dn,
-        DConstFieldSpMomX neutrals,
+        DFieldMomSpX dn,
+        DConstFieldMomSpX neutrals,
         DConstFieldSpX density,
         DConstFieldSpX velocity,
         DConstFieldSpX temperature) const
@@ -233,14 +234,14 @@ void SameGridFluidSolver::get_derivative(
             .with("convection_term", conv_term_host);
 }
 
-DFieldSpMomX SameGridFluidSolver::operator()(
-        DFieldSpMomX const neutrals,
+DFieldMomSpX SameGridFluidSolver::operator()(
+        DFieldMomSpX const neutrals,
         DConstFieldSpXVx const allfdistribu,
         DConstFieldX const efield,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("SameGridFluidSolver");
-    RK2<DFieldMemSpMomX> timestepper(get_idx_range(neutrals));
+    RK2<DFieldMemMomSpX> timestepper(get_idx_range(neutrals));
 
     // moments computation
     IdxRangeSpX idx_range_kspx(get_idx_range(allfdistribu));
@@ -276,7 +277,7 @@ DFieldSpMomX SameGridFluidSolver::operator()(
                         = (momentum_flux - particle_flux * velocity(ispx)) / density(ispx);
             });
 
-    timestepper.update(neutrals, dt, [&](DFieldSpMomX dn, DConstFieldSpMomX n) {
+    timestepper.update(neutrals, dt, [&](DFieldMomSpX dn, DConstFieldMomSpX n) {
         get_derivative(
                 dn,
                 n,

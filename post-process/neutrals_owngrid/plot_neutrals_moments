@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: MIT
+"""Plot neutral density and particle flux
+"""
+
+from argparse import ArgumentParser
+from pathlib import Path
+
+from gysdata_voice import DiskStore
+from plot_utils import plot_field1d, plot_field2d
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description='Plots the density of neutrals')
+    parser.add_argument('data_dir',
+                        action='store',
+                        nargs='?',
+                        default=Path.cwd(),
+                        type=Path,
+                        help='location of the results')
+    parser.add_argument('--itime',
+                        action='store',
+                        default=-1,
+                        type=int,
+                        help='time index')
+    parser.add_argument('--show_flux',
+                        action='store_true',
+                        default=False,
+                        help='display the particle flux')
+
+    args = parser.parse_args()
+
+    # Load data
+    path_data_structure = Path('data_structure_neutral_owngrid.yaml')
+    ds = DiskStore(args.data_dir, data_structure=path_data_structure)
+    fluid_moments = ds['fluid_moments']
+
+
+    # Neutral density
+    current_nspecies = 'neutrals'
+    density_n = fluid_moments.sel(speciesn=current_nspecies, moment='density')
+    density_n = density_n.chunk({'time': len(density_n['time'])})
+    flux_n = fluid_moments.sel(speciesn=current_nspecies, moment='particle_flux')
+    flux_n = flux_n.chunk({'time': len(flux_n['time'])})
+
+    time_init = fluid_moments.coords['time'].values[0]
+    time_diag = fluid_moments.coords['time'].values[args.itime]
+    time_values = density_n.coords['time'].values
+    dt = time_values[1] - time_values[0]
+    title = f'density {current_nspecies}, t={time_diag}, dt={dt}'
+
+    output_filename = Path.cwd() / f'density_{current_nspecies}_xt_dt{dt}.png'
+    plot_field2d(density_n,
+                 title,
+                 output_filename,
+                 scale='linear',
+                 cmap='viridis')
+
+    title = f'particle flux {current_nspecies}, t={time_diag}, dt={dt}'
+    output_filename = Path.cwd() / f'particle_flux_{current_nspecies}_xt_dt{dt}.png'
+    plot_field2d(flux_n,
+                 title,
+                 output_filename,
+                 scale='linear',
+                 cmap='viridis')
+
+    title = f'fluid moments {current_nspecies}, t={time_diag}, dt={dt}'
+    data_dict = {f'$n_N, t={time_init}$': density_n.sel(time=time_init),
+                 f'$n_N, t={time_diag}$': density_n.sel(time=time_diag)}
+    if args.show_flux:
+        data_dict[f'$\Gamma_N, t={time_init}$'] = flux_n.sel(time=time_init)
+        data_dict[f'$\Gamma_N, t={time_diag}$'] = flux_n.sel(time=time_diag)
+
+    output_filename = Path.cwd() / f'fluid_moments_{current_nspecies}_t{time_diag}_dt{dt}.png'
+    plot_field1d(data_dict, title, output_filename)

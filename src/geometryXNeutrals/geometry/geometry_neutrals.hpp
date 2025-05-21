@@ -64,19 +64,19 @@ using SplineX_GridXnEvaluator = ddc::SplineEvaluator<
 using IdxXn = Idx<GridXNeutrals>;
 using IdxSpXn = Idx<Species, GridXNeutrals>;
 using IdxMomXn = Idx<GridMom, GridXNeutrals>;
-using IdxSpMomXn = Idx<Species, GridMom, GridXNeutrals>;
+using IdxMomSpXn = Idx<GridMom, Species, GridXNeutrals>;
 
 using IdxStepXn = IdxStep<GridXNeutrals>;
 using IdxStepSpXn = IdxStep<Species, GridXNeutrals>;
 using IdxStepMomXn = IdxStep<GridMom, GridXNeutrals>;
-using IdxStepSpMomXn = IdxStep<Species, GridMom, GridXNeutrals>;
+using IdxStepMomSpXn = IdxStep<GridMom, Species, GridXNeutrals>;
 
 using IdxRangeBSXn = IdxRange<BSplinesXNeutrals>;
 
 using IdxRangeXn = IdxRange<GridXNeutrals>;
 using IdxRangeSpXn = IdxRange<Species, GridXNeutrals>;
 using IdxRangeMomXn = IdxRange<GridMom, GridXNeutrals>;
-using IdxRangeSpMomXn = IdxRange<Species, GridMom, GridXNeutrals>;
+using IdxRangeMomSpXn = IdxRange<GridMom, Species, GridXNeutrals>;
 
 template <class ElementType>
 using FieldMemXn = FieldMem<ElementType, IdxRangeXn>;
@@ -88,12 +88,12 @@ template <class ElementType>
 using FieldMemSpXn = FieldMem<ElementType, IdxRangeSpXn>;
 
 template <class ElementType>
-using FieldMemSpMomXn = FieldMem<ElementType, IdxRangeSpMomXn>;
+using FieldMemMomSpXn = FieldMem<ElementType, IdxRangeMomSpXn>;
 
 using DFieldMemXn = FieldMemXn<double>;
 using DBSFieldMemXn = BSFieldMemXn<double>;
 using DFieldMemSpXn = FieldMemSpXn<double>;
-using DFieldMemSpMomXn = FieldMemSpMomXn<double>;
+using DFieldMemMomSpXn = FieldMemMomSpXn<double>;
 
 template <class ElementType>
 using BSFieldXn = Field<ElementType, IdxRangeBSXn>;
@@ -102,7 +102,7 @@ template <class ElementType>
 using FieldXn = Field<ElementType, IdxRangeXn>;
 
 template <class ElementType>
-using FieldSpMomXn = Field<ElementType, IdxRangeSpMomXn>;
+using FieldMomSpXn = Field<ElementType, IdxRangeMomSpXn>;
 
 template <class ElementType>
 using FieldSpXn = Field<ElementType, IdxRangeSpXn>;
@@ -110,7 +110,7 @@ using FieldSpXn = Field<ElementType, IdxRangeSpXn>;
 using DFieldXn = FieldXn<double>;
 using DBSFieldXn = BSFieldXn<double>;
 using DFieldSpXn = FieldSpXn<double>;
-using DFieldSpMomXn = FieldSpMomXn<double>;
+using DFieldMomSpXn = FieldMomSpXn<double>;
 
 template <class ElementType>
 using ConstFieldXn = Field<ElementType const, IdxRangeXn>;
@@ -119,12 +119,12 @@ template <class ElementType>
 using BSConstFieldXn = ConstField<ElementType, IdxRangeBSXn>;
 
 template <class ElementType>
-using ConstFieldSpMomXn = ConstField<ElementType, IdxRangeSpMomXn>;
+using ConstFieldMomSpXn = ConstField<ElementType, IdxRangeMomSpXn>;
 
 template <class ElementType>
 using ConstFieldSpXn = ConstField<ElementType, IdxRangeSpXn>;
 
 using DConstFieldXn = ConstFieldXn<double>;
 using DBSConstFieldXn = BSConstFieldXn<double>;
-using DConstFieldSpMomXn = ConstFieldSpMomXn<double>;
+using DConstFieldMomSpXn = ConstFieldMomSpXn<double>;
 using DConstFieldSpXn = ConstFieldSpXn<double>;

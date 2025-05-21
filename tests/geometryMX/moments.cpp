@@ -9,6 +9,7 @@
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "species_info.hpp"
 
 /**
@@ -18,7 +19,7 @@
  * for the density, particle flux and stress. The test checks if the
  * initialisation works properly.
  */
-TEST(GeometryXM, MomentsInitialisation)
+TEST(GeometryMX, MomentsInitialisation)
 {
     CoordX const x_min(0.0);
     CoordX const x_max(1.0);
@@ -92,27 +93,24 @@ TEST(GeometryXM, MomentsInitialisation)
 
     // Moments index range initialisation
     IdxStepMom const nb_fluid_moments(3);
-    IdxRangeMom const meshM(IdxMom(0), nb_fluid_moments);
+    IdxRangeMom const meshM(GeometryMX::density_idx, nb_fluid_moments);
+    assert(GeometryMX::is_valid(meshM));
     ddc::init_discrete_space<GridMom>();
 
-    IdxMom idensity(0);
-    IdxMom iparticle_flux(1);
-    IdxMom istress(2);
-
     // Neutral species initialisation
-    DFieldMemSpMomX neutrals_alloc(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    DFieldSpMomX neutrals = get_field(neutrals_alloc);
+    DFieldMemMomSpX neutrals_alloc(IdxRangeMomSpX(idx_range_fluidsp, meshM, meshX));
+    DFieldMomSpX neutrals = get_field(neutrals_alloc);
 
     double const fluid_density_init(1.);
-    double const fluid_particle_flux_init(0.5);
+    double const fluid_momentum_init(0.5);
     double const fluid_stress_init(0.9);
 
     host_t<DFieldMemSpMom> moments_init_alloc(IdxRangeSpMom(idx_range_fluidsp, meshM));
     host_t<DFieldSpMom> moments_init = get_field(moments_init_alloc);
 
-    moments_init(ifluid, idensity) = fluid_density_init;
-    moments_init(ifluid, iparticle_flux) = fluid_particle_flux_init;
-    moments_init(ifluid, istress) = fluid_stress_init;
+    moments_init(ifluid, GeometryMX::density_idx) = fluid_density_init;
+    moments_init(ifluid, GeometryMX::velocity_idx) = fluid_momentum_init;
+    moments_init(ifluid, GeometryMX::temperature_idx) = fluid_stress_init;
 
     ConstantFluidInitialisation<GridX> fluid_init(get_const_field(moments_init));
     fluid_init(neutrals);
@@ -125,17 +123,15 @@ TEST(GeometryXM, MomentsInitialisation)
         IdxX const ix(ddc::select<GridX>(ispx));
 
         // test for equality of density
-        IdxSpMomX const idensity_loc(isp, idensity, ix);
+        IdxMomSpX const idensity_loc(isp, GeometryMX::density_idx, ix);
         EXPECT_LE(std::fabs(neutrals_host(idensity_loc) - fluid_density_init), tolerance);
 
-        // test for equality of particle_flux
-        IdxSpMomX const iparticle_flux_loc(isp, iparticle_flux, ix);
-        EXPECT_LE(
-                std::fabs(neutrals_host(iparticle_flux_loc) - fluid_particle_flux_init),
-                tolerance);
+        // test for equality of momentum
+        IdxMomSpX const iparticle_flux_loc(isp, GeometryMX::velocity_idx, ix);
+        EXPECT_LE(std::fabs(neutrals_host(iparticle_flux_loc) - fluid_momentum_init), tolerance);
 
         // test for equality of stresses
-        IdxSpMomX const istress_loc(isp, istress, ix);
+        IdxMomSpX const istress_loc(isp, GeometryMX::temperature_idx, ix);
         EXPECT_LE(std::fabs(neutrals_host(istress_loc) - fluid_stress_init), tolerance);
     });
 }

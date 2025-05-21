@@ -3,6 +3,7 @@
 #pragma once
 
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "geometry_neutrals.hpp"
 #include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"
@@ -52,6 +53,9 @@
  */
 class DiffGridsFluidSolver : public IFluidSolver<GridXNeutrals>
 {
+private:
+    using IdxRangeMomSpX = IdxRange<GridMom, Species, GridX>;
+
 public:
     /**
      * @brief An enum class to store the type of boundary condition used
@@ -139,8 +143,8 @@ public:
      *
      * @return A field referencing the neutral fluid moments passed as argument.
      */
-    DFieldSpMomXn operator()(
-            DFieldSpMomXn neutrals,
+    DFieldMomSpXn operator()(
+            DFieldMomSpXn neutrals_moments,
             DConstFieldSpXVx allfdistribu,
             DConstFieldX efield,
             double dt) const override;
@@ -157,14 +161,32 @@ public:
      *
      * @param[inout] dn The time derivative of neutral fluid moments.
      * @param[in] n The fluid moments of the neutral species.
-     * @param[in] density The plasma density (for ion and electrons).
-     * @param[in] velocity The plasma mean velocity (for ion and electrons).
-     * @param[in] temperature The plasma temperature (for ion and electrons).
+     * @param[in] plasma_moments The plasma fluid moments (for ions and electrons).
      */
-    void get_derivative(
-            DFieldSpMomXn dn,
-            DConstFieldSpMomXn n,
-            DConstFieldSpX density,
-            DConstFieldSpX velocity,
-            DConstFieldSpX temperature) const;
+    void get_density_derivative(
+            DFieldSpXn const derivative_density_neutrals,
+            DConstFieldSpXn const density_neutrals,
+            DConstFieldMomSpXn const plasma_moments,
+            DConstFieldSpXn const charge_exchange,
+            DConstFieldSpXn const ionisation,
+            DConstFieldSpXn const recombination) const;
+
+    void compute_particle_flux(
+            DFieldSpXn const neutrals_particle_flux,
+            DConstFieldSpXn const neutrals_density,
+            DConstFieldMomSpXn const plasma_moments,
+            DConstFieldSpXn const charge_exchange,
+            DConstFieldSpXn const ionisation,
+            DConstFieldSpXn const recombination) const;
+
+    void compute_plasma_moments(
+            DFieldMomSpX const plasma_moments,
+            DConstFieldSpXVx const allfdistribu) const;
+
+    void compute_reaction_rates(
+            DFieldSpXn const charge_exchange,
+            DFieldSpXn const ionisation,
+            DFieldSpXn const recombination,
+            DConstFieldMomSpXn const neutrals_moment,
+            DConstFieldMomSpX const plasma_moments_on_X) const;
 };
