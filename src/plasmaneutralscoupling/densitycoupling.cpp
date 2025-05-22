@@ -19,6 +19,7 @@ DensityCoupling::DensityCoupling(
         double const density_coupling_coeff,
         double const momentum_coupling_coeff,
         double const energy_coupling_coeff,
+        double const temperature_normalisation,
         IReactionRate const& charge_exchange,
         IReactionRate const& ionisation,
         IReactionRate const& recombination,
@@ -28,6 +29,7 @@ DensityCoupling::DensityCoupling(
     : m_density_coupling_coeff(density_coupling_coeff)
     , m_momentum_coupling_coeff(momentum_coupling_coeff)
     , m_energy_coupling_coeff(energy_coupling_coeff)
+    , m_T_0(temperature_normalisation)
     , m_charge_exchange(charge_exchange)
     , m_ionisation(ionisation)
     , m_recombination(recombination)
@@ -111,6 +113,7 @@ void DensityCoupling::get_plasma_source_term(
     DConstFieldSpX plasma_density = plasma_moments[GeometryMX::density_idx];
     DConstFieldSpX plasma_velocity = plasma_moments[GeometryMX::velocity_idx];
     DConstFieldSpX plasma_temperature = plasma_moments[GeometryMX::temperature_idx];
+    double const T_0_proxy = m_T_0;
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             get_idx_range<GridX, GridVx>(plasma_source_term),
@@ -128,6 +131,7 @@ void DensityCoupling::get_plasma_source_term(
                     double const density_electrons = plasma_density(ielec(), ix);
                     double const velocity_ions = plasma_velocity(iion, ix);
                     double const temperature_ions = plasma_temperature(iion, ix);
+                    double const temperature_electrons = plasma_temperature(ielec(), ix);
                     double const energy_ions = (mass_ion * velocity_ions * velocity_ions
                                                 + density_ions * temperature_ions)
                                                / 2;
@@ -162,8 +166,13 @@ void DensityCoupling::get_plasma_source_term(
                     }
                     // electron species
                     {
-                        double const temperature_loss_ionisation = 1;
-                        double const temperature_loss_recombination = 1;
+                        double const temperature_loss_ionisation
+                                = (15 + 170 * Kokkos::exp(-temperature_electrons / 2)) / T_0_proxy;
+                        double temperature_loss_recombination
+                                = 8 * Kokkos::exp(temperature_electrons / 9);
+                        if (temperature_loss_recombination < 250)
+                            temperature_loss_recombination = 250;
+                        temperature_loss_recombination /= T_0_proxy;
                         double const energy_source
                                 = -temperature_loss_ionisation * density_electrons
                                           * density_neutrals * K_i

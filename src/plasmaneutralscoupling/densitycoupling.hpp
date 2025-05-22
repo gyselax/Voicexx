@@ -32,6 +32,7 @@ private:
     double const m_density_coupling_coeff;
     double const m_momentum_coupling_coeff;
     double const m_energy_coupling_coeff;
+    double const m_T_0;
     IReactionRate const& m_charge_exchange;
     IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
@@ -58,6 +59,7 @@ public:
             double density_coupling_coeff,
             double momentum_coupling_coeff,
             double energy_coupling_coeff,
+            double const temperature_normalisation,
             IReactionRate const& charge_exchange,
             IReactionRate const& ionisation,
             IReactionRate const& recombination,

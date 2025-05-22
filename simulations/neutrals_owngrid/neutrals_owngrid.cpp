@@ -347,6 +347,7 @@ int main(int argc, char** argv)
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.density_coupling_coeff"),
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.momentum_coupling_coeff"),
                 PCpp_double(conf_voicexx, ".KineticFluidCoupling.energy_coupling_coeff"),
+                temperature_normalisation,
                 charge_exchange,
                 ionisation,
                 recombination,
