@@ -29,9 +29,9 @@ template <typename FluidGrid>
 class PredCorrHybrid : public ITimeSolverHybrid<FluidGrid>
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
-    using DFieldMemSpMomGrid = DFieldMem<IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = DField<IdxRangeMomSpGrid>;
+    using DFieldMemMomSpGrid = DFieldMem<IdxRangeMomSpGrid>;
 
 private:
     IBoltzmannSolver const& m_boltzmann_solver;
@@ -74,7 +74,7 @@ public:
      */
     DFieldSpXVx operator()(
             DFieldSpXVx allfdistribu,
-            DFieldSpMomGrid fluid_moments,
+            DFieldMomSpGrid fluid_moments,
             double time_start,
             double dt,
             int steps = 1) const override
@@ -90,7 +90,7 @@ public:
 
         DFieldMemX electric_field(idx_range_x);
 
-        host_t<DFieldMemSpMomGrid> fluid_moments_host(get_idx_range(fluid_moments));
+        host_t<DFieldMemMomSpGrid> fluid_moments_host(get_idx_range(fluid_moments));
 
         // a 2D chunk of the same size as fdistribu
         host_t<DFieldMemSpXVx> allfdistribu_half_t_host(get_idx_range(allfdistribu));

@@ -69,7 +69,7 @@ public:
      * @param[in] dt The time step over which the collisions occur.
      *
      */
-    void operator()(DFieldSpXVx const allfdistribu, DFieldSpMomX neutrals, double const dt)
+    void operator()(DFieldSpXVx const allfdistribu, DFieldMomSpX neutrals, double const dt)
             const override;
 
 public:
@@ -95,7 +95,7 @@ public:
     void get_source_term(
             DFieldX density_source_neutral,
             DConstFieldSpX kinsp_density,
-            DConstFieldSpMomX neutrals,
+            DConstFieldMomSpX neutrals,
             DConstFieldSpX ionisation,
             DConstFieldSpX recombination) const;
 
@@ -108,8 +108,8 @@ public:
      *
     */
     void get_derivative_neutrals(
-            DFieldSpMomX dn,
-            DConstFieldSpMomX neutrals,
+            DFieldMomSpX dn,
+            DConstFieldMomSpX neutrals,
             DConstFieldX density_source_neutral) const;
 
     /**

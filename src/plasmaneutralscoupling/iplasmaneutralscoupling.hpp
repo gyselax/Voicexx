@@ -11,8 +11,8 @@ template <typename FluidGrid>
 class IPlasmaNeutralsCoupling
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = DField<IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = DField<IdxRangeMomSpGrid>;
 
 public:
     virtual ~IPlasmaNeutralsCoupling() = default;
@@ -39,6 +39,6 @@ public:
      */
     virtual void operator()(
             DFieldSpXVx const allfdistribu,
-            DFieldSpMomGrid neutrals,
+            DFieldMomSpGrid neutrals,
             double const dt) const = 0;
 };

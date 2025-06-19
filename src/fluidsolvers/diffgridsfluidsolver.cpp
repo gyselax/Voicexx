@@ -10,6 +10,7 @@
 #include "ddc_alias_inline_functions.hpp"
 #include "diffgridsfluidsolver.hpp"
 #include "geometry.hpp"
+#include "geometry_moments.hpp"
 #include "geometry_neutrals.hpp"
 #include "ireactionrate.hpp"
 #include "rk2.hpp"
@@ -61,15 +62,17 @@ IdxSp DiffGridsFluidSolver::find_ion(IdxRangeSp const idx_range_kinsp) const
 }
 
 void DiffGridsFluidSolver::get_derivative(
-        DFieldSpMomXn dn,
-        DConstFieldSpMomXn neutrals,
-        DConstFieldSpX density,
-        DConstFieldSpX velocity,
-        DConstFieldSpX temperature) const
+        DFieldMomSpXn dn,
+        DConstFieldMomSpXn neutrals,
+        DConstField<IdxRangeMomSpX> plasma_moments) const
 {
+    DConstFieldSpX plasma_density = plasma_moments[GeometryMX::density_idx];
+    DConstFieldSpX plasma_velocity = plasma_moments[GeometryMX::velocity_idx];
+    DConstFieldSpX plasma_temperature = plasma_moments[GeometryMX::temperature_idx];
     IdxRangeSpXn idx_range_neutrals(get_idx_range(neutrals));
-    IdxRangeSpX
-            idx_range_rates_on_X(get_idx_range<Species>(neutrals), get_idx_range<GridX>(density));
+    IdxRangeSpX idx_range_rates_on_X(
+            get_idx_range<Species>(neutrals),
+            get_idx_range<GridX>(plasma_density));
 
     // building reaction rates
     // pay attention, these are normalised to Kcx0=10^-14
@@ -81,11 +84,11 @@ void DiffGridsFluidSolver::get_derivative(
     DFieldSpX ionisation_rate = get_field(ionisation_rate_alloc);
     DFieldSpX recombination_rate = get_field(recombination_rate_alloc);
 
-    m_charge_exchange(charge_exchange_rate, density, temperature);
-    m_ionisation(ionisation_rate, density, temperature);
-    m_recombination(recombination_rate, density, temperature);
+    m_charge_exchange(charge_exchange_rate, plasma_density, plasma_temperature);
+    m_ionisation(ionisation_rate, plasma_density, plasma_temperature);
+    m_recombination(recombination_rate, plasma_density, plasma_temperature);
 
-    // expose to pdi the reaction coefficients
+    // expose to pdi the reaction rate coefficients
     auto cx_host = ddc::create_mirror_view_and_copy(charge_exchange_rate);
     auto i_host = ddc::create_mirror_view_and_copy(ionisation_rate);
     auto r_host = ddc::create_mirror_view_and_copy(recombination_rate);
@@ -96,7 +99,7 @@ void DiffGridsFluidSolver::get_derivative(
 
     // create the fields to interpolate the plasma quantities on the neutral grid
     IdxRangeSpXn idx_range_kinsp_onXn(
-            get_idx_range<Species>(density),
+            get_idx_range<Species>(plasma_density),
             get_idx_range<GridXNeutrals>(neutrals));
     DFieldMemSpXn density_on_Xn_alloc(idx_range_kinsp_onXn);
     DFieldSpXn density_on_Xn = get_field(density_on_Xn_alloc);
@@ -113,9 +116,9 @@ void DiffGridsFluidSolver::get_derivative(
     DFieldSpXn recombination_rate_on_Xn = get_field(r_rate_Xn_alloc);
 
     // do the interpolation on the neutral grid
-    interpolate_on_neutral_grid(density_on_Xn, density);
-    interpolate_on_neutral_grid(velocity_on_Xn, velocity);
-    interpolate_on_neutral_grid(temperature_on_Xn, temperature);
+    interpolate_on_neutral_grid(density_on_Xn, plasma_density);
+    interpolate_on_neutral_grid(velocity_on_Xn, plasma_velocity);
+    interpolate_on_neutral_grid(temperature_on_Xn, plasma_temperature);
 
     interpolate_on_neutral_grid(charge_exchange_rate_on_Xn, get_const_field(charge_exchange_rate));
     interpolate_on_neutral_grid(ionisation_rate_on_Xn, get_const_field(ionisation_rate));
@@ -134,11 +137,11 @@ void DiffGridsFluidSolver::get_derivative(
     DFieldSpXn pressure_diffusion_coefficient
             = get_field(pressure_diffusion_coefficient_alloc); // \hat D
 
-    IdxSp const iion(find_ion(get_idx_range<Species>(density)));
-    IdxMom const ineutral_density(0);
+    IdxSp const iion(find_ion(get_idx_range<Species>(plasma_density)));
     double const sqrt_mass_ratio(Kokkos::sqrt(mass(ielec()) / mass(iion)));
     double const mean_free_path = m_mean_free_path;
 
+    DConstFieldSpXn neutrals_density = neutrals[GeometryMX::density_idx];
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_neutrals,
@@ -148,7 +151,7 @@ void DiffGridsFluidSolver::get_derivative(
 
                 // in this for loop we construct the terms n_eff*u_i, p_N and \hat D
                 // we will take their derivatives afterwards
-                double density_neutrals = neutrals(ifspxn, ineutral_density);
+                double density_neutrals = neutrals_density(ifspxn);
                 double density_elec = density_on_Xn(ielec(), ixn);
                 double density_ions = density_on_Xn(iion, ixn);
                 double K_cx = charge_exchange_rate_on_Xn(ifspxn);
@@ -246,12 +249,14 @@ void DiffGridsFluidSolver::get_derivative(
     }
     }
 
-    // compute the neutral derivative
+    // Compute the neutral derivative
+    // As the equations for the other moments are not solved, we only slice the density
+    DFieldSpXn dn_sliced = dn[GeometryMX::density_idx];
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_neutrals,
             KOKKOS_LAMBDA(IdxSpXn const ifspxn) {
-                dn(ifspxn, ineutral_density) = -sqrt_mass_ratio * div_particle_flux(ifspxn);
+                dn_sliced(ifspxn) = -sqrt_mass_ratio * div_particle_flux(ifspxn);
             }); // density source is not solved here, we only solve transport.
 
     // we expose to pdi the coefficients
@@ -270,31 +275,30 @@ void DiffGridsFluidSolver::get_derivative(
             .with("n_eq_ui", n_eq_ui_host);
 }
 
-DFieldSpMomXn DiffGridsFluidSolver::operator()(
-        DFieldSpMomXn const neutrals,
+DFieldMomSpXn DiffGridsFluidSolver::operator()(
+        DFieldMomSpXn const neutrals,
         DConstFieldSpXVx const allfdistribu,
         DConstFieldX const efield,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("DiffusiveNeutralSolver");
-    RK2<DFieldMemSpMomXn> timestepper(get_idx_range(neutrals));
+    RK2<DFieldMemMomSpXn> timestepper(get_idx_range(neutrals));
 
     // moments computation
     IdxRangeSpX idx_range_kspx(get_idx_range(allfdistribu));
-    DFieldMemSpX density_alloc(idx_range_kspx);
-    DFieldMemSpX velocity_alloc(idx_range_kspx);
-    DFieldMemSpX temperature_alloc(idx_range_kspx);
-
-    DFieldSpX density = get_field(density_alloc);
-    DFieldSpX velocity = get_field(velocity_alloc);
-    DFieldSpX temperature = get_field(temperature_alloc);
+    IdxRangeMomSpX idx_range_momkspx(GeometryMX::first_three_moments, idx_range_kspx);
+    DFieldMem<IdxRangeMomSpX> plasma_moments_alloc(idx_range_momkspx);
+    DField<IdxRangeMomSpX> plasma_moments(plasma_moments_alloc);
+    DFieldSpX density = plasma_moments[GeometryMX::density_idx];
+    DFieldSpX velocity = plasma_moments[GeometryMX::velocity_idx];
+    DFieldSpX temperature = plasma_moments[GeometryMX::temperature_idx];
 
     DConstFieldVx quadrature_coeffs = m_quadrature_coeffs;
 
     IdxRangeVx const idx_range_vx(get_idx_range<GridVx>(allfdistribu));
 
     // fluid moments computation
-    ddc::parallel_fill(density, 0.);
+    ddc::parallel_fill(plasma_moments, 0.);
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
             idx_range_kspx,
@@ -313,13 +317,8 @@ DFieldSpMomXn DiffGridsFluidSolver::operator()(
                         = (momentum_flux - particle_flux * velocity(ispx)) / density(ispx);
             });
 
-    timestepper.update(neutrals, dt, [&](DFieldSpMomXn dn, DConstFieldSpMomXn n) {
-        get_derivative(
-                dn,
-                n,
-                get_const_field(density),
-                get_const_field(velocity),
-                get_const_field(temperature));
+    timestepper.update(neutrals, dt, [&](DFieldMomSpXn dn, DConstFieldMomSpXn n) {
+        get_derivative(dn, n, get_const_field(plasma_moments));
     });
     Kokkos::Profiling::popRegion();
     return neutrals;

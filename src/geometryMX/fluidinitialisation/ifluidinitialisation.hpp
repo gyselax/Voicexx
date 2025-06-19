@@ -11,8 +11,8 @@ template <typename FluidGrid>
 class IFluidInitialisation
 {
 private:
-    using IdxRangeSpMomGrid = IdxRange<Species, GridMom, FluidGrid>;
-    using DFieldSpMomGrid = Field<double, IdxRangeSpMomGrid>;
+    using IdxRangeMomSpGrid = IdxRange<GridMom, Species, FluidGrid>;
+    using DFieldMomSpGrid = Field<double, IdxRangeMomSpGrid>;
 
 public:
     virtual ~IFluidInitialisation() = default;
@@ -23,5 +23,5 @@ public:
      *                                 On output: the initialised fluid species.
      * @return A field referencing the initialised fluid species.
      */
-    virtual DFieldSpMomGrid operator()(DFieldSpMomGrid fluid_moments) const = 0;
+    virtual DFieldMomSpGrid operator()(DFieldMomSpGrid fluid_moments) const = 0;
 };

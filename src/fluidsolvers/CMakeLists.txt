@@ -22,6 +22,7 @@ target_link_libraries("fluidsolver_${GEOMETRY_VARIANT}"
         gslx::speciesinfo
         gslx::timestepper
         gslx::utils
+        voicexx::geometry_moments_${GEOMETRY_VARIANT}
         voicexx::geometry_neutrals_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
 )

@@ -1,6 +1,7 @@
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
+#include "geometry_moments.hpp"
 #include "mask_tanh.hpp"
 #include "noenergytransfercoupling.hpp"
 #include "rk2.hpp"
@@ -61,7 +62,7 @@ IdxSp NoEnergyExchangeCoupling::find_ion(IdxRangeSp const dom_kinsp) const
 void NoEnergyExchangeCoupling::get_source_term(
         DFieldX density_source_neutral,
         DConstFieldSpX kinsp_density,
-        DConstFieldSpMomX neutrals,
+        DConstFieldMomSpX neutrals,
         DConstFieldSpX ionisation,
         DConstFieldSpX recombination) const
 {
@@ -84,8 +85,8 @@ void NoEnergyExchangeCoupling::get_source_term(
 }
 
 void NoEnergyExchangeCoupling::get_derivative_neutrals(
-        DFieldSpMomX dn,
-        DConstFieldSpMomX neutrals,
+        DFieldMomSpX dn,
+        DConstFieldMomSpX neutrals,
         DConstFieldX density_source_neutral) const
 {
     // neutrals dn computation
@@ -125,12 +126,17 @@ void NoEnergyExchangeCoupling::get_derivative_allfdistribu(
 
 void NoEnergyExchangeCoupling::operator()(
         DFieldSpXVx const allfdistribu,
-        DFieldSpMomX neutrals,
+        DFieldMomSpX neutrals,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("KineticFluidCouplingSource");
-    RK2<DFieldMemSpMomX> timestepper_neutrals(get_idx_range(neutrals));
+    RK2<DFieldMemMomSpX> timestepper_neutrals(get_idx_range(neutrals));
     RK2<DFieldMemSpXVx> timestepper_kinetic(get_idx_range(allfdistribu));
+
+    // check if we have the right moments for the neutrals
+    if (!GeometryMX::is_only_density(ddc::get_domain<GridMom>(neutrals))) {
+        throw std::runtime_error("Fluid moments not valid");
+    }
 
     // useful params and index ranges
     IdxSp const iion(find_ion(get_idx_range<Species>(allfdistribu)));
@@ -235,7 +241,7 @@ void NoEnergyExchangeCoupling::operator()(
     timestepper_kinetic.update(allfdistribu, dt, [&](DFieldSpXVx df, DConstFieldSpXVx f) {
         get_derivative_allfdistribu(df, f, get_const_field(velocity_shape_source));
     });
-    timestepper_neutrals.update(neutrals, dt, [&](DFieldSpMomX dn, DConstFieldSpMomX n) {
+    timestepper_neutrals.update(neutrals, dt, [&](DFieldMomSpX dn, DConstFieldMomSpX n) {
         get_derivative_neutrals(dn, n, get_const_field(density_source_neutral));
     });
     Kokkos::Profiling::popRegion();
