@@ -27,6 +27,7 @@
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "gridneutral_interpolator.hpp"
 #include "input.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_source.hpp"
@@ -181,10 +182,15 @@ int main(int argc, char** argv)
     ddc::PeriodicExtrapolationRule<X> bv_x_min;
     ddc::PeriodicExtrapolationRule<X> bv_x_max;
     SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
+    SplineX_GridXnEvaluator const evaluator_from_X_to_Xn(bv_x_min, bv_x_max);
+    SplineXn_GridXEvaluator const evaluator_from_Xn_to_X(bv_x_min, bv_x_max);
 #else
     ddc::ConstantExtrapolationRule<X> bv_x_min(ddc::coordinate(mesh_x.front()));
     ddc::ConstantExtrapolationRule<X> bv_x_max(ddc::coordinate(mesh_x.back()));
     SplineXEvaluator const spline_x_evaluator(bv_x_min, bv_x_max);
+    SplineX_GridXnEvaluator const evaluator_from_X_to_Xn(bv_x_min, bv_x_max);
+    ddc::NullExtrapolationRule null_bv;
+    SplineXn_GridXEvaluator const evaluator_from_Xn_to_X(null_bv, null_bv);
 #endif
 
     ddc::ConstantExtrapolationRule<Vx> bv_vx_min(ddc::coordinate(mesh_vx.front()));
@@ -305,8 +311,14 @@ int main(int argc, char** argv)
 
     // splines to interpolate from one grid to another
     SplineXNeutralsBuilder const spline_builder_on_Xn(mesh_x_neutrals);
+    GridNeutralInterpolator interpolator_between_X_and_Xn(
+            builder_x,
+            spline_builder_on_Xn,
+            evaluator_from_X_to_Xn,
+            evaluator_from_Xn_to_X);
+
+    // to take derivatives on GridXNeutrals
     SplineXn_GridXnEvaluator const spline_evaluator_on_Xn(bv_x_min, bv_x_max);
-    SplineX_GridXnEvaluator const interpolator_from_X_to_Xn(bv_x_min, bv_x_max);
 
     DFieldMemVx const quadrature_coeffs_neutrals(
             trapezoid_quadrature_coefficients<Kokkos::DefaultExecutionSpace>(mesh_vx));
@@ -328,7 +340,7 @@ int main(int argc, char** argv)
                 spline_builder_on_Xn,
                 spline_evaluator_on_Xn,
                 builder_x,
-                interpolator_from_X_to_Xn,
+                interpolator_between_X_and_Xn,
                 get_const_field(quadrature_coeffs_neutrals),
                 bc_flux,
                 PCpp_double(conf_voicexx, ".DiffusiveSolver.recycling_coefficient"));

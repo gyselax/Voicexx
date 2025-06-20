@@ -23,7 +23,7 @@ DiffGridsFluidSolver::DiffGridsFluidSolver(
         SplineXNeutralsBuilder const& spline_builder_on_Xn,
         SplineXn_GridXnEvaluator const& spline_evaluator_on_Xn,
         SplineXBuilder const& spline_builder_on_X,
-        SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
+        GridNeutralInterpolator const& interpolator,
         DConstFieldVx const& quadrature_coeffs,
         NeutralFluxBoundaryCondition flux_BC,
         double recycling_coeff)
@@ -35,7 +35,7 @@ DiffGridsFluidSolver::DiffGridsFluidSolver(
     , m_spline_builder_on_Xn(spline_builder_on_Xn)
     , m_spline_evaluator_on_Xn(spline_evaluator_on_Xn)
     , m_spline_builder_on_X(spline_builder_on_X)
-    , m_interpolator_from_X_to_Xn(interpolator_from_X_to_Xn)
+    , m_interpolator(interpolator)
     , m_quadrature_coeffs(quadrature_coeffs)
     , m_flux_BC(flux_BC)
     , m_recycling_coefficient(recycling_coeff)
@@ -113,13 +113,13 @@ void DiffGridsFluidSolver::get_derivative(
     DFieldSpXn recombination_rate_on_Xn = get_field(r_rate_Xn_alloc);
 
     // do the interpolation on the neutral grid
-    interpolate_on_neutral_grid(density_on_Xn, density);
-    interpolate_on_neutral_grid(velocity_on_Xn, velocity);
-    interpolate_on_neutral_grid(temperature_on_Xn, temperature);
+    m_interpolator(density_on_Xn, density);
+    m_interpolator(velocity_on_Xn, velocity);
+    m_interpolator(temperature_on_Xn, temperature);
 
-    interpolate_on_neutral_grid(charge_exchange_rate_on_Xn, get_const_field(charge_exchange_rate));
-    interpolate_on_neutral_grid(ionisation_rate_on_Xn, get_const_field(ionisation_rate));
-    interpolate_on_neutral_grid(recombination_rate_on_Xn, get_const_field(recombination_rate));
+    m_interpolator(charge_exchange_rate_on_Xn, get_const_field(charge_exchange_rate));
+    m_interpolator(ionisation_rate_on_Xn, get_const_field(ionisation_rate));
+    m_interpolator(recombination_rate_on_Xn, get_const_field(recombination_rate));
 
     // compute diffusive model equation terms
     DFieldMemSpXn density_eff_alloc(idx_range_neutrals);
@@ -323,26 +323,6 @@ DFieldSpMomXn DiffGridsFluidSolver::operator()(
     });
     Kokkos::Profiling::popRegion();
     return neutrals;
-}
-
-void DiffGridsFluidSolver::interpolate_on_neutral_grid(
-        DFieldSpXn field_on_Xn,
-        DConstFieldSpX field_on_X) const
-{
-    SplineX_GridXnEvaluator interpolator = m_interpolator_from_X_to_Xn;
-    ddc::for_each(get_idx_range<Species>(field_on_X), [&](IdxSp const isp) {
-        DBSFieldMemX spline_coeff_alloc(get_spline_idx_range(m_spline_builder_on_X));
-        DBSFieldX spline_coeff(get_field(spline_coeff_alloc));
-        m_spline_builder_on_X(spline_coeff, get_const_field(field_on_X[isp]));
-
-        FieldMemXn<CoordX> coords_eval_alloc(get_idx_range<GridXNeutrals>(field_on_Xn));
-        FieldXn<CoordX> coords_eval = get_field(coords_eval_alloc);
-        ddc::parallel_for_each(
-                Kokkos::DefaultExecutionSpace(),
-                get_idx_range<GridXNeutrals>(field_on_Xn),
-                KOKKOS_LAMBDA(IdxXn const ixn) { coords_eval(ixn) = ddc::coordinate(ixn); });
-        interpolator(field_on_Xn[isp], get_const_field(coords_eval), get_const_field(spline_coeff));
-    });
 }
 
 DiffGridsFluidSolver::NeutralFluxBoundaryCondition DiffGridsFluidSolver::
