@@ -60,6 +60,19 @@ using SplineX_GridXnEvaluator = ddc::SplineEvaluator<
 #endif
         >;
 
+using SplineXn_GridXEvaluator = ddc::SplineEvaluator<
+        Kokkos::DefaultExecutionSpace,
+        Kokkos::DefaultExecutionSpace::memory_space,
+        BSplinesXNeutrals,
+        GridX,
+#ifdef PERIODIC_RDIMX
+        ddc::PeriodicExtrapolationRule<X>,
+        ddc::PeriodicExtrapolationRule<X>
+#else
+        ddc::NullExtrapolationRule,
+        ddc::NullExtrapolationRule
+#endif
+        >;
 
 using IdxXn = Idx<GridXNeutrals>;
 using IdxSpXn = Idx<Species, GridXNeutrals>;
