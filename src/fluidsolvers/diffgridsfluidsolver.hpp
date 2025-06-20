@@ -4,6 +4,7 @@
 
 #include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "gridneutral_interpolator.hpp"
 #include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"
 
@@ -81,7 +82,7 @@ private:
     SplineXn_GridXnEvaluator const& m_spline_evaluator_on_Xn;
 
     SplineXBuilder const& m_spline_builder_on_X;
-    SplineX_GridXnEvaluator const& m_interpolator_from_X_to_Xn;
+    GridNeutralInterpolator const& m_interpolator;
 
     DConstFieldVx const m_quadrature_coeffs;
 
@@ -93,13 +94,6 @@ private:
 
 public:
     /**
-     * @brief Interpolate a field from GridX to GridXNeutral.
-     * @param[out] field_on_Xn The field interpolated
-     * @param[in] field_on_X The field to interpolate
-     */
-    void interpolate_on_neutral_grid(DFieldSpXn field_on_Xn, DConstFieldSpX field_on_X) const;
-
-    /**
      * @brief Creates an instance of the DiffusiveNeutralSolver class.
      * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
      * @param[in] ionisation An object that represents ionisation reaction rate.
@@ -108,7 +102,7 @@ public:
      * @param[in] spline_builder_on_Xn A one-dimensional spline builder on GridNeutrals
      * @param[in] spline_evaluator_on_Xn A one-dimensional spline evaluator on GridNeutrals
      * @param[in] spline_builder_on_X A one-dimensional spline builder on GridX
-     * @param[in] interpolator_from_X_to_Xn A one-dimensional spline evaluator with splines on X which can be evaluated on Xn
+     * @param[in] interpolator_from_X_to_Xn An interpolator to communicate between the two grids
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      * @param[in] flux_BC The boundary condition on the neutrals particle flux.
      * @param[in] recycling_coeff The neutrals recycling coefficient for density.
@@ -121,7 +115,7 @@ public:
             SplineXNeutralsBuilder const& spline_builder_on_Xn,
             SplineXn_GridXnEvaluator const& spline_evaluator_on_Xn,
             SplineXBuilder const& spline_builder_on_X,
-            SplineX_GridXnEvaluator const& interpolator_from_X_to_Xn,
+            GridNeutralInterpolator const& interpolator_from_X_to_Xn,
             DConstFieldVx const& quadrature_coeffs,
             NeutralFluxBoundaryCondition flux_BC,
             double recycling_coeff = 1);
