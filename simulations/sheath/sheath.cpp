@@ -121,7 +121,7 @@ int main(int argc, char** argv)
                 init_from_input(get_const_field(allfequilibrium), idx_range_kinsp, conf_voicexx);
         init(get_field(allfdistribu));
     } else {
-        RestartInitialisation const restart(iter_start, time_start);
+        RestartInitialisation const restart(time_start);
         restart(get_field(allfdistribu));
     }
     auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));
