@@ -107,13 +107,12 @@ documentation:
     git config --global --add safe.directory $CI_PROJECT_DIR
     git fetch origin ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} --recurse-submodules=no
     git config --global --add safe.directory ${CI_PROJECT_DIR}/gyselalibxx/vendor/kokkos
-    export PYTHONPATH=$(pwd)/docs/pip_install/local/lib/python3.10/dist-packages/
-    pip install -r gyselalibxx/docs/requirements.txt --prefix docs/pip_install
+    pip install -r gyselalibxx/docs/requirements.txt
   script: |
     rm -rf docs/mkdoc docs/site || true
     python3 gyselalibxx/docs/prepare_mkdocs.py . docs/mkdoc gyselalibxx/ docs/mkdoc
     cd docs
-    pip_install/local/bin/mkdocs build
+    mkdocs build
     cat doxygen.log
     cd ..
     # Get files which have changed in this merge request
