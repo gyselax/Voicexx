@@ -118,7 +118,7 @@ int main(int argc, char** argv)
     IdxRangeSpVx const meshSpVx(idx_range_kinsp, mesh_vx);
     DFieldMemSpVx allfequilibrium(meshSpVx);
     MaxwellianEquilibrium const init_fequilibrium
-            = MaxwellianEquilibrium::init_from_input(idx_range_kinsp, conf_voicexx);
+            = maxwellian_equilibrium::init_from_input(idx_range_kinsp, conf_voicexx);
     init_fequilibrium(get_field(allfequilibrium));
     auto allfequilibrium_host = ddc::create_mirror_view_and_copy(get_field(allfequilibrium));
 

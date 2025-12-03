@@ -21,6 +21,7 @@ if (${VOICEXX_BUILD_TESTING})
 endif()
 set(GYSELALIBXX_BUILD_TESTING OFF)
 set(GYSELALIBXX_BUILD_SIMULATIONS OFF)
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
 add_subdirectory(gyselalibxx)
 
 add_subdirectory(src)
