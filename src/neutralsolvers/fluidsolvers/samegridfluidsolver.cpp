@@ -236,7 +236,6 @@ void SameGridFluidSolver::get_derivative(
 DFieldSpMomX SameGridFluidSolver::operator()(
         DFieldSpMomX const neutrals,
         DConstFieldSpXVx const allfdistribu,
-        DConstFieldX const efield,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("SameGridFluidSolver");

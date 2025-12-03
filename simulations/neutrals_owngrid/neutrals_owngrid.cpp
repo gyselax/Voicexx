@@ -36,6 +36,7 @@
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals_owngrid.yml.hpp"
+#include "neutralsolver.hpp"
 #include "nullfluidsolver.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
@@ -325,14 +326,14 @@ int main(int argc, char** argv)
 
     // depending if we want to solve the transport for the neutral species
     // we choose the corresponding neutral solver
-    std::unique_ptr<IFluidSolver<GridXNeutrals>> ptr_neutral_solver;
+    std::unique_ptr<IFluidSolver<GridXNeutrals>> ptr_transport_solver;
     if (PCpp_bool(conf_voicexx, ".DiffusiveSolver.on")) {
         std::string bc_flux_input
                 = PCpp_string(conf_voicexx, ".DiffusiveSolver.boundary_condition");
         DiffGridsFluidSolver::NeutralFluxBoundaryCondition bc_flux
                 = DiffGridsFluidSolver::neutral_flux_boundary_condition(bc_flux_input);
 
-        ptr_neutral_solver = std::make_unique<DiffGridsFluidSolver>(
+        ptr_transport_solver = std::make_unique<DiffGridsFluidSolver>(
                 charge_exchange,
                 ionisation,
                 recombination,
@@ -345,14 +346,14 @@ int main(int argc, char** argv)
                 bc_flux,
                 PCpp_double(conf_voicexx, ".DiffusiveSolver.recycling_coefficient"));
     } else {
-        ptr_neutral_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
+        ptr_transport_solver = std::make_unique<NullFluidSolver<GridXNeutrals>>(idx_range_fluidsp);
     }
 
     // for the moment we don't have any coupling
     NullPlasmaNeutralsCoupling<GridXNeutrals> const kineticfluidcoupling;
 
-    PredCorrHybrid<GridXNeutrals> const
-            predcorr(boltzmann, *ptr_neutral_solver, poisson, kineticfluidcoupling);
+    NeutralSolver<GridXNeutrals> const neutral_solver(*ptr_transport_solver, kineticfluidcoupling);
+    PredCorrHybrid<GridXNeutrals> const predcorr(boltzmann, poisson, neutral_solver);
 
     // Starting the code
     ddc::expose_to_pdi("Nx_spline_cells", ddc::discrete_space<BSplinesX>().ncells());

@@ -20,6 +20,7 @@
 #include "irighthandside.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
+#include "neutralsolver.hpp"
 #include "noenergytransfercoupling.hpp"
 #include "predcorr.hpp"
 #include "predcorr_hybrid.hpp"
@@ -250,7 +251,8 @@ static void TestKineticFluidCoupling()
     int const nb_iter(20);
     double const deltat(0.1);
 
-    PredCorrHybrid<GridX> const predcorr_hybrid(vlasov, fluidsolver, poisson, kineticfluidcoupling);
+    NeutralSolver<GridX> const neutral_solver(fluidsolver, kineticfluidcoupling);
+    PredCorrHybrid<GridX> const predcorr_hybrid(vlasov, poisson, neutral_solver);
     predcorr_hybrid(allfdistribu, fluid_moments, time_start, deltat, nb_iter);
 
     auto fluid_moments_host = ddc::create_mirror_view_and_copy(fluid_moments);

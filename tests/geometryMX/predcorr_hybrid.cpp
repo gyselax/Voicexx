@@ -18,6 +18,7 @@
 #include "geometry.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
+#include "neutralsolver.hpp"
 #include "noenergytransfercoupling.hpp"
 #include "nullfluidsolver.hpp"
 #include "predcorr.hpp"
@@ -246,7 +247,8 @@ TEST(GeometryXM, PredCorrHybrid)
 
     // construction of predcorr with fluid species
     NullFluidSolver<GridX> const fluidsolver(idx_range_fluidsp);
-    PredCorrHybrid<GridX> const predcorr_hybrid(vlasov, fluidsolver, poisson, kineticfluidcoupling);
+    NeutralSolver<GridX> const neutral_solver(fluidsolver, kineticfluidcoupling);
+    PredCorrHybrid<GridX> const predcorr_hybrid(vlasov, poisson, neutral_solver);
     predcorr_hybrid(allfdistribu, fluid_moments, time_start, deltat, nb_iter);
 
     auto allfdistribu_host = ddc::create_mirror_view_and_copy(allfdistribu);

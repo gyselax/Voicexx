@@ -33,6 +33,7 @@
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals.yml.hpp"
+#include "neutralsolver.hpp"
 #include "noenergytransfercoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
@@ -280,7 +281,7 @@ int main(int argc, char** argv)
     double const neutrals_wall_stiffness = PCpp_double(conf_voicexx, ".NeutralKrook.stiffness");
     double const neutrals_wall_amplitude = PCpp_double(conf_voicexx, ".NeutralKrook.amplitude");
 
-    SameGridFluidSolver const neutralsolver(
+    SameGridFluidSolver const transport_solver(
             charge_exchange,
             ionisation,
             recombination,
@@ -305,7 +306,8 @@ int main(int argc, char** argv)
             neutrals_wall_stiffness,
             mesh_x);
 
-    PredCorrHybrid<GridX> const predcorr(boltzmann, neutralsolver, poisson, kineticfluidcoupling);
+    NeutralSolver<GridX> const neutral_solver(transport_solver, kineticfluidcoupling);
+    PredCorrHybrid<GridX> const predcorr(boltzmann, poisson, neutral_solver);
 
     // Starting the code
     ddc::expose_to_pdi("Nx_spline_cells", ddc::discrete_space<BSplinesX>().ncells());

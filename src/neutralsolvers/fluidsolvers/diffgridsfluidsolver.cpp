@@ -273,7 +273,6 @@ void DiffGridsFluidSolver::get_derivative(
 DFieldSpMomXn DiffGridsFluidSolver::operator()(
         DFieldSpMomXn const neutrals,
         DConstFieldSpXVx const allfdistribu,
-        DConstFieldX const efield,
         double const dt) const
 {
     Kokkos::Profiling::pushRegion("DiffusiveNeutralSolver");
