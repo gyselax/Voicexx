@@ -26,6 +26,7 @@
 #include "geometry.hpp"
 #include "input.hpp"
 #include "ionisation.hpp"
+#include "iplasmaneutralscoupling.hpp"
 #include "irighthandside.hpp"
 #include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
@@ -34,6 +35,8 @@
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals.yml.hpp"
 #include "noenergytransfercoupling.hpp"
+#include "nullfluidsolver.hpp"
+#include "nullplasmaneutralscoupling.hpp"
 #include "output.hpp"
 #include "paraconfpp.hpp"
 #include "pdi_out_neutrals.yml.hpp"
@@ -264,9 +267,9 @@ int main(int argc, char** argv)
 
     // Initialisation of the neutrals
     double const normalisation_coeff
-            = PCpp_double(conf_voicexx, ".DiffusiveNeutralSolver.normalisation_coeff_neutrals");
+            = PCpp_double(conf_voicexx, ".TransportSolver.normalisation_coeff_neutrals");
     double const norm_coeff_rate
-            = PCpp_double(conf_voicexx, ".DiffusiveNeutralSolver.norm_coeff_rate_neutrals");
+            = PCpp_double(conf_voicexx, ".TransportSolver.norm_coeff_rate_neutrals");
 
     // The CX coefficient needs to be first constructed in order to write a correct initstate file. Check pdi_out_neutrals.yml.hpp for a closer look.
     ChargeExchangeRate charge_exchange(norm_coeff_rate);
@@ -280,32 +283,47 @@ int main(int argc, char** argv)
     double const neutrals_wall_stiffness = PCpp_double(conf_voicexx, ".NeutralKrook.stiffness");
     double const neutrals_wall_amplitude = PCpp_double(conf_voicexx, ".NeutralKrook.amplitude");
 
-    SameGridFluidSolver const neutralsolver(
-            charge_exchange,
-            ionisation,
-            recombination,
-            normalisation_coeff,
-            builder_x,
-            spline_x_evaluator,
-            get_const_field(quadrature_coeffs_neutrals),
-            neutrals_wall_extent,
-            neutrals_wall_stiffness,
-            neutrals_wall_amplitude,
-            mesh_x);
+    // depending if we want to solve the transport for the neutral species
+    // we choose the corresponding neutral solver
+    std::unique_ptr<IFluidSolver<GridX>> ptr_neutral_transport_solver;
+    if (PCpp_bool(conf_voicexx, ".TransportSolver.on")) {
+        ptr_neutral_transport_solver = std::make_unique<SameGridFluidSolver>(
+                charge_exchange,
+                ionisation,
+                recombination,
+                normalisation_coeff,
+                builder_x,
+                spline_x_evaluator,
+                get_const_field(quadrature_coeffs_neutrals),
+                neutrals_wall_extent,
+                neutrals_wall_stiffness,
+                neutrals_wall_amplitude,
+                mesh_x);
+    } else {
+        ptr_neutral_transport_solver = std::make_unique<NullFluidSolver<GridX>>(idx_range_fluidsp);
+    }
 
-    NoEnergyExchangeCoupling const kineticfluidcoupling(
-            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.density_coupling_coeff"),
-            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.momentum_coupling_coeff"),
-            PCpp_double(conf_voicexx, ".KineticFluidCouplingSource.energy_coupling_coeff"),
-            ionisation,
-            recombination,
-            normalisation_coeff,
-            get_const_field(quadrature_coeffs_alloc),
-            neutrals_wall_extent,
-            neutrals_wall_stiffness,
-            mesh_x);
+    // depending if we want to solve the coupling between
+    // the plasma and the neutrals, we choose the corresponding coupling
+    std::unique_ptr<IPlasmaNeutralsCoupling<GridX>> ptr_coupling_solver;
+    if (PCpp_bool(conf_voicexx, ".PlasmaNeutralsCoupling.on")) {
+        ptr_coupling_solver = std::make_unique<NoEnergyExchangeCoupling>(
+                PCpp_double(conf_voicexx, ".PlasmaNeutralsCoupling.density_coupling_coeff"),
+                PCpp_double(conf_voicexx, ".PlasmaNeutralsCoupling.momentum_coupling_coeff"),
+                PCpp_double(conf_voicexx, ".PlasmaNeutralsCoupling.energy_coupling_coeff"),
+                ionisation,
+                recombination,
+                normalisation_coeff,
+                get_const_field(quadrature_coeffs_alloc),
+                neutrals_wall_extent,
+                neutrals_wall_stiffness,
+                mesh_x);
+    } else {
+        ptr_coupling_solver = std::make_unique<NullPlasmaNeutralsCoupling<GridX>>();
+    }
 
-    PredCorrHybrid<GridX> const predcorr(boltzmann, neutralsolver, poisson, kineticfluidcoupling);
+    PredCorrHybrid<GridX> const
+            predcorr(boltzmann, *ptr_neutral_transport_solver, poisson, *ptr_coupling_solver);
 
     // Starting the code
     ddc::expose_to_pdi("Nx_spline_cells", ddc::discrete_space<BSplinesX>().ncells());

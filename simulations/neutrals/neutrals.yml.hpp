@@ -58,11 +58,13 @@ KineticSource:
   energy: 1.
   temperature: 1.
 
-DiffusiveNeutralSolver:
+TransportSolver:
+  on: true
   normalisation_coeff_neutrals: 1e-2
   norm_coeff_rate_neutrals: 1e-3
 
-KineticFluidCouplingSource:
+PlasmaNeutralsCoupling:
+  on: true
   density_coupling_coeff: 1.0
   momentum_coupling_coeff: 0.0
   energy_coupling_coeff: 0.0
