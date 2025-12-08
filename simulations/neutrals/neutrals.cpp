@@ -266,15 +266,42 @@ int main(int argc, char** argv)
     QNSolver const poisson(poisson_solver, rhs);
 
     // Initialisation of the neutrals
-    double const normalisation_coeff
-            = PCpp_double(conf_voicexx, ".TransportSolver.normalisation_coeff_neutrals");
-    double const norm_coeff_rate
-            = PCpp_double(conf_voicexx, ".TransportSolver.norm_coeff_rate_neutrals");
+    double const mean_free_path
+            = PCpp_double(conf_voicexx, ".NeutralsReactionRates.mean_free_path");
+    double const temperature_normalisation
+            = PCpp_double(conf_voicexx, ".NeutralsReactionRates.temperature_normalisation");
+    double const density_normalisation
+            = PCpp_double(conf_voicexx, ".NeutralsReactionRates.density_normalisation");
 
     // The CX coefficient needs to be first constructed in order to write a correct initstate file. Check pdi_out_neutrals.yml.hpp for a closer look.
-    ChargeExchangeRate charge_exchange(norm_coeff_rate);
-    IonisationRate ionisation(norm_coeff_rate);
-    RecombinationRate recombination(norm_coeff_rate);
+    ChargeExchangeRate charge_exchange(density_normalisation, temperature_normalisation);
+    IonisationRate ionisation(
+            density_normalisation,
+            temperature_normalisation,
+            charge_exchange.get_Kcx0());
+    RecombinationRate recombination(
+            density_normalisation,
+            temperature_normalisation,
+            charge_exchange.get_Kcx0());
+    // These computations are irrelevant for the simulation, they
+    // are just here to give feedback about the relevance of the physical parameters
+    double mass_proton = 1.67262192e-27;
+    double elementary_charge = 1.60217663e-19;
+    double permittivity = 8.8541878188e-12;
+    double L_cx_0 = elementary_charge
+                    / (sqrt(mass_proton * density_normalisation * permittivity)
+                       * charge_exchange.get_Kcx0() * 1e-14);
+    printf(" <====================================================>\n"
+           " The K_{cx,0} taken for this simulation is %fe-14.\n"
+           " It has been computed from n_0=%e and T_0=%e.\n"
+           " It should give a mean free path of %Le Debye length.\n"
+           " However the L_{cx,0} taken is %e.\n"
+           " <====================================================>\n",
+           charge_exchange.get_Kcx0(),
+           density_normalisation,
+           temperature_normalisation,
+           L_cx_0,
+           mean_free_path);
 
     DFieldMemVx const quadrature_coeffs_neutrals(
             trapezoid_quadrature_coefficients<Kokkos::DefaultExecutionSpace>(mesh_vx));
@@ -291,7 +318,7 @@ int main(int argc, char** argv)
                 charge_exchange,
                 ionisation,
                 recombination,
-                normalisation_coeff,
+                mean_free_path,
                 builder_x,
                 spline_x_evaluator,
                 get_const_field(quadrature_coeffs_neutrals),
@@ -313,7 +340,7 @@ int main(int argc, char** argv)
                 PCpp_double(conf_voicexx, ".PlasmaNeutralsCoupling.energy_coupling_coeff"),
                 ionisation,
                 recombination,
-                normalisation_coeff,
+                mean_free_path,
                 get_const_field(quadrature_coeffs_alloc),
                 neutrals_wall_extent,
                 neutrals_wall_stiffness,
@@ -342,8 +369,10 @@ int main(int argc, char** argv)
     ddc::expose_to_pdi(
             "neutrals_masses",
             ddc::discrete_space<Species>().masses()[idx_range_fluidsp]);
-    ddc::expose_to_pdi("normalisation_coeff_neutrals", normalisation_coeff);
-    ddc::expose_to_pdi("norm_coeff_rate_neutrals", norm_coeff_rate);
+    ddc::expose_to_pdi("mean_free_path", mean_free_path);
+    ddc::expose_to_pdi("temperature_normalisation", temperature_normalisation);
+    ddc::expose_to_pdi("density_normalisation", density_normalisation);
+    ddc::expose_to_pdi("K_cx_0", charge_exchange.get_Kcx0());
     ddc::PdiEvent("initial_state").with("fdistribu_eq", allfequilibrium_host);
 
     steady_clock::time_point const start = steady_clock::now();

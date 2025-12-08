@@ -12,7 +12,7 @@ NoEnergyExchangeCoupling::NoEnergyExchangeCoupling(
         double const energy_coupling_coeff,
         IReactionRate const& ionisation,
         IReactionRate const& recombination,
-        double const normalisation_coeff,
+        double const mean_free_path,
         DConstFieldVx const& quadrature_coeffs,
         double const extent,
         double const stiffness,
@@ -22,7 +22,7 @@ NoEnergyExchangeCoupling::NoEnergyExchangeCoupling(
     , m_energy_coupling_coeff(energy_coupling_coeff)
     , m_ionisation(ionisation)
     , m_recombination(recombination)
-    , m_normalisation_coeff(normalisation_coeff)
+    , m_mean_free_path(mean_free_path)
     , m_quadrature_coeffs(quadrature_coeffs)
     , m_mask(gridx)
 {
@@ -92,7 +92,7 @@ void NoEnergyExchangeCoupling::get_derivative_neutrals(
     IdxRangeSpX dom_fluidspx(get_idx_range<Species, GridX>(neutrals));
     // compute diffusive model equation terms
     IdxMom const ineutral_density(0);
-    double const normalisation_coeff_alpha0(m_normalisation_coeff);
+    double const mean_free_path_cx0(m_mean_free_path);
     // build rhs of diffusive model equation
     DConstFieldX mask(get_field(m_mask));
     ddc::parallel_for_each(
@@ -100,8 +100,8 @@ void NoEnergyExchangeCoupling::get_derivative_neutrals(
             dom_fluidspx,
             KOKKOS_LAMBDA(IdxSpX const ifspx) {
                 IdxX const ix(ifspx);
-                dn(ifspx, ineutral_density) = -density_source_neutral(ix) * (1. - mask(ix))
-                                              / normalisation_coeff_alpha0;
+                dn(ifspx, ineutral_density)
+                        = -density_source_neutral(ix) * (1. - mask(ix)) / mean_free_path_cx0;
             });
 }
 
@@ -204,7 +204,7 @@ void NoEnergyExchangeCoupling::operator()(
     double density_coupling_coeff_proxy = m_density_coupling_coeff;
     double momentum_coupling_coeff_proxy = m_momentum_coupling_coeff;
     double energy_coupling_coeff_proxy = m_energy_coupling_coeff;
-    double const normalisation_coeff_alpha0_proxy = m_normalisation_coeff;
+    double const mean_free_path_cx0 = m_mean_free_path;
 
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
@@ -226,11 +226,11 @@ void NoEnergyExchangeCoupling::operator()(
                 double const energy_source = 2 * energy_coupling_coeff_proxy
                                              * (-1 + coordvx_sq / neutral_temperature)
                                              * Kokkos::exp(-coordvx_sq / (2 * neutral_temperature));
-                velocity_shape_source(ispxvx) = (density_source_neutral(ix)
-                                                 / (Kokkos::sqrt(2 * M_PI * neutral_temperature)
-                                                    * normalisation_coeff_alpha0_proxy))
-                                                        * density_source
-                                                + momentum_source + energy_source;
+                velocity_shape_source(ispxvx)
+                        = (density_source_neutral(ix)
+                           / (Kokkos::sqrt(2 * M_PI * neutral_temperature) * mean_free_path_cx0))
+                                  * density_source
+                          + momentum_source + energy_source;
             });
     timestepper_kinetic.update(allfdistribu, dt, [&](DFieldSpXVx df, DConstFieldSpXVx f) {
         get_derivative_allfdistribu(df, f, get_const_field(velocity_shape_source));

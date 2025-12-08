@@ -62,7 +62,7 @@ private:
     IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
 
-    double const m_normalisation_coeff;
+    double const m_mean_free_path;
 
     SplineXBuilder const& m_spline_x_builder;
     SplineXEvaluator const& m_spline_x_evaluator;
@@ -80,7 +80,7 @@ public:
      * @param[in] charge_exchange An object that represents charge-exchange reaction rate.
      * @param[in] ionisation An object that represents ionisation reaction rate.
      * @param[in] recombination An object that represents recombination reaction rate.
-     * @param[in] normalisation_coeff A normalisation coefficient for the diffusive neutral model.
+     * @param[in] mean_free_path The charge exchange mean free path for neutrals.
      * @param[in] spline_x_builder A one-dimensional spline builder.
      * @param[in] spline_x_evaluator A one-dimensional spline evaluator.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
@@ -93,7 +93,7 @@ public:
             IReactionRate const& charge_exchange,
             IReactionRate const& ionisation,
             IReactionRate const& recombination,
-            double const normalisation_coeff,
+            double const mean_free_path,
             SplineXBuilder const& spline_x_builder,
             SplineXEvaluator const& spline_x_evaluator,
             DConstFieldVx const& quadrature_coeffs,

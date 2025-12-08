@@ -58,10 +58,13 @@ KineticSource:
   energy: 1.
   temperature: 1.
 
+NeutralsReactionRates:
+  temperature_normalisation_in_eV: 10 # in eV
+  density_normalisation: 1e20 # n_0 to compute K_{cx,0}
+  mean_free_path: 100
+
 TransportSolver:
-  on: true
-  normalisation_coeff_neutrals: 1e-2
-  norm_coeff_rate_neutrals: 1e-3
+  on: false
 
 PlasmaNeutralsCoupling:
   on: true
