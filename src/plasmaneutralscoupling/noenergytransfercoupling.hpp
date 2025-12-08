@@ -30,7 +30,7 @@ private:
     double m_energy_coupling_coeff;
     IReactionRate const& m_ionisation;
     IReactionRate const& m_recombination;
-    double m_normalisation_coeff;
+    double m_mean_free_path;
     DConstFieldVx const m_quadrature_coeffs;
     DFieldMemX m_mask;
 
@@ -43,7 +43,7 @@ public:
      * @param[in] energy_coupling_coeff The coefficient of the energy source.
      * @param[in] ionisation The rate of the ionisation reaction.
      * @param[in] recombination The rate of the recombination reaction.
-     * @param[in] normalisation_coeff The normalisation coefficient of neutrals.
+     * @param[in] mean_free_path The charge exchange mean free path for neutrals.
      * @param[in] quadrature_coeffs A constant field referencing coefficients for a quadrature.
      * @param[in] mask_extent The extent of the mask for the neutrals fluid.
      * @param[in] mask_stiffness The stiffnes of the mask for the neutrals fluid.
@@ -55,7 +55,7 @@ public:
             double energy_coupling_coeff,
             IReactionRate const& ionisation,
             IReactionRate const& recombination,
-            double normalisation_coeff,
+            double mean_free_path,
             DConstFieldVx const& quadrature_coeffs,
             double mask_extent,
             double mask_stiffness,

@@ -54,8 +54,10 @@ metadata:
     size: [ '$fdistribu_eq_extents[0]', '$fdistribu_eq_extents[1]' ]
   collintra_nustar0 : double
   collinter_nustar0 : double
-  normalisation_coeff_neutrals : double
-  norm_coeff_rate_neutrals : double
+  mean_free_path : double
+  temperature_normalisation : double
+  density_normalisation : double
+  K_cx_0 : double
   charge_exchange_coefficients:
     type: array
     subtype: double
@@ -220,8 +222,10 @@ plugins:
         - nbstep_diag
         - collintra_nustar0
         - collinter_nustar0
-        - normalisation_coeff_neutrals
-        - norm_coeff_rate_neutrals
+        - mean_free_path
+        - temperature_normalisation
+        - density_normalisation
+        - K_cx_0
 
         - Nkinspecies
         - fdistribu_charges

@@ -12,7 +12,7 @@ SameGridFluidSolver::SameGridFluidSolver(
         IReactionRate const& charge_exchange,
         IReactionRate const& ionisation,
         IReactionRate const& recombination,
-        double const normalisation_coeff,
+        double const mean_free_path,
         SplineXBuilder const& spline_x_builder,
         SplineXEvaluator const& spline_x_evaluator,
         DConstFieldVx const& quadrature_coeffs,
@@ -24,7 +24,7 @@ SameGridFluidSolver::SameGridFluidSolver(
     : m_charge_exchange(charge_exchange)
     , m_ionisation(ionisation)
     , m_recombination(recombination)
-    , m_normalisation_coeff(normalisation_coeff)
+    , m_mean_free_path(mean_free_path)
     , m_spline_x_builder(spline_x_builder)
     , m_spline_x_evaluator(spline_x_evaluator)
     , m_quadrature_coeffs(quadrature_coeffs)
@@ -106,7 +106,7 @@ void SameGridFluidSolver::get_derivative(
     IdxSp const iion(find_ion(get_idx_range<Species>(density)));
     IdxMom const ineutral_density(0);
 
-    double const normalisation_coeff_alpha0(m_normalisation_coeff);
+    double const mean_free_path_cx0(m_mean_free_path);
     double const mass_ratio(mass(ielec()) / mass(iion));
     ddc::parallel_for_each(
             Kokkos::DefaultExecutionSpace(),
@@ -125,7 +125,7 @@ void SameGridFluidSolver::get_derivative(
                           * velocity(iion, ix) * Kokkos::sqrt(mass_ratio) / denom;
 
                 diffusion_temperature(ifspx)
-                        = normalisation_coeff_alpha0 * temperature(iion, ix) / (mass(isp) * denom);
+                        = mean_free_path_cx0 * temperature(iion, ix) / (mass(isp) * denom);
                 // density source is not solved here, we only solve transport.
             });
 

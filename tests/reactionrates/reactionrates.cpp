@@ -171,21 +171,21 @@ static void TestDiffusiveNeutralsRateCoefficients()
     EXPECT_NEAR(mean_r_rate, 7.638123065868132e-06, 1e-13);
 
     { // we verify that the choice of normalisation does not change the result
+        IdxSpX const origin(0, 0);
+        IdxRangeSpX const test_range(origin, IdxStep<Species, GridX>(1, 1));
+        DFieldMemSpX cx_result1_alloc(test_range);
+        DFieldSpX cx_result1(get_field(cx_result1_alloc));
+        DFieldMemSpX cx_result2_alloc(test_range);
+        DFieldSpX cx_result2(get_field(cx_result2_alloc));
+        auto result_1_host = ddc::create_mirror_view_and_copy(cx_result1);
+        auto result_2_host = ddc::create_mirror_view_and_copy(cx_result2);
+
         double const n_0 = 1e20;
         double const T_0 = 10;
-        // 13 and 7 are chosen randomly. It should never change the result.
         ChargeExchangeRate const cx_rate1(n_0, T_0);
         for (double n_factor = 1e-5; n_factor < 1e6; n_factor *= 10) {
             for (double T_factor = 0.1; T_factor < 1e3; T_factor *= 10) {
                 ChargeExchangeRate const cx_rate2(n_factor * n_0, T_factor * T_0);
-                IdxSpX const origin(0, 0);
-                IdxRangeSpX const test_range(origin, IdxStep<Species, GridX>(1, 1));
-                DFieldMemSpX cx_result1_alloc(test_range);
-                DFieldSpX cx_result1(get_field(cx_result1_alloc));
-                DFieldMemSpX cx_result2_alloc(test_range);
-                DFieldSpX cx_result2(get_field(cx_result2_alloc));
-                auto result_1_host = ddc::create_mirror_view_and_copy(cx_result1);
-                auto result_2_host = ddc::create_mirror_view_and_copy(cx_result2);
                 cx_rate1(
                         cx_result1,
                         get_const_field(kinsp_density),
@@ -195,6 +195,43 @@ static void TestDiffusiveNeutralsRateCoefficients()
                         get_const_field(kinsp_density),
                         get_const_field(kinsp_temperature));
                 EXPECT_NEAR(result_1_host(origin), result_2_host(origin), 1e-13);
+            }
+        }
+    }
+
+    { // we verify that the old and the new normalisations are equivalent
+        // for various densities and temperatures
+        IdxSpX const origin(0, 0);
+        IdxRangeSpX const test_range(origin, IdxStep<Species, GridX>(1, 1));
+        DFieldMemSpX cx_result_new_alloc(test_range);
+        DFieldSpX cx_result_new(get_field(cx_result_new_alloc));
+        DFieldMemSpX cx_result_old_alloc(test_range);
+        DFieldSpX cx_result_old(get_field(cx_result_old_alloc));
+
+        double const n_0 = 1e20;
+        double const T_0 = 10;
+        ChargeExchangeRate const cx_rate_new(n_0, T_0);
+        for (double old_norm = 1e-5; old_norm < 1e5; old_norm *= 10) {
+            ChargeExchangeRate const cx_rate_old(old_norm);
+            for (double density = 1; density < 10; density++) {
+                ddc::parallel_fill(kinsp_density, density);
+                for (double temperature = 1; temperature < 10; temperature++) {
+                    ddc::parallel_fill(kinsp_temperature, temperature);
+                    cx_rate_new(
+                            cx_result_new,
+                            get_const_field(kinsp_density),
+                            get_const_field(kinsp_temperature));
+                    cx_rate_old(
+                            cx_result_old,
+                            get_const_field(kinsp_density),
+                            get_const_field(kinsp_temperature));
+                    auto result_new_host = ddc::create_mirror_view_and_copy(cx_result_new);
+                    auto result_old_host = ddc::create_mirror_view_and_copy(cx_result_old);
+                    EXPECT_NEAR(
+                            result_new_host(origin) * cx_rate_new.get_Kcx0(),
+                            result_old_host(origin) / old_norm,
+                            1e-13);
+                }
             }
         }
     }
