@@ -14,10 +14,10 @@ target_link_libraries(sheath_${GEOMETRY_VARIANT}
   gslx::io
   gslx::paraconfpp
   gslx::poisson_${GEOMETRY_VARIANT}
-  gslx::rhs_${GEOMETRY_VARIANT}
   gslx::speciesinfo
   gslx::time_integration_${GEOMETRY_VARIANT}
   gslx::utils
+  voicexx::plasmasources_${GEOMETRY_VARIANT}
 
   PDI::pdi
   paraconf::paraconf

@@ -26,10 +26,9 @@
 #include "fft_poisson_solver.hpp"
 #include "geometry.hpp"
 #include "input.hpp"
-#include "irighthandside.hpp"
-#include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
 #include "krook_source_constant.hpp"
+#include "maxwellian_source.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "output.hpp"
@@ -199,17 +198,10 @@ int main(int argc, char** argv)
         }
     }
 
-    // Kinetic source
-    KineticSource const rhs_kinetic_source(
-            mesh_x,
-            mesh_vx,
-            PCpp_double(conf_voicexx, ".KineticSource.extent"),
-            PCpp_double(conf_voicexx, ".KineticSource.stiffness"),
-            PCpp_double(conf_voicexx, ".KineticSource.amplitude"),
-            PCpp_double(conf_voicexx, ".KineticSource.density"),
-            PCpp_double(conf_voicexx, ".KineticSource.energy"),
-            PCpp_double(conf_voicexx, ".KineticSource.temperature"));
-    rhs_operators.emplace_back(rhs_kinetic_source);
+    // Maxwellian source
+    MaxwellianSource const rhs_plasma_source
+            = maxwellian_source::init_from_input(meshSpXVx, conf_voicexx);
+    rhs_operators.emplace_back(rhs_plasma_source);
 
     CollisionsIntra const
             collisions_intra(meshSpXVx, PCpp_double(conf_voicexx, ".CollisionsInfo.nustar0"));

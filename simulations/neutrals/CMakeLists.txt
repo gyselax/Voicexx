@@ -21,6 +21,7 @@ target_link_libraries(neutrals_${GEOMETRY_VARIANT}
         voicexx::fluidinitialisation_${GEOMETRY_VARIANT}
         voicexx::fluidrestart_${GEOMETRY_VARIANT}
         voicexx::fluidsolver_${GEOMETRY_VARIANT}
+        voicexx::plasmasources_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
         voicexx::time_integration_hybrid_${GEOMETRY_VARIANT}
 

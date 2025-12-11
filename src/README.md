@@ -3,4 +3,5 @@
 - [fluidsolvers](./fluidsolvers/README.md) : All the solvers used to evolve a fluid species
 - [plasmaneutrascoupling](./plasmaneutralscoupling/README.md) : Source term due to the interaction between the plasma and the neutrals.
 - [reactionrates](./reactionrates/README.md) : Code describing the ionisation, recombination and charge-exchange reactions between the plasma and the neutrals.
+- [plasmasources](./plasmasources/README.md) : Code describing a plasma source
 

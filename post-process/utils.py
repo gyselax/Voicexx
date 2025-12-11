@@ -76,15 +76,15 @@ def compute_krook_sink_adaptive(diskstore, density):
     return -nu*mask*(diskstore['fdistribu']-ftarget)
 
 
-def compute_kinetic_source(diskstore):
-    '''Computes the kinetic source expression
+def compute_maxwellian_source(diskstore):
+    '''Computes the maxwellian source expression
     '''
     try:
-        return diskstore['kinetic_source_amplitude'] \
-            * diskstore['kinetic_source_spatial_extent'] \
-            * diskstore['kinetic_source_velocity_shape']
+        return diskstore['maxwellian_source_amplitude'] \
+            * diskstore['maxwellian_source_spatial_extent'] \
+            * diskstore['maxwellian_source_velocity_shape']
     except KeyError as e:
-        print('Info: no kinetic source in simulation:', e)
+        print('Info: no maxwellian source in simulation:', e)
         return xr.zeros_like(diskstore['fdistribu'])
 
 
