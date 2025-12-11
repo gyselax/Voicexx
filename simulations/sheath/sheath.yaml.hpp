@@ -46,13 +46,13 @@ Krook:
     density: 1e-9
     temperature: 0.5
 
-KineticSource:
+PlasmaSource:
   extent: 0.45
   stiffness: 4
   amplitude: 0.1
   density: 1.
-  energy: 1.
-  temperature: 1.
+  temperature_elec: 1.
+  temperature_ions: 1.
 
 CollisionsInfo:
   enable_inter: true

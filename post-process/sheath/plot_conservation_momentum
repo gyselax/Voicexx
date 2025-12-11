@@ -16,7 +16,7 @@ import numpy as np
 from gysdata_voice import DiskStore
 from plot_utils import plot_field1d, plot_field2d
 from math_utils import compute_moment, differentiate
-from utils import compute_krook_sink_constant, compute_krook_sink_adaptive, compute_kinetic_source
+from utils import compute_krook_sink_constant, compute_krook_sink_adaptive, compute_maxwellian_source
 from utils import compute_collinter_momentum_exchange, compute_temperature
 
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     force_term = density*charge/np.sqrt(mass)*electric_field
     momentum_source = compute_moment(compute_krook_sink_constant(ds), 'v_x', moment_order=1) \
             + compute_moment(compute_krook_sink_adaptive(ds, density), 'v_x', moment_order=1) \
-            + compute_moment(compute_kinetic_source(ds), 'v_x', moment_order=1) \
+            + compute_moment(compute_maxwellian_source(ds), 'v_x', moment_order=1) \
             + compute_collinter_momentum_exchange(ds, density, particle_flux/density, temperature)
     error = dgamma_dt + grad_flux_over_m - momentum_source - force_term
 

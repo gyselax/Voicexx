@@ -73,14 +73,14 @@ krook_sink_adaptive_density:
   dimensions: [ ]
   path: { file: 'VOICEXX_initstate.h5', dataset: 'krook_sink_adaptive_density' }
 
-kinetic_source_amplitude:
+maxwellian_source_amplitude:
   dimensions: [ ]
-  path: { file: 'VOICEXX_initstate.h5', dataset: 'kinetic_source_amplitude' }
+  path: { file: 'VOICEXX_initstate.h5', dataset: 'maxwellian_source_amplitude' }
 
-kinetic_source_spatial_extent:
+maxwellian_source_spatial_extent:
   dimensions: [ *xd ]
-  path: { file: 'VOICEXX_initstate.h5', dataset: 'kinetic_source_spatial_extent' }
+  path: { file: 'VOICEXX_initstate.h5', dataset: 'maxwellian_source_spatial_extent' }
 
-kinetic_source_velocity_shape:
-  dimensions: [ *vxd ]
-  path: { file: 'VOICEXX_initstate.h5', dataset: 'kinetic_source_velocity_shape' }
+maxwellian_source_velocity_shape:
+  dimensions: [ *speciesd , *vxd ]
+  path: { file: 'VOICEXX_initstate.h5', dataset: 'maxwellian_source_velocity_shape' }

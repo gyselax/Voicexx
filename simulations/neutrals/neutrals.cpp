@@ -28,9 +28,9 @@
 #include "ionisation.hpp"
 #include "iplasmaneutralscoupling.hpp"
 #include "irighthandside.hpp"
-#include "kinetic_source.hpp"
 #include "krook_source_adaptive.hpp"
 #include "krook_source_constant.hpp"
+#include "maxwellian_source.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "neutrals.yml.hpp"
@@ -227,18 +227,10 @@ int main(int argc, char** argv)
         }
     }
 
-    // Kinetic source
-    KineticSource const rhs_kinetic_source(
-            mesh_x,
-            mesh_vx,
-            PCpp_double(conf_voicexx, ".KineticSource.extent"),
-            PCpp_double(conf_voicexx, ".KineticSource.stiffness"),
-            PCpp_double(conf_voicexx, ".KineticSource.amplitude"),
-            PCpp_double(conf_voicexx, ".KineticSource.density"),
-            PCpp_double(conf_voicexx, ".KineticSource.energy"),
-            PCpp_double(conf_voicexx, ".KineticSource.temperature"));
-    rhs_operators.emplace_back(rhs_kinetic_source);
-
+    // Maxwellian source
+    MaxwellianSource const rhs_plasma_source
+            = maxwellian_source::init_from_input(meshSpXVx, conf_voicexx);
+    rhs_operators.emplace_back(rhs_plasma_source);
 
     CollisionsIntra const
             collisions_intra(meshSpXVx, PCpp_double(conf_voicexx, ".CollisionsInfo.nustar0"));
@@ -269,7 +261,7 @@ int main(int argc, char** argv)
     double const mean_free_path
             = PCpp_double(conf_voicexx, ".NeutralsReactionRates.mean_free_path");
     double const temperature_normalisation
-            = PCpp_double(conf_voicexx, ".NeutralsReactionRates.temperature_normalisation");
+            = PCpp_double(conf_voicexx, ".NeutralsReactionRates.temperature_normalisation_in_eV");
     double const density_normalisation
             = PCpp_double(conf_voicexx, ".NeutralsReactionRates.density_normalisation");
 
@@ -294,7 +286,7 @@ int main(int argc, char** argv)
     printf(" <====================================================>\n"
            " The K_{cx,0} taken for this simulation is %fe-14.\n"
            " It has been computed from n_0=%e and T_0=%e.\n"
-           " It should give a mean free path of %Le Debye length.\n"
+           " It should give a mean free path of %e Debye length.\n"
            " However the L_{cx,0} taken is %e.\n"
            " <====================================================>\n",
            charge_exchange.get_Kcx0(),

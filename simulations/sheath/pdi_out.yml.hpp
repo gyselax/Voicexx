@@ -82,22 +82,22 @@ metadata:
     subtype: double
     size: [ '$krook_sink_constant_ftarget_extents[0]' ]
 
-  kinetic_source_extent : double
-  kinetic_source_stiffness : double
-  kinetic_source_amplitude : double
-  kinetic_source_density : double
-  kinetic_source_energy : double
-  kinetic_source_temperature : double
-  kinetic_source_velocity_shape_extents: { type: array, subtype: int64, size: 1 }
-  kinetic_source_velocity_shape:
+  maxwellian_source_extent : double
+  maxwellian_source_stiffness : double
+  maxwellian_source_amplitude : double
+  maxwellian_source_density : double
+  maxwellian_source_temperature_elec : double
+  maxwellian_source_temperature_ions : double
+  maxwellian_source_velocity_shape_extents: { type: array, subtype: int64, size: 2 }
+  maxwellian_source_velocity_shape:
     type: array
     subtype: double
-    size: [ '$kinetic_source_velocity_shape_extents[0]' ]
-  kinetic_source_spatial_extent_extents: { type: array, subtype: int64, size: 1 }
-  kinetic_source_spatial_extent:
+    size: [ '$maxwellian_source_velocity_shape_extents[0]' , '$maxwellian_source_velocity_shape_extents[1]' ]
+  maxwellian_source_spatial_extent_extents: { type: array, subtype: int64, size: 1 }
+  maxwellian_source_spatial_extent:
     type: array
     subtype: double
-    size: [ '$kinetic_source_spatial_extent_extents[0]' ]
+    size: [ '$maxwellian_source_spatial_extent_extents[0]' ]
 
   filename_size: size_t
   filename: {type: array, subtype: char, size: "$filename_size"}
@@ -159,14 +159,14 @@ plugins:
         - krook_sink_constant_mask
         - krook_sink_constant_ftarget
 
-        - kinetic_source_extent
-        - kinetic_source_stiffness
-        - kinetic_source_amplitude
-        - kinetic_source_density
-        - kinetic_source_energy
-        - kinetic_source_temperature
-        - kinetic_source_velocity_shape
-        - kinetic_source_spatial_extent
+        - maxwellian_source_extent
+        - maxwellian_source_stiffness
+        - maxwellian_source_amplitude
+        - maxwellian_source_density
+        - maxwellian_source_temperature_elec
+        - maxwellian_source_temperature_ions
+        - maxwellian_source_velocity_shape
+        - maxwellian_source_spatial_extent
     - file: 'VOICEXX_${iter_saved:05}.h5'
       on_event: [iteration, last_iteration]
       when: '${iter} % ${nbstep_diag} = 0'
