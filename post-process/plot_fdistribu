@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from gysdata_voice import DiskStore
-from plot_utils import plot_field2d
+from plot_utils import plot_field2d, plot_field1d
 
 
 if __name__ == '__main__':
@@ -29,6 +29,11 @@ if __name__ == '__main__':
                         default=-1,
                         type=int,
                         help='time index')
+    parser.add_argument('--location',
+                        action='store',
+                        default=0.5,
+                        type=float,
+                        help='Location in the simulation box in [0,1]')
 
     args = parser.parse_args()
 
@@ -38,12 +43,23 @@ if __name__ == '__main__':
     time_init = data.coords['time'].values[0]
     time_diag = data.coords['time'].values[args.itime]
 
+    x_min = data.coords['x'].values[0]
+    x_max = data.coords['x'].values[-1]
+    location = args.location * x_max + ((1 - args.location) * x_min)
+
     for scale in ['linear', 'log']:
         for species in ['ions', 'electrons']:
             for time in [time_init, time_diag]:
-                output_filename = os.path.join(Path.cwd(), f'fdistribu_xv_{species}_t{time}_{scale}.png')
+                output_filename = Path.cwd() / f'fdistribu_xv_{species}_t{time}_{scale}.png'
                 plot_field2d(data.sel(time=time, species=species).T,
                              f'fdistribu {species} t={time}',
                              output_filename,
                              cmap='viridis',
                              scale=scale)
+
+    for species in ['ions', 'electrons']:
+        output_filename = Path.cwd() / f'fdistribu_v_{species}_t{time}_x{location}.png'
+        title = f'{species} distribution function at x={location}'
+        data_dict = {f't={time_init}': data.sel(time=time_init, species=species).sel(x=location, method="nearest"),
+                     f't={time_diag}': data.sel(time=time_diag, species=species).sel(x=location, method="nearest")}
+        plot_field1d(data_dict, title, output_filename)
