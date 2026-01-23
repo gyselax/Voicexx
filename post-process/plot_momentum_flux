@@ -26,6 +26,16 @@ if __name__ == '__main__':
                         default=-1,
                         type=int,
                         help='time index')
+    parser.add_argument('--slice_begin',
+                        action='store',
+                        default=0,
+                        type=float,
+                        help='first point to consider as a ratio of the simulation box')
+    parser.add_argument('--slice_end',
+                        action='store',
+                        default=1,
+                        type=float,
+                        help='last point to consider as a ratio of the simulation box')
 
     args = parser.parse_args()
 
@@ -33,18 +43,23 @@ if __name__ == '__main__':
     ds = DiskStore(args.data_dir)
     fdistribu = ds['fdistribu']
     data = compute_moment(fdistribu, 'v_x', moment_order=2)
+
+    coord_x = data.coords['x'].values
+    slice_left = coord_x[0] + args.slice_begin * (coord_x[-1] - coord_x[0])
+    slice_right = coord_x[0] + args.slice_end * (coord_x[-1] - coord_x[0])
+
     time_init = fdistribu.coords['time'].values[0]
     time_diag = fdistribu.coords['time'].values[args.itime]
     for species in data.coords['species'].values:
         title = rf'momentum flux $nT + mu^2/2$ {species}'
-        output_filename = os.path.join(Path.cwd(), f'momentum_flux_{species}_xt.png')
+        output_filename = Path.cwd() / f'momentum_flux_{species}_xt.png'
         plot_field2d(data.sel(species=species),
                      title,
                      output_filename,
                      scale='linear',
                      cmap='viridis')
 
-        output_filename = os.path.join(Path.cwd(), f'momentum_flux_{species}_t{time_diag}.png')
-        data_dict = {f't={time_init}': data.sel(time=time_init, species=species),
-                     f't={time_diag}': data.sel(time=time_diag, species=species)}
+        output_filename = Path.cwd() / f'momentum_flux_{species}_t{time_diag}.png'
+        data_dict = {f't={time_init}': data.sel(time=time_init, species=species)[(coord_x <= slice_right) & (coord_x >= slice_left)],
+                     f't={time_diag}': data.sel(time=time_diag, species=species)[(coord_x <= slice_right) & (coord_x >= slice_left)]}
         plot_field1d(data_dict, title, output_filename)
