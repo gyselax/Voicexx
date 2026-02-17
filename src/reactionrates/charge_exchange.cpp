@@ -3,7 +3,7 @@
 #include <pdi.h>
 
 #include "charge_exchange.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "species_info.hpp"
 
 ChargeExchangeRate::ChargeExchangeRate(double const n_0, double const T_0)

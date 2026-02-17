@@ -9,8 +9,8 @@
 #include "central_fdm_partial_derivatives_with_boundary_values.hpp"
 #include "ddc_alias_inline_functions.hpp"
 #include "diffgridsfluidsolver.hpp"
-#include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "geometry_xvx.hpp"
 #include "ireactionrate.hpp"
 #include "rk2.hpp"
 #include "species_info.hpp"
@@ -171,7 +171,7 @@ void DiffGridsFluidSolver::get_derivative(
     IdxRangeXn Xn_range_neutrals(idx_range_neutrals);
     DFieldMemSpXn gradx_pressure_alloc(idx_range_neutrals);
     DFieldSpXn gradx_pressure = get_field(gradx_pressure_alloc);
-    ddc::for_each(get_idx_range<Species>(neutrals), [&](IdxSp const isp) {
+    ddc::host_for_each(get_idx_range<Species>(neutrals), [&](IdxSp const isp) {
         DFieldXn pressure_sp = neutral_pressure[isp];
         std::unique_ptr<IPartialDerivative<IdxRangeXn, X>> const partial_x_pointer
                 = partial_x_creator.create_instance(get_const_field(pressure_sp));
@@ -197,7 +197,7 @@ void DiffGridsFluidSolver::get_derivative(
     DFieldSpXn div_particle_flux = get_field(div_particle_flux_alloc); // \partial_x \Gamma_N
     switch (m_flux_BC) {
     case NeutralFluxBoundaryCondition::escaping_neutrals: {
-        ddc::for_each(get_idx_range<Species>(neutrals), [&](IdxSp const isp) {
+        ddc::host_for_each(get_idx_range<Species>(neutrals), [&](IdxSp const isp) {
             DFieldXn flux_sp = particle_flux[isp];
             std::unique_ptr<IPartialDerivative<IdxRangeXn, X>> const partial_x_pointer
                     = partial_x_creator.create_instance(get_const_field(flux_sp));

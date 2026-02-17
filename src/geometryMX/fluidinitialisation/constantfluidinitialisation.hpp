@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ddc_alias_inline_functions.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "ifluidinitialisation.hpp"
 
 /**

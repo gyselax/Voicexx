@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "geometry_xvx.hpp"
 
 /**
  * @brief A class that is used to interpolate a field from the plasma grid to

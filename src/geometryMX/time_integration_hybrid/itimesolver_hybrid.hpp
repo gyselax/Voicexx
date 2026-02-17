@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 
 /**
  * @brief An abstract class for solving a Boltzmann-Poisson system of equations coupled to a fluid model.

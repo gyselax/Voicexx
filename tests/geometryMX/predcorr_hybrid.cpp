@@ -15,7 +15,7 @@
 #include "ddc_alias_inline_functions.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "maxwellianequilibrium.hpp"
 #include "neumann_spline_quadrature.hpp"
 #include "noenergytransfercoupling.hpp"
@@ -25,6 +25,7 @@
 #include "qnsolver.hpp"
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
+#include "spline_definitions_xvx.hpp"
 #include "spline_interpolator.hpp"
 #include "splitvlasovsolver.hpp"
 
@@ -259,7 +260,7 @@ TEST(GeometryXM, PredCorrHybrid)
      * should be equal
      */
     double const tolerance(1.e-12);
-    ddc::for_each(get_idx_range(allfdistribu), [&](IdxSpXVx const ispxvx) {
+    ddc::host_for_each(get_idx_range(allfdistribu), [&](IdxSpXVx const ispxvx) {
         EXPECT_LE(
                 std::fabs(allfdistribu_host(ispxvx) - allfdistribu_predcorr_host(ispxvx)),
                 tolerance);

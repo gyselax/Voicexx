@@ -9,10 +9,11 @@
 #include "charge_exchange.hpp"
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "ionisation.hpp"
 #include "recombination.hpp"
 #include "species_info.hpp"
+#include "spline_definitions_xvx.hpp"
 
 
 /**

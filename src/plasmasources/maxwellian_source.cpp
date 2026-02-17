@@ -32,7 +32,7 @@ MaxwellianSource::MaxwellianSource(
     double const coeff_ions(1.0 / std::sqrt(2 * M_PI * m_temperature_ions));
     IdxRangeSpVx idx_range_spvx(idx_range_species, idx_range_vx);
     host_t<DFieldMemSpVx> velocity_shape_host(idx_range_spvx);
-    ddc::for_each(idx_range_spvx, [&](IdxSpVx const ispvx) {
+    ddc::host_for_each(idx_range_spvx, [&](IdxSpVx const ispvx) {
         IdxVx ivx(ispvx);
         IdxSp isp(ispvx);
         CoordVx const coordvx = ddc::coordinate(ivx);

@@ -5,7 +5,7 @@
 #include <ddc/ddc.hpp>
 #include <ddc/pdi.hpp>
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "species_info.hpp"
 
 /**

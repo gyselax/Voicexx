@@ -6,8 +6,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "species_info.hpp"
+#include "spline_definitions_xvx.hpp"
 
 /**
  * This test initialises a discrete space for kinetic species 
@@ -88,7 +89,7 @@ TEST(GeometryXM, KineticFluidSpecies)
 
     ddc::init_discrete_space<Species>(std::move(charges), std::move(masses));
 
-    ddc::for_each(idx_range_allsp, [&](IdxSp const isp) {
+    ddc::host_for_each(idx_range_allsp, [&](IdxSp const isp) {
         if (isp.uid() < nb_kinspecies) {
             EXPECT_EQ(ddc::discrete_space<Species>().charges()(isp), kinetic_charges(isp));
             EXPECT_EQ(ddc::discrete_space<Species>().masses()(isp), kinetic_masses(isp));
@@ -191,7 +192,7 @@ TEST(GeometryXM, KineticFluidAdiabaticSpecies)
      * checks that the masses and charges of idx_range_allsp are well-ordered:
      * kinetic species first, then fluid species, then adiabatic species.
      */
-    ddc::for_each(idx_range_allsp, [&](IdxSp const isp) {
+    ddc::host_for_each(idx_range_allsp, [&](IdxSp const isp) {
         if (isp.uid() < nb_kinspecies) {
             EXPECT_EQ(ddc::discrete_space<Species>().charges()(isp), kinetic_charges(isp));
             EXPECT_EQ(ddc::discrete_space<Species>().masses()(isp), kinetic_masses(isp));

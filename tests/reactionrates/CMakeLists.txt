@@ -20,6 +20,7 @@ target_link_libraries(unit_tests_reactionrates_${GEOMETRY_VARIANT}
         gslx::utils_${GEOMETRY_VARIANT}
         voicexx::fluidinitialisation_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
+	voicexx::spline_definitions
 )
 
 gtest_discover_tests(unit_tests_reactionrates_${GEOMETRY_VARIANT}

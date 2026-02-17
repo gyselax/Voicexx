@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"
+#include "spline_definitions_xvx.hpp"
 
 /**
  * @brief A class that solves a so-called "pressure-diffusive" fluid neutral model.

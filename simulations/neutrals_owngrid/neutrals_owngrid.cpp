@@ -25,8 +25,8 @@
 #include "ddc_alias_inline_functions.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
-#include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "geometry_xvx.hpp"
 #include "gridneutral_interpolator.hpp"
 #include "input.hpp"
 #include "irighthandside.hpp"
@@ -43,6 +43,7 @@
 #include "singlemodeperturbinitialisation.hpp"
 #include "species_info.hpp"
 #include "species_init.hpp"
+#include "spline_definitions_xvx.hpp"
 #include "spline_interpolator.hpp"
 #include "splitrighthandsidesolver.hpp"
 #include "splitvlasovsolver.hpp"
@@ -138,6 +139,7 @@ int main(int argc, char** argv)
     Coord<X> min(PCpp_double(conf_voicexx, ".NeutralMesh.x_min"));
     Coord<X> max(PCpp_double(conf_voicexx, ".NeutralMesh.x_max"));
     IdxStep<GridXNeutrals> ncells(PCpp_int(conf_voicexx, ".NeutralMesh.x_ncells"));
+
     ddc::init_discrete_space<BSplinesXNeutrals>(min, max, ncells);
     ddc::init_discrete_space<GridXNeutrals>(
             SplineInterpPointsXNeutrals::get_sampling<GridXNeutrals>());

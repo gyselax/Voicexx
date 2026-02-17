@@ -2,7 +2,7 @@
 #pragma once
 #include <cmath>
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "iplasmaneutralscoupling.hpp"
 
 /**

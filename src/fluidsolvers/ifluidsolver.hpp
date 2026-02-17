@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 
 /**
  * @brief An abstract class for solving the transport of a fluid model on a given grid.
@@ -31,5 +31,5 @@ public:
             DConstFieldX efield,
             double dt) const = 0;
 
-    virtual ~IFluidSolver<FluidGrid>() = default;
+    virtual ~IFluidSolver() = default;
 };
