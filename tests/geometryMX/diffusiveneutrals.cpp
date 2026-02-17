@@ -8,7 +8,7 @@
 
 #include "constantrate.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "samegridfluidsolver.hpp"
 #include "species_info.hpp"
 #include "trapezoid_quadrature.hpp"
@@ -159,7 +159,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
     // Initialisation of the neutral density
     host_t<DFieldMemSpMomX> neutrals_init_host(IdxRangeSpMomX(idx_range_fluidsp, meshM, meshX));
-    ddc::for_each(get_idx_range(neutrals_init_host), [&](IdxSpMomX const ispmx) {
+    ddc::host_for_each(get_idx_range(neutrals_init_host), [&](IdxSpMomX const ispmx) {
         CoordX coordx(ddc::coordinate(ddc::select<GridX>(ispmx)));
         double const lx_2((x_max + x_min) / 2.);
         neutrals_init_host(ispmx) = std::exp(-0.5 * (coordx - lx_2) * (coordx - lx_2));
@@ -200,7 +200,7 @@ TEST(GeometryMX, DiffusiveNeutralsDerivative)
 
     double error_l1(0);
     double max_derivative(0);
-    ddc::for_each(get_idx_range(neutrals), [&](IdxSpMomX const ispmx) {
+    ddc::host_for_each(get_idx_range(neutrals), [&](IdxSpMomX const ispmx) {
         double const neutral_val(neutrals_init_host(ispmx));
 
         double const lx_2((x_max + x_min) / 2.);

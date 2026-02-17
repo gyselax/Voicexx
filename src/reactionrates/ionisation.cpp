@@ -2,7 +2,7 @@
 
 #include <pdi.h>
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "ionisation.hpp"
 
 IonisationRate::IonisationRate(double const n_0, double const T_0, double const K_cx_0)

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "geometry.hpp"
 #include "geometry_neutrals.hpp"
+#include "geometry_xvx.hpp"
 #include "gridneutral_interpolator.hpp"
 #include "ifluidsolver.hpp"
 #include "ireactionrate.hpp"

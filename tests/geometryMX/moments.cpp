@@ -8,8 +8,9 @@
 
 #include "constantfluidinitialisation.hpp"
 #include "ddc_alias_inline_functions.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "species_info.hpp"
+#include "spline_definitions_xvx.hpp"
 
 /**
  * This test initialises a discrete space for moments (density,
@@ -120,7 +121,7 @@ TEST(GeometryXM, MomentsInitialisation)
     auto neutrals_host = ddc::create_mirror_view_and_copy(neutrals);
 
     double const tolerance(1.e-12);
-    ddc::for_each(get_idx_range<Species, GridX>(neutrals_host), [&](IdxSpX const ispx) {
+    ddc::host_for_each(get_idx_range<Species, GridX>(neutrals_host), [&](IdxSpX const ispx) {
         IdxSp const isp(ddc::select<Species>(ispx));
         IdxX const ix(ddc::select<GridX>(ispx));
 

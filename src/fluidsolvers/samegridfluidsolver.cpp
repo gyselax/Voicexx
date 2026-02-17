@@ -149,7 +149,7 @@ void SameGridFluidSolver::get_derivative(
     DFieldSpX gradx_neutrals_density = get_field(gradx_neutrals_density_alloc);
     DFieldSpX laplx_neutrals_density = get_field(laplx_neutrals_density_alloc);
 
-    ddc::for_each(get_idx_range<Species>(neutrals), [&](IdxSp const isp) {
+    ddc::host_for_each(get_idx_range<Species>(neutrals), [&](IdxSp const isp) {
         // compute spline coefficients
         DBSFieldMemX density_equilibrium_velocity_spline_x_coeff(
                 get_spline_idx_range(m_spline_x_builder));
@@ -171,18 +171,22 @@ void SameGridFluidSolver::get_derivative(
                 get_const_field(neutrals[IdxSpMom(isp, ineutral_density)]));
 
         // compute gradients
+        Idx<ddc::Deriv<X>> dx(1);
         m_spline_x_evaluator
-                .deriv(get_field(gradx_density_equilibrium_velocity[isp]),
+                .deriv(dx,
+                       get_field(gradx_density_equilibrium_velocity[isp]),
                        get_const_field(coords_eval),
                        get_const_field(density_equilibrium_velocity_spline_x_coeff));
 
         m_spline_x_evaluator
-                .deriv(gradx_diffusion_temperature[isp],
+                .deriv(dx,
+                       gradx_diffusion_temperature[isp],
                        get_const_field(coords_eval),
                        get_const_field(diffusion_temperature_spline_x_coeff));
 
         m_spline_x_evaluator
-                .deriv(gradx_neutrals_density[isp],
+                .deriv(dx,
+                       gradx_neutrals_density[isp],
                        get_const_field(coords_eval),
                        get_const_field(neutrals_density_spline_x_coeff));
 
@@ -195,7 +199,8 @@ void SameGridFluidSolver::get_derivative(
                 get_const_field(gradx_neutrals_density[isp]));
 
         m_spline_x_evaluator
-                .deriv(laplx_neutrals_density[isp],
+                .deriv(dx,
+                       laplx_neutrals_density[isp],
                        get_const_field(coords_eval),
                        get_const_field(gradx_neutrals_density_spline_x_coeff));
     });

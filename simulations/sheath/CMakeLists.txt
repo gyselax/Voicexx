@@ -18,6 +18,7 @@ target_link_libraries(sheath_${GEOMETRY_VARIANT}
   gslx::time_integration_${GEOMETRY_VARIANT}
   gslx::utils
   voicexx::plasmasources_${GEOMETRY_VARIANT}
+  voicexx::spline_definitions
 
   PDI::pdi
   paraconf::paraconf

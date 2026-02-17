@@ -23,7 +23,7 @@
 #include "ddc_alias_inline_functions.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "input.hpp"
 #include "ionisation.hpp"
 #include "iplasmaneutralscoupling.hpp"

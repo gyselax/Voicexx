@@ -5,10 +5,11 @@
 
 #include <pdi.h>
 
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "maxwellian_source.hpp"
 #include "quadrature.hpp"
 #include "species_info.hpp"
+#include "spline_definitions_xvx.hpp"
 #include "trapezoid_quadrature.hpp"
 
 TEST(MaxwellianSource, Moments)
@@ -96,14 +97,14 @@ TEST(MaxwellianSource, Moments)
     host_t<DFieldMemVx> values_density(idx_range_vx);
     host_t<DFieldMemVx> values_fluid_velocity(idx_range_vx);
     host_t<DFieldMemVx> values_temperature(idx_range_vx);
-    ddc::for_each(idx_range_spx, [&](IdxSpX const ispx) {
+    ddc::host_for_each(idx_range_spx, [&](IdxSpX const ispx) {
         // density
         ddc::parallel_deepcopy(values_density, allfdistribu[ispx]);
         density(ispx)
                 = integrate_v(Kokkos::DefaultHostExecutionSpace(), get_const_field(values_density));
 
         // fluid velocity
-        ddc::for_each(idx_range_vx, [&](IdxVx const iv) {
+        ddc::host_for_each(idx_range_vx, [&](IdxVx const iv) {
             values_fluid_velocity(iv) = values_density(iv) * ddc::coordinate(iv);
         });
         fluid_velocity(ispx) = integrate_v(
@@ -112,7 +113,7 @@ TEST(MaxwellianSource, Moments)
                                / density(ispx);
 
         // temperature
-        ddc::for_each(idx_range_vx, [&](IdxVx const iv) {
+        ddc::host_for_each(idx_range_vx, [&](IdxVx const iv) {
             values_temperature(iv)
                     = values_density(iv) * std::pow(ddc::coordinate(iv) - fluid_velocity(ispx), 2);
         });
@@ -134,7 +135,7 @@ TEST(MaxwellianSource, Moments)
 
     double error_fluid_velocity_elec(0);
     double error_temperature_elec(0);
-    ddc::for_each(idx_range_x, [&](IdxX const ix) {
+    ddc::host_for_each(idx_range_x, [&](IdxX const ix) {
         error_fluid_velocity_elec
                 = std::fmax(std::fabs(fluid_velocity(my_ielec, ix)), error_fluid_velocity_elec);
         error_temperature_elec = std::
@@ -146,7 +147,7 @@ TEST(MaxwellianSource, Moments)
 
     double error_fluid_velocity_ions(0);
     double error_temperature_ions(0);
-    ddc::for_each(idx_range_x, [&](IdxX const ix) {
+    ddc::host_for_each(idx_range_x, [&](IdxX const ix) {
         error_fluid_velocity_ions
                 = std::fmax(std::fabs(fluid_velocity(my_iion, ix)), error_fluid_velocity_ions);
         error_temperature_ions = std::

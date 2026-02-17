@@ -6,7 +6,8 @@
 #include <ddc/kernels/splines.hpp>
 
 #include "ddc_aliases.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
+#include "spline_definitions_xvx.hpp"
 
 int constexpr BSDegreeXNeutrals = 3;
 struct BSplinesXNeutrals : ddc::UniformBSplines<X, BSDegreeXNeutrals>

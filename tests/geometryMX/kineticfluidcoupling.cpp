@@ -15,7 +15,7 @@
 #include "ddc_alias_inline_functions.hpp"
 #include "fem_1d_poisson_solver.hpp"
 #include "fft_poisson_solver.hpp"
-#include "geometry.hpp"
+#include "geometry_xvx.hpp"
 #include "ionisation.hpp"
 #include "irighthandside.hpp"
 #include "maxwellianequilibrium.hpp"
@@ -288,7 +288,7 @@ static void TestKineticFluidCoupling()
 
     auto analytical_nN_host = ddc::create_mirror_view_and_copy(analytical_nN);
 
-    ddc::for_each(get_idx_range(fluid_moments_host), [&](IdxSpMomX const ispmx) {
+    ddc::host_for_each(get_idx_range(fluid_moments_host), [&](IdxSpMomX const ispmx) {
         EXPECT_NEAR(analytical_nN_host(ispmx), fluid_moments_host(ispmx), 1.5e-8);
     });
 
