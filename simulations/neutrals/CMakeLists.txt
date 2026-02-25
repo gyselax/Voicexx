@@ -26,7 +26,7 @@ target_link_libraries(neutrals_${GEOMETRY_VARIANT}
         voicexx::time_integration_hybrid_${GEOMETRY_VARIANT}
 
         paraconf::paraconf
-        PDI::pdi
+        PDI::PDI_C
 )
 
 set_target_properties(neutrals_${GEOMETRY_VARIANT}
