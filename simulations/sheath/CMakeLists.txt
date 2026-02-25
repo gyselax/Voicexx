@@ -20,7 +20,7 @@ target_link_libraries(sheath_${GEOMETRY_VARIANT}
   voicexx::plasmasources_${GEOMETRY_VARIANT}
   voicexx::spline_definitions
 
-  PDI::pdi
+  PDI::PDI_C
   paraconf::paraconf
   )
 set_target_properties(sheath_${GEOMETRY_VARIANT}
