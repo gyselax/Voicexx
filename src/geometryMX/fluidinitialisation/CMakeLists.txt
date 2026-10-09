@@ -10,8 +10,8 @@ target_include_directories("fluidinitialisation_${GEOMETRY_VARIANT}"
 
 target_link_libraries("fluidinitialisation_${GEOMETRY_VARIANT}" INTERFACE
         DDC::core
-        gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::utils
+        gyselalibxx::geometry_${GEOMETRY_VARIANT}
+        gyselalibxx::utils
 
 )
 

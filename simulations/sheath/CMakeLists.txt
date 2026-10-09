@@ -7,16 +7,16 @@ target_link_libraries(sheath_${GEOMETRY_VARIANT}
   PUBLIC
   DDC::core
   DDC::pdi
-  gslx::advection
-  gslx::boltzmann_${GEOMETRY_VARIANT}
-  gslx::initialisation_${GEOMETRY_VARIANT}
-  gslx::interpolation
-  gslx::io
-  gslx::paraconfpp
-  gslx::poisson_${GEOMETRY_VARIANT}
-  gslx::speciesinfo
-  gslx::time_integration_${GEOMETRY_VARIANT}
-  gslx::utils
+  gyselalibxx::advection
+  gyselalibxx::boltzmann_${GEOMETRY_VARIANT}
+  gyselalibxx::initialisation_${GEOMETRY_VARIANT}
+  gyselalibxx::interpolation
+  gyselalibxx::io
+  gyselalibxx::paraconfpp
+  gyselalibxx::poisson_${GEOMETRY_VARIANT}
+  gyselalibxx::speciesinfo
+  gyselalibxx::time_integration_${GEOMETRY_VARIANT}
+  gyselalibxx::utils
   voicexx::plasmasources_${GEOMETRY_VARIANT}
   voicexx::spline_definitions
 

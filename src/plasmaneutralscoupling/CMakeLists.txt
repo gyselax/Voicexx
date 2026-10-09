@@ -12,8 +12,8 @@ target_include_directories("plasmaneutralscoupling_${GEOMETRY_VARIANT}"
 
 target_link_libraries("plasmaneutralscoupling_${GEOMETRY_VARIANT}"
     PUBLIC
-        gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::rhs_${GEOMETRY_VARIANT}
+        gyselalibxx::geometry_${GEOMETRY_VARIANT}
+        gyselalibxx::rhs_${GEOMETRY_VARIANT}
         voicexx::geometry_neutrals_${GEOMETRY_VARIANT}
         voicexx::reactionrates_${GEOMETRY_VARIANT}
 )
