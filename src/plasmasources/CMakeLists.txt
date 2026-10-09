@@ -14,11 +14,11 @@ target_link_libraries("plasmasources_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
         DDC::pdi
-        gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::paraconfpp
-        gslx::rhs_${GEOMETRY_VARIANT}
-        gslx::speciesinfo
-        gslx::utils
+        gyselalibxx::geometry_${GEOMETRY_VARIANT}
+        gyselalibxx::paraconfpp
+        gyselalibxx::rhs_${GEOMETRY_VARIANT}
+        gyselalibxx::speciesinfo
+        gyselalibxx::utils
 
 )
 

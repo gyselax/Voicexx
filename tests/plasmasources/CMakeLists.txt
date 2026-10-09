@@ -15,8 +15,8 @@ target_link_libraries(unit_tests_sources_${GEOMETRY_VARIANT}
     PUBLIC
         GTest::gtest
         GTest::gmock
-        gslx::speciesinfo
-        gslx::utils_${GEOMETRY_VARIANT}
+        gyselalibxx::speciesinfo
+        gyselalibxx::utils_${GEOMETRY_VARIANT}
         voicexx::plasmasources_${GEOMETRY_VARIANT}
 	voicexx::spline_definitions
 )

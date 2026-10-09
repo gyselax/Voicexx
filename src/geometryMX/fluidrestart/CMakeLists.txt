@@ -12,9 +12,9 @@ target_link_libraries("fluidrestart_${GEOMETRY_VARIANT}"
     INTERFACE
         DDC::core
         DDC::pdi
-        gslx::speciesinfo
-        gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::utils
+        gyselalibxx::speciesinfo
+        gyselalibxx::geometry_${GEOMETRY_VARIANT}
+        gyselalibxx::utils
 )
 
 add_library("voicexx::fluidrestart_${GEOMETRY_VARIANT}" ALIAS "fluidrestart_${GEOMETRY_VARIANT}")

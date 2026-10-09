@@ -12,10 +12,10 @@ target_include_directories("geometry_neutrals_${GEOMETRY_VARIANT}"
 target_link_libraries("geometry_neutrals_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
-        gslx::speciesinfo
-        gslx::moments
-        gslx::utils
-        gslx::geometry_${GEOMETRY_VARIANT}
+        gyselalibxx::speciesinfo
+        gyselalibxx::moments
+        gyselalibxx::utils
+        gyselalibxx::geometry_${GEOMETRY_VARIANT}
 	voicexx::spline_definitions
 )
 add_library("voicexx::geometry_neutrals_${GEOMETRY_VARIANT}" ALIAS "geometry_neutrals_${GEOMETRY_VARIANT}")

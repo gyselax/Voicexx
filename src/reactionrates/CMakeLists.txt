@@ -17,9 +17,9 @@ target_link_libraries("reactionrates_${GEOMETRY_VARIANT}"
     PUBLIC
         DDC::core
         DDC::pdi
-        gslx::geometry_${GEOMETRY_VARIANT}
-        gslx::speciesinfo
-        gslx::utils
+        gyselalibxx::geometry_${GEOMETRY_VARIANT}
+        gyselalibxx::speciesinfo
+        gyselalibxx::utils
 
 )
 

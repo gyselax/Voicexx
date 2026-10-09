@@ -12,11 +12,11 @@ target_link_libraries("time_integration_hybrid_${GEOMETRY_VARIANT}"
     INTERFACE
         DDC::core
         DDC::pdi
-        gslx::boltzmann_${GEOMETRY_VARIANT}
-        gslx::initialisation_${GEOMETRY_VARIANT}
-        gslx::poisson_${GEOMETRY_VARIANT}
-        gslx::speciesinfo
-        gslx::utils
+        gyselalibxx::boltzmann_${GEOMETRY_VARIANT}
+        gyselalibxx::initialisation_${GEOMETRY_VARIANT}
+        gyselalibxx::poisson_${GEOMETRY_VARIANT}
+        gyselalibxx::speciesinfo
+        gyselalibxx::utils
         voicexx::fluidsolver_${GEOMETRY_VARIANT}
         voicexx::plasmaneutralscoupling_${GEOMETRY_VARIANT}
 
